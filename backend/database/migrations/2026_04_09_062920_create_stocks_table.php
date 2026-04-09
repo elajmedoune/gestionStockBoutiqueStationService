@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stocks', function (Blueprint $table) {
-            $table->id();
+            $table->id('idStock');
+            $table->integer('quantiteInitiale')->default(0);
+            $table->integer('quantiteRestante')->default(0);
+            $table->date('dateEntree');
+            $table->date('dateExpiration')->nullable();
+            $table->decimal('prixEnGros', 10, 2)->default(0.00);
+            $table->decimal('prixAchat', 10, 2)->default(0.00);
             $table->timestamps();
         });
     }
