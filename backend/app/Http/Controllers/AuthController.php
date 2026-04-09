@@ -20,9 +20,7 @@ class AuthController extends Controller
                            ->first();
 
         if (! $user || ! Hash::check($request->motDePasse, $user->motDePasse)) {
-            return response()->json([
-                'message' => 'Identifiants incorrects'
-            ], 401);
+            return response()->json(['message' => 'Identifiants incorrects'], 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -30,7 +28,7 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'user'  => [
-                'id'     => $user->IdUtilisateur,
+                'id'     => $user->idUtilisateur,
                 'nom'    => $user->nom,
                 'prenom' => $user->prenom,
                 'login'  => $user->login,
@@ -43,18 +41,14 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Déconnexion réussie'
-        ]);
+        return response()->json(['message' => 'Déconnexion réussie']);
     }
 
     public function me(Request $request)
     {
         $user = $request->user();
-
         return response()->json([
-            'id'     => $user->IdUtilisateur,
+            'id'     => $user->idUtilisateur,
             'nom'    => $user->nom,
             'prenom' => $user->prenom,
             'login'  => $user->login,
