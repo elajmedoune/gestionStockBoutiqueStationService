@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Livraison extends Model
 {
     protected $table      = 'Livraison';
-    protected $primaryKey = 'IdLivraison';
+    protected $primaryKey = 'idLivraison';
 
     protected $fillable = [
         'dateLivraison',
         'montantTotal',
         'observations',
-        'IdCommande',
+        'idCommande',
     ];
 
     protected $casts = [
@@ -23,6 +23,6 @@ class Livraison extends Model
 
     public function commande()
     {
-        return $this->belongsTo(Commande::class, 'IdCommande', 'IdCommande');
+        return $this->hasOne(Commande::class, 'idLivraison', 'idLivraison');
     }
 }

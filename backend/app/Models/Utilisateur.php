@@ -10,7 +10,7 @@ class Utilisateur extends Authenticatable
     use HasApiTokens;
 
     protected $table      = 'Utilisateur';
-    protected $primaryKey = 'IdUtilisateur';
+    protected $primaryKey = 'idUtilisateur';
 
     protected $fillable = [
         'nom',
@@ -37,6 +37,11 @@ class Utilisateur extends Authenticatable
 
     public function ventes()
     {
-        return $this->hasMany(Vente::class, 'IdUtilisateur', 'IdUtilisateur');
+        return $this->hasMany(Vente::class, 'idUtilisateur', 'idUtilisateur');
+    }
+
+    public function commandes()
+    {
+        return $this->hasMany(Commande::class, 'idUtilisateur', 'idUtilisateur');
     }
 }

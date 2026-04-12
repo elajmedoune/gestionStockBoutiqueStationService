@@ -7,28 +7,29 @@ use Illuminate\Database\Eloquent\Model;
 class LigneVente extends Model
 {
     protected $table      = 'LigneVente';
-    protected $primaryKey = 'IdLigneVente';
-    public    $timestamps = false;
+    public    $incrementing = false;
+    public    $timestamps   = false;
+
+    protected $primaryKey = ['idProduit', 'idVente'];
 
     protected $fillable = [
+        'idProduit',
+        'idVente',
         'quantite',
-        'prixUnitaire',
-        'IdVente',
-        'IdProduit',
+        'totalPartielle',
     ];
 
     protected $casts = [
-        'prixUnitaire' => 'decimal:2',
-        'sousTotal'    => 'decimal:2',
+        'totalPartielle' => 'decimal:2',
     ];
 
     public function vente()
     {
-        return $this->belongsTo(Vente::class, 'IdVente', 'IdVente');
+        return $this->belongsTo(Vente::class, 'idVente', 'idVente');
     }
 
     public function produit()
     {
-        return $this->belongsTo(Produit::class, 'IdProduit', 'IdProduit');
+        return $this->belongsTo(Produit::class, 'idProduit', 'idProduit');
     }
 }

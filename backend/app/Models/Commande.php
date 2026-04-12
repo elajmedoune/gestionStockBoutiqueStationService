@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Commande extends Model
 {
     protected $table      = 'Commande';
-    protected $primaryKey = 'IdCommande';
+    protected $primaryKey = 'idCommande';
 
     protected $fillable = [
         'dateCommande',
         'dateLivraisonPrevue',
         'statut',
         'montantTotal',
-        'IdFournisseur',
-        'IdProduit',
+        'idLivraison',
+        'idUtilisateur',
     ];
 
     protected $casts = [
@@ -24,18 +24,18 @@ class Commande extends Model
         'montantTotal'        => 'decimal:2',
     ];
 
-    public function fournisseur()
+    public function utilisateur()
     {
-        return $this->belongsTo(Fournisseur::class, 'IdFournisseur', 'IdFournisseur');
-    }
-
-    public function produit()
-    {
-        return $this->belongsTo(Produit::class, 'IdProduit', 'IdProduit');
+        return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
     public function livraison()
     {
-        return $this->hasOne(Livraison::class, 'IdCommande', 'IdCommande');
+        return $this->belongsTo(Livraison::class, 'idLivraison', 'idLivraison');
+    }
+
+    public function lignes()
+    {
+        return $this->hasMany(LigneCommande::class, 'idCommande', 'idCommande');
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Vente extends Model
 {
     protected $table      = 'Vente';
-    protected $primaryKey = 'IdVente';
+    protected $primaryKey = 'idVente';
 
     protected $fillable = [
         'dateVente',
@@ -16,7 +16,7 @@ class Vente extends Model
         'tva',
         'modePaiement',
         'totalTaxeComprise',
-        'IdUtilisateur',
+        'idUtilisateur',
     ];
 
     protected $casts = [
@@ -29,11 +29,11 @@ class Vente extends Model
 
     public function utilisateur()
     {
-        return $this->belongsTo(Utilisateur::class, 'IdUtilisateur', 'IdUtilisateur');
+        return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
     public function lignes()
     {
-        return $this->hasMany(LigneVente::class, 'IdVente', 'IdVente');
+        return $this->hasMany(LigneVente::class, 'idVente', 'idVente');
     }
 }
