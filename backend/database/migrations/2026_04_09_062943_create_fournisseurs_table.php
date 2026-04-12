@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fournisseurs', function (Blueprint $table) {
-            $table->id();
+            $table->id('idFournisseur');
+            $table->string('nom');
+            $table->string('telephone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('adresse')->nullable();
+            $table->integer('dateLivraison')->default(1);
             $table->timestamps();
         });
     }
