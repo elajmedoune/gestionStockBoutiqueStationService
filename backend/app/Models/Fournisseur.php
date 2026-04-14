@@ -10,7 +10,7 @@ class Fournisseur extends Model
     protected $primaryKey = 'idFournisseur';
     protected $fillable = [
         'nom', 'telephone', 'email',
-        'adresse', 'dateLivraison'
+        'adresse', 'delaiLivraison'
     ];
 
     public function produits() {

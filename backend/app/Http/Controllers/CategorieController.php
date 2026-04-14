@@ -3,63 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categorie;
-use Illuminate\Http\Request;
+use Illuminate\Http\Requests\StoreCategorieRequest;
 
 class CategorieController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(Categorie::with('produits')->get(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreCategorieRequest $request)
     {
-        //
+        $categorie = Categorie::create($request->validated());
+        return response()->json($categorie. 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show($id)
     {
-        //
+        $categorie = Categorie::with('produits')->findOrFail($id);
+        return response()->json($categorie, 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Categorie $categorie)
+    public function update(StoreCategorieRequest $request, $id)
     {
-        //
+        $categorie = Categorie::findOrFail($id);
+        $categorie->update($request->validated());
+        return response()->json($categorie, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Categorie $categorie)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Categorie $categorie)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Categorie $categorie)
-    {
-        //
+        $categorie = Categorie::findOrFail($id);
+        $categorie->delete();
+        return response()->json(['message' => 'Categorie supprimee'], 200);
     }
 }

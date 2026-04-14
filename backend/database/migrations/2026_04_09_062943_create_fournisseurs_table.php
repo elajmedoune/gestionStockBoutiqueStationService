@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('telephone')->nullable();
             $table->string('email')->nullable();
             $table->string('adresse')->nullable();
-            $table->integer('dateLivraison')->default(1);
+            $table->integer('delaiLivraison')->default(1);
             $table->timestamps();
         });
     }

@@ -3,63 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produit;
-use Illuminate\Http\Request;
+use Illuminate\Http\Requests\StoreProduitRequest;
 
 class ProduitController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(
+            Produit::with(['categorie', 'stocks', 'fournisseurs'])->get(), 200
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreProduitRequest $request)
     {
-        //
+        $produit = Produit::create($request->validated());
+        return response()->json($produit, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show($id)
     {
-        //
+        $produit = Produit::with(['categorie', 'stocks', 'fournisseurs'])->findOrFail($id);
+        return response()->json($produit, 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Produit $produit)
+    public function update(StoreProduitRequest $request, $id)
     {
-        //
+        $produit = Produit::findOrFail($id);
+        $produit->update($request->validated());
+        return response()->json($produit, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Produit $produit)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Produit $produit)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Produit $produit)
-    {
-        //
+        $produit = Produit::findOrFail($id);
+        $produit->delete();
+        return response()->json(['message' => 'Produit supprime'], 200);
     }
 }
