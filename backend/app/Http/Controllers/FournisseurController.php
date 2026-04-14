@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fournisseur;
-use Illuminate\Http\Requests\StoreFournisseurRequest;
+use App\Http\Requests\StoreFournisseurRequest;
 
 class FournisseurController extends Controller
 {
@@ -27,7 +27,8 @@ class FournisseurController extends Controller
     public function update(StoreFournisseurRequest $request, $id)
     {
         $fournisseur = Fournisseur::findOrFail($id);
-        $fournisseur->update($request->validated(), 200);
+        $fournisseur->update($request->validated());
+        return response()->json($fournisseur, 200);
     }
 
     public function destroy($id)

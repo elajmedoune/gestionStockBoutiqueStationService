@@ -18,9 +18,9 @@ class StoreStockRequest extends FormRequest
             'quantiteInitiale' => 'required|integer|min:0',
             'dateEntree' => 'required|date',
             'dateExpiration' => 'required|date|after:dateEntree',
-            'prixEnGros' => 'required|numeric|mni:0',
-            'prixAchat' => 'required|numeric|mni:0',
-            'idProduit' => 'required|integer|exists:produits, idProduit',
+            'prixEnGros' => 'required|numeric|min:0',
+            'prixAchat' => 'required|numeric|min:0',
+            'idProduit' => 'required|integer|exists:produits,idProduit',
         ];
     }
 }

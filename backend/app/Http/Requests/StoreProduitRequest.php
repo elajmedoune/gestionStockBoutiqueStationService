@@ -15,8 +15,8 @@ class StoreProduitRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reference' => 'required|string|max:50|unique'.$idProduit.'idProduit',
-            'codeBarre' => 'required|string|max:50|unique'.$idProduit.'idProduit',
+            'reference' => 'required|string|max:50|unique:produits,reference,'.$idProduit.',idProduit',
+            'codeBarre' => 'nullable|string|max:50|unique:produits,codeBarre,'.$idProduit.',idProduit',
             'prixUnitaire' => 'required|numeric|min:0',
             'seuilSecurite' => 'required|numeric|min:0',
             'idCategorie' => 'required|integer|exists:categories,idCategorie',

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Stock;
-use Illuminate\Http\Requests\StoreStockRequest;
+use App\Http\Requests\StoreStockRequest;
 
 class StockController extends Controller
 {
@@ -28,7 +28,7 @@ class StockController extends Controller
     {
         $stock = Stock::findOrFail($id);
         $stock->update($request->validated());
-        return response()->json(stock, 200);
+        return response()->json($stock, 200);
     }
 
     public function destroy($id)

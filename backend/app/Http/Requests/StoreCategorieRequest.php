@@ -16,7 +16,7 @@ class StoreCategorieRequest extends FormRequest
     {
         return [
             'libelle' =>'required|string|max:50',
-            'description' =>'nullable|string|max"500',
+            'description' =>'nullable|string|max:500',
         ];
     }
 }

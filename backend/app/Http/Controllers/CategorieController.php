@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categorie;
-use Illuminate\Http\Requests\StoreCategorieRequest;
+use App\Http\Requests\StoreCategorieRequest;
 
 class CategorieController extends Controller
 {
@@ -15,7 +15,7 @@ class CategorieController extends Controller
     public function store(StoreCategorieRequest $request)
     {
         $categorie = Categorie::create($request->validated());
-        return response()->json($categorie. 201);
+        return response()->json($categorie, 201);
     }
 
     public function show($id)
