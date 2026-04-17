@@ -3,63 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Models\Stock;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreStockRequest;
 
 class StockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(Stock::with('produit')->get(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreStockRequest $request)
     {
-        //
+        $stock = Stock::create($request->validated());
+        return response()->json($stock, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show($id)
     {
-        //
+        $stock = Stock::with('produit')->findOrFail($id);
+        return response()->json($stock, 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Stock $stock)
+    public function update(StoreStockRequest $request, $id)
     {
-        //
+        $stock = Stock::findOrFail($id);
+        $stock->update($request->validated());
+        return response()->json($stock, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Stock $stock)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Stock $stock)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Stock $stock)
-    {
-        //
+        $stock = Stock::findOrFail($id);
+        $stock->delete();
+        return response()->json(['message' => 'Stock supprime'], 200);
     }
 }

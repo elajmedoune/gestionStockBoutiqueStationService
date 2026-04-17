@@ -6,5 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
-    //
+    protected $table = 'stocks';
+    protected $primaryKey = 'idStock';
+    protected $fillable = [
+        'quantiteInitiale', 'dateEntree',
+        'dateExpiration', 'prixEnGros',
+        'prixAchat', 'idProduit',
+    ];
+
+    public function produit() {
+        return $this->belongsTo(Produit::class, 'idProduit');
+    }
 }

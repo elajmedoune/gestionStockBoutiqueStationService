@@ -3,63 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fournisseur;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreFournisseurRequest;
 
 class FournisseurController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return response()->json(Fournisseur::with('produits')->get(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreFournisseurRequest $request)
     {
-        //
+        $fournisseur = Fournisseur::create($request->validated());
+        return response()->json($fournisseur, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show($id)
     {
-        //
+        $fournisseur = Fournisseur::with('produits')->findOrFail($id);
+        return response()->json($fournisseur, 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Fournisseur $fournisseur)
+    public function update(StoreFournisseurRequest $request, $id)
     {
-        //
+        $fournisseur = Fournisseur::findOrFail($id);
+        $fournisseur->update($request->validated());
+        return response()->json($fournisseur, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Fournisseur $fournisseur)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Fournisseur $fournisseur)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Fournisseur $fournisseur)
-    {
-        //
+        $fournisseur = Fournisseur::findOrFail($id);
+        $fournisseur->delete();
+        return response()->json(['message' => 'Fournisseur supprime'], 200);
     }
 }

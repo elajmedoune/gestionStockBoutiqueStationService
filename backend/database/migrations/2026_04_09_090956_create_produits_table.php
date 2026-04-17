@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('produits', function (Blueprint $table) {
-            $table->id();
+            $table->id('idProduit');
+            $table->string('reference')->unique();
+            $table->string('codeBarre')->unique()->nullable();
+            $table->decimal('prixUnitaire', 10, 2)->default(0.00);
+            $table->decimal('seuilSecurite')->default(0);
+            $table->foreignId('idCategorie')
+                  ->constrained('categories', 'idCategorie')
+                  ->onDelete('restrict');
             $table->timestamps();
         });
     }

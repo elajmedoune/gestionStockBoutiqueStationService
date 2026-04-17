@@ -1,16 +1,14 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class LigneVente extends Model
 {
-    protected $table      = 'LigneVente';
+    protected $table        = 'LigneVente';
     public    $incrementing = false;
     public    $timestamps   = false;
-
-    protected $primaryKey = ['idProduit', 'idVente'];
+    protected $primaryKey   = 'idProduit';
 
     protected $fillable = [
         'idProduit',
@@ -20,8 +18,18 @@ class LigneVente extends Model
     ];
 
     protected $casts = [
+        'idProduit'      => 'integer',
+        'idVente'        => 'integer',
+        'quantite'       => 'integer',
         'totalPartielle' => 'decimal:2',
     ];
+
+    public static function findByKeys(int $idProduit, int $idVente): ?self
+    {
+        return static::where('idProduit', $idProduit)
+                     ->where('idVente', $idVente)
+                     ->first();
+    }
 
     public function vente()
     {
