@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Utilisateur extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
+    //Nom de la table personnalisé
     protected $table      = 'Utilisateur';
-    protected $primaryKey = 'idUtilisateur';
+    protected $primaryKey = 'IdUtilisateur';
 
     protected $fillable = [
         'nom',
@@ -24,17 +27,29 @@ class Utilisateur extends Authenticatable
 
     protected $hidden = [
         'motDePasse',
+        'remember_token',
     ];
 
     protected $casts = [
         'actif' => 'boolean',
     ];
 
-    public function getAuthPassword()
+    //Laravel attend "password" pour l'auth -- on pointe vers motDePasse
+    public function getAuthPassword(): string
     {
         return $this->motDePasse;
     }
 
+    //-------------------------------------------------------------------
+    //Relations
+    //-------------------------------------------------------------------
+    public function inventaires(){
+       return $this->hasMany(Inventaire::class, 'IdUtilisateur', 'IdUtilisateur'); 
+    }
+
+    public function alertes(){
+       return $this->hasMany(Alerte::class, 'IdUtilisateur', 'IdUtilisateur'); 
+    }
     public function ventes()
     {
         return $this->hasMany(Vente::class, 'idUtilisateur', 'idUtilisateur');
@@ -43,5 +58,20 @@ class Utilisateur extends Authenticatable
     public function commandes()
     {
         return $this->hasMany(Commande::class, 'idUtilisateur', 'idUtilisateur');
+    }
+
+    //--------------------------------------------------------------------
+    //Helpers roles
+    //--------------------------------------------------------------------
+    public function isAdmin(): bool{
+        return $this->role === 'admin';
+    }
+    
+     public function isGestionnaire(): bool{
+        return $this->role === 'gestionnaire';
+    }
+
+     public function isCaissier(): bool{
+        return $this->role === 'caissier';
     }
 }
