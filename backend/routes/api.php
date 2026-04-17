@@ -25,7 +25,7 @@ Route::middleware(['auth:sanctum', 'throttle:50,1'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
 
-<<<<<<< HEAD
+// <!-- <<<<<<< HEAD  -->
     //Gestion des utilisateurs (admin seulement)
     Route::middleware('role:admin')->group(function() {
         Route::post(' /register',                       [AuthController::class, 'register']);
@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum', 'throttle:50,1'])->group(function () {
     Route::apiResource('produits',     ProduitController::class);
     Route::apiResource('stocks',       StockController::class);
 
->>>>>>> origin/main
+// >>>>>>> origin/main
     // Ventes
     Route::get('/ventes/rapport', [VenteController::class, 'rapport']);
     Route::apiResource('ventes', VenteController::class);
