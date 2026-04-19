@@ -200,16 +200,16 @@ export default function Layout({ children }) {
             <div className="dropdown dropdown-end">
               <div tabIndex={0} className="btn btn-ghost btn-sm gap-2 px-2">
                 <div className="w-7 h-7 rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center">
-  {user?.photo ? (
-    <img
-      src={`http://localhost:8000/storage/${user.photo}`}
-      alt="avatar"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <User size={14} />
-  )}
-</div>
+                  {user?.photo ? (
+                    <img
+                    src={`http://localhost:8000/storage/${user.photo}`}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                    />
+                  ) : (
+                  <User size={14} />
+                  )}
+                  </div>
                 <span className="hidden md:inline text-sm font-medium">
                   {user?.prenom}
                 </span>

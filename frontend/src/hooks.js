@@ -10,7 +10,7 @@ function useFetch(endpoint) {
     setLoading(true)
     try {
       const res = await api.get(endpoint)
-      setData(res.data.data ?? res.data)
+      setData(Array.isArray(res.data) ? res.data : (res.data.data ?? []))
     } catch {
       setError('Erreur de chargement')
     } finally {
