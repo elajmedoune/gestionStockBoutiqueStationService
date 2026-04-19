@@ -34,6 +34,7 @@ class AuthController extends Controller
                 'login'  => $user->login,
                 'email'  => $user->email,
                 'role'   => $user->role,
+                'photo'  => $user->photo,
             ]
         ]);
     }
@@ -54,6 +55,37 @@ class AuthController extends Controller
             'login'  => $user->login,
             'email'  => $user->email,
             'role'   => $user->role,
+            'photo'  => $user->photo,
         ]);
+    }
+    public function uploadPhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|image|max:2048']);
+        $user = $request->user();
+        $path = $request->file('photo')->store('photos', 'public');
+        $user->photo = $path;
+        $user->save();
+        return response()->json(['photo' => $path]);
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $user = $request->user();
+        $user->nom    = $request->nom;
+        $user->prenom = $request->prenom;
+        $user->email  = $request->email;
+        $user->save();
+        return response()->json(['message' => 'Profil mis à jour']);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+        if (!Hash::check($request->ancien_mot_de_passe, $user->motDePasse)) {
+            return response()->json(['message' => 'Ancien mot de passe incorrect'], 401);
+            }
+        $user->motDePasse = Hash::make($request->nouveau_mot_de_passe);
+        $user->save();
+        return response()->json(['message' => 'Mot de passe modifié']);
     }
 }

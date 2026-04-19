@@ -29,6 +29,12 @@ Route::middleware(['auth:sanctum', 'throttle:50,1'])->group(function () {
     Route::apiResource('produits', ProduitController::class);
     Route::apiResource('stocks', StockController::class);
 
+    // Profil
+
+    Route::post('/profil/photo', [AuthController::class, 'uploadPhoto']);
+    Route::put('/profil', [AuthController::class, 'updateProfil']);
+    Route::put('/profil/password', [AuthController::class, 'updatePassword']);
+
     // Ventes
     Route::get('/ventes/rapport', [VenteController::class, 'rapport']);
     Route::apiResource('ventes', VenteController::class);
