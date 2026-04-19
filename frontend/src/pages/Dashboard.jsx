@@ -169,46 +169,51 @@ export default function Dashboard() {
   const loading = lV || lP || lS || lC
 
   /* ── Stats ── */
-  const caTotal    = useMemo(() => ventes.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventes])
-  const ventesAuj  = useMemo(() => { const t = new Date().toDateString(); return ventes.filter(v => v.dateVente && new Date(v.dateVente).toDateString() === t) }, [ventes])
-  const caAuj      = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventesAuj])
-  const ventes7j   = useMemo(() => ventes.filter(v => v.dateVente && new Date(v.dateVente) >= il7), [ventes])
-  const ca7j       = useMemo(() => ventes7j.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventes7j])
-  const stockTotal = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0), [stocks])
+const ventesActives = useMemo(() => ventes.filter(v => v.statut !== 'annulee'), [ventes])
+const caTotal    = useMemo(() => ventesActives.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventesActives])
+const ventesAuj  = useMemo(() => { const t = new Date().toDateString(); return ventesActives.filter(v => v.dateVente && new Date(v.dateVente).toDateString() === t) }, [ventesActives])
+const caAuj      = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventesAuj])
+const ventes7j   = useMemo(() => ventesActives.filter(v => v.dateVente && new Date(v.dateVente) >= il7), [ventesActives])
+const ca7j       = useMemo(() => ventes7j.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventes7j])
 
-  const alertes = useMemo(() => produits.filter(p => {
-    const qte = stocks.filter(s => s.idProduit === p.idProduit).reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0)
-    return qte <= (parseInt(p.seuilSecurite) || 0)
-  }), [produits, stocks])
+const stockTotal = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
 
-  const topProduits = useMemo(() => {
-    const map = {}
-    ventes.forEach(v => {
-      v.lignes?.forEach(l => {
-        const id = l.idProduit
-        if (!map[id]) map[id] = { nom: l.produit?.reference || `#${id}`, qte: 0, total: 0 }
-        map[id].qte   += parseInt(l.quantite) || 0
-        map[id].total += parseFloat(l.totalPartielle) || 0
-      })
+const alertes = useMemo(() => produits.filter(p => {
+  const qte = stocks.filter(s => s.idProduit === p.idProduit)
+    .reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)
+  return qte <= (parseInt(p.seuilSecurite) || 0)
+}), [produits, stocks])
+
+const topProduits = useMemo(() => {
+  const map = {}
+  ventesActives.forEach(v => {
+    v.lignes?.forEach(l => {
+      const id = l.idProduit
+      if (!map[id]) map[id] = { nom: l.produit?.reference || `#${id}`, qte: 0, total: 0 }
+      map[id].qte   += parseInt(l.quantite) || 0
+      map[id].total += parseFloat(l.totalPartielle) || 0
     })
-    return Object.values(map).sort((a, b) => b.qte - a.qte).slice(0, 6)
-  }, [ventes])
+  })
+  return Object.values(map).sort((a, b) => b.qte - a.qte).slice(0, 6)
+}, [ventesActives])
 
-  const stockParCat = useMemo(() => {
-    const map = {}
-    categories.forEach(c => { map[c.idCategorie] = { name: c.nom ?? c.name, stock: 0 } })
-    produits.forEach(p => {
-      if (p.idCategorie && map[p.idCategorie]) {
-        const qte = stocks.filter(s => s.idProduit === p.idProduit).reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0)
-        map[p.idCategorie].stock += qte
-      }
-    })
-    const entries = Object.values(map).filter(e => e.stock > 0)
-    return { labels: entries.map(e => e.name), data: entries.map(e => e.stock) }
-  }, [produits, stocks, categories])
+const dernieresVentes = useMemo(() => [...ventesActives].slice(0, 6), [ventesActives])
+const caData = useMemo(() => buildCAData(ventesActives, caConfig.dateDebut, caConfig.dateFin, caConfig.groupBy), [ventesActives, caConfig])
 
-  const dernieresVentes = useMemo(() => [...ventes].slice(0, 6), [ventes])
-  const caData     = useMemo(() => buildCAData(ventes, caConfig.dateDebut, caConfig.dateFin, caConfig.groupBy), [ventes, caConfig])
+const stockParCat = useMemo(() => {
+  const map = {}
+  categories.forEach(c => { map[c.idCategorie] = { name: c.libelle, stock: 0 } })
+  produits.forEach(p => {
+    if (p.idCategorie && map[p.idCategorie]) {
+      const qte = stocks.filter(s => s.idProduit === p.idProduit)
+        .reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)
+      map[p.idCategorie].stock += qte
+    }
+  })
+  const entries = Object.values(map).filter(e => e.stock > 0)
+  return { labels: entries.map(e => e.name), data: entries.map(e => e.stock) }
+}, [produits, stocks, categories])
+
   const caPeriode  = useMemo(() => caData.data.reduce((s, v) => s + v, 0), [caData])
 
   const chartOpts = (cb) => ({
@@ -327,17 +332,25 @@ export default function Dashboard() {
                         options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#fff0f5', titleColor: '#9d174d', bodyColor: '#be185d', borderColor: '#fbcfe8', borderWidth: 1, padding: 8, cornerRadius: 8 } }, cutout: '68%' }}
                       />
                     </div>
-                    <div className="mt-3 space-y-1.5">
-                      {stockParCat.labels.map((l, i) => (
-                        <div key={l} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: DOUGHNUT_COLORS[i] }} />
-                            <span className="text-xs text-base-content/60 truncate max-w-[110px]">{l}</span>
-                          </div>
-                          <span className="text-xs font-bold text-base-content">{fmt(stockParCat.data[i])}</span>
-                        </div>
-                      ))}
-                    </div>
+<div className="mt-3 space-y-2">
+  {stockParCat.labels.map((l, i) => (
+    <div key={i}>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: DOUGHNUT_COLORS[i] }} />
+          <span className="text-xs text-base-content/60 truncate">{l}</span>
+        </div>
+        <span className="text-xs font-bold text-base-content ml-2 shrink-0">{fmt(stockParCat.data[i])}</span>
+      </div>
+      <div className="w-full bg-base-200 rounded-full h-1.5">
+        <div className="h-1.5 rounded-full transition-all duration-500" style={{
+          background: DOUGHNUT_COLORS[i],
+          width: `${Math.round((stockParCat.data[i] / Math.max(...stockParCat.data)) * 100)}%`
+        }} />
+      </div>
+    </div>
+  ))}
+</div>
                   </>
               }
             </div>

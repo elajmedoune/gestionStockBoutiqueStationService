@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Layout from '../components/Layout'
+import appConfig from '../config/app'
 import {
   Plus, Search, Download, Eye, Ban, Printer,
   ShoppingCart, DollarSign, TrendingUp, CreditCard,
@@ -8,7 +9,8 @@ import {
   Receipt, User, Calendar, Package
 } from 'lucide-react'
 import { createVente, deleteVente, getVente } from '../services/api'
-import { useVentes, useProduits } from '../hooks'
+import { exportTicketCaisse } from '../services/pdf'
+import { useVentes, useProduits, useStocks } from '../hooks'
 
 const fmt = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
@@ -21,64 +23,6 @@ const MODE_LABELS = {
 }
 
 const TVA_RATE = 18
-
-/* ════════════════════════════════════
-   TICKET DE CAISSE PDF
-════════════════════════════════════ */
-function imprimerTicket(vente) {
-  const mode = MODE_LABELS[vente.modePaiement]?.label ?? vente.modePaiement
-  const lignes = vente.lignes ?? []
-  const win = window.open('', '_blank', 'width=400,height=600')
-  win.document.write(`
-    <html>
-    <head>
-      <title>Ticket #${vente.idVente}</title>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: monospace; font-size: 13px; padding: 20px; max-width: 300px; }
-        .center { text-align: center; }
-        .bold { font-weight: bold; }
-        .line { border-top: 1px dashed #000; margin: 8px 0; }
-        .row { display: flex; justify-content: space-between; margin: 3px 0; }
-        .title { font-size: 18px; font-weight: bold; }
-        .total { font-size: 15px; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <div class="center">
-        <div class="title">⛽ GESTION STOCK</div>
-        <div>Boutique Station Service</div>
-        <div>${new Date(vente.dateVente).toLocaleString('fr-FR')}</div>
-      </div>
-      <div class="line"></div>
-      <div class="row"><span>Ticket N°</span><span>#${vente.idVente}</span></div>
-      <div class="row"><span>Caissier</span><span>${vente.utilisateur?.prenom ?? ''} ${vente.utilisateur?.nom ?? ''}</span></div>
-      <div class="row"><span>Paiement</span><span>${mode}</span></div>
-      <div class="line"></div>
-      <div class="bold" style="margin-bottom:6px">ARTICLES</div>
-      ${lignes.map(l => `
-        <div class="row">
-          <span>${l.produit?.reference ?? '#' + l.idProduit}</span>
-          <span>${l.quantite} x ${fmt(l.produit?.prixUnitaire)} F</span>
-        </div>
-        <div class="row" style="padding-left:10px">
-          <span></span>
-          <span class="bold">${fmt(l.totalPartielle)} F</span>
-        </div>
-      `).join('')}
-      <div class="line"></div>
-      <div class="row"><span>Sous-total HT</span><span>${fmt(vente.totalHorsTaxe)} F</span></div>
-      <div class="row"><span>TVA (18%)</span><span>${fmt(vente.tva)} F</span></div>
-      <div class="line"></div>
-      <div class="row total"><span>TOTAL TTC</span><span>${fmt(vente.totalTaxeComprise)} F</span></div>
-      <div class="line"></div>
-      <div class="center" style="margin-top:10px">Merci de votre visite !</div>
-    </body>
-    </html>
-  `)
-  win.document.close()
-  win.print()
-}
 
 /* ════════════════════════════════════
    MODAL : Détail d'une vente
@@ -169,13 +113,12 @@ function ModalDetail({ vente, onClose }) {
         </div>
 
         <div className="modal-action">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>Fermer</button>
           <button
-            className="btn btn-primary btn-sm gap-2"
-            onClick={() => imprimerTicket(vente)}
+          className="btn btn-primary btn-sm gap-2"
+          onClick={() => exportTicketCaisse(vente)}
           >
             <Printer size={14} /> Ticket de caisse
-          </button>
+            </button>
         </div>
       </div>
       <div className="modal-backdrop" onClick={onClose} />
@@ -204,9 +147,16 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
         p.codeBarre?.includes(search)
       ).slice(0, 6)
   }, [produits, search])
-
+  
   const ajouterLigne = (produit) => {
     if (!produit) return
+    const stockDispo = produit.stocks?.reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0) ?? 0
+    const qteExistante = lignes.find(l => l.produit.idProduit === produit.idProduit)?.quantite ?? 0
+    if (qte + qteExistante > stockDispo) {
+      setError(`Stock insuffisant. Disponible : ${stockDispo}`)
+      return
+    }
+    setError('')
     setLignes(prev => {
       const exist = prev.find(l => l.produit.idProduit === produit.idProduit)
       if (exist) return prev.map(l =>
@@ -236,7 +186,7 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
         idUtilisateur: user.idUtilisateur,
         lignes: lignes.map(l => ({ idProduit: l.produit.idProduit, quantite: l.quantite }))
       })
-      onSuccess(resVente.data)
+      onSuccess(resVente.data.data ?? resVente.data)
       onClose()
     } catch (e) {
       setError(e.response?.data?.message ?? 'Erreur lors de la création de la vente.')
@@ -303,7 +253,12 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                       <button className="w-full text-left px-3 py-2 text-sm hover:bg-base-200 flex justify-between items-center"
                         onClick={() => { setProduitSelectionne(p); setSearch(p.reference) }}>
                         <span className="font-medium">{p.reference}</span>
-                        <span className="text-xs text-base-content/50 badge badge-ghost">{fmt(p.prixUnitaire)} F</span>
+                        <div className="flex gap-2 items-center">
+                          <span className="text-xs text-base-content/50 badge badge-ghost">{fmt(p.prixUnitaire)} F</span>
+                          <span className="text-xs badge badge-outline badge-sm">
+                            Stock: {p.stocks?.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0) ?? 0}
+                            </span>
+                            </div>
                       </button>
                     </li>
                   ))}
@@ -403,8 +358,15 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
 const PER_PAGE = 10
 
 export default function Ventes() {
-  const { data: ventes, loading: lV, refetch } = useVentes()
-  const { data: produits, loading: lP }         = useProduits()
+  const { data: ventes, loading: lV, refetch: refetchVentes } = useVentes()
+  const { data: produits, loading: lP, refetch: refetchProduits } = useProduits()
+  const { refetch: refetchStocks } = useStocks()
+
+  const refetchAll = useCallback(() => {
+    refetchVentes()
+    refetchProduits()
+    refetchStocks()
+  }, [refetchVentes, refetchProduits, refetchStocks])
 
   const [search,      setSearch]      = useState('')
   const [filterMode,  setFilterMode]  = useState('')
@@ -436,27 +398,28 @@ export default function Ventes() {
   const ventesPaged = ventesFiltrees.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   const todayStr    = toISO(today)
-  const ventesAuj   = useMemo(() => ventes.filter(v => v.dateVente?.startsWith(todayStr)), [ventes])
-  const caAuj       = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0), [ventesAuj])
-  const caMois      = useMemo(() => {
+const ventesActives = useMemo(() => ventes.filter(v => v.statut !== 'annulee'), [ventes])
+const ventesAuj   = useMemo(() => ventesActives.filter(v => v.dateVente?.startsWith(todayStr)), [ventesActives])
+const caAuj       = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0), [ventesAuj])
+const caMois      = useMemo(() => {
     const debut = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
-    return ventes.filter(v => v.dateVente >= debut)
+    return ventesActives.filter(v => v.dateVente >= debut)
       .reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0)
-  }, [ventes])
-  const panierMoyen = useMemo(() =>
-    ventes.length ? ventes.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0) / ventes.length : 0
-  , [ventes])
+  }, [ventesActives])
+const panierMoyen = useMemo(() =>
+    ventesActives.length ? ventesActives.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0) / ventesActives.length : 0
+  , [ventesActives])
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteVente(id)
-      showToast('success', `Vente #${id} annulée.`)
-      refetch()
-    } catch {
-      showToast('error', 'Impossible d\'annuler cette vente.')
-    }
-    setConfirmDel(null)
+const handleDelete = async (id) => {
+  try {
+    await deleteVente(id)
+    showToast('success', `Vente #${id} annulée.`)
+    refetchAll()
+  } catch {
+    showToast('error', 'Impossible d\'annuler cette vente.')
   }
+  setConfirmDel(null)
+}
 
   const handleDetail = async (v) => {
     try {
@@ -468,13 +431,13 @@ export default function Ventes() {
   }
 
   const handleTicket = async (v) => {
-    try {
-      const res = await getVente(v.idVente)
-      imprimerTicket(res.data.data ?? res.data)
-    } catch {
-      imprimerTicket(v)
-    }
+  try {
+    const res = await getVente(v.idVente)
+    exportTicketCaisse(res.data.data ?? res.data)
+  } catch {
+    exportTicketCaisse(v)
   }
+}
 
   if (lV || lP) return (
     <Layout>
@@ -589,7 +552,7 @@ export default function Ventes() {
                       const mode = MODE_LABELS[v.modePaiement] ?? { label: v.modePaiement, cls: 'badge-ghost' }
                       const lignes = v.lignes ?? []
                       return (
-                        <tr key={v.idVente} className="hover">
+                        <tr key={v.idVente} className={`hover ${v.statut === 'annulee' ? 'opacity-50' : ''}`}>
                           <td className="font-bold text-base-content/50">#{v.idVente}</td>
                           <td className="text-base-content/70 text-xs">
                             {v.dateVente ? new Date(v.dateVente).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
@@ -620,19 +583,25 @@ export default function Ventes() {
                           <td className="text-right font-extrabold text-success">{fmt(v.totalTaxeComprise)} F</td>
                           <td className="text-right">
                             <div className="flex gap-1 justify-end">
+                              {v.statut === 'annulee' ? (
+                                <span className="badge badge-error badge-sm">Annulée</span>
+                              ) : (
+                              <>
                               <button className="btn btn-ghost btn-xs btn-circle tooltip" data-tip="Détail"
-                                onClick={() => handleDetail(v)}>
+                              onClick={() => handleDetail(v)}>
                                 <Eye size={13} />
-                              </button>
-                              <button className="btn btn-ghost btn-xs btn-circle tooltip text-primary" data-tip="Ticket de caisse"
+                                </button>
+                                <button className="btn btn-ghost btn-xs btn-circle tooltip text-primary" data-tip="Ticket de caisse"
                                 onClick={() => handleTicket(v)}>
-                                <Printer size={13} />
-                              </button>
-                              <button className="btn btn-ghost btn-xs btn-circle text-warning tooltip" data-tip="Annuler"
-                                onClick={() => setConfirmDel(v.idVente)}>
-                                <Ban size={13} />
-                              </button>
-                            </div>
+                                  <Printer size={13} />
+                                  </button>
+                                  <button className="btn btn-ghost btn-xs btn-circle text-warning tooltip" data-tip="Annuler"
+                                  onClick={() => setConfirmDel(v.idVente)}>
+                                    <Ban size={13} />
+                                    </button>
+                                    </>
+                                  )}
+                                  </div>
                           </td>
                         </tr>
                       )
@@ -674,7 +643,7 @@ export default function Ventes() {
       {modalNew && (
         <ModalNouvelleVente produits={produits}
           onClose={() => setModalNew(false)}
-          onSuccess={() => { showToast('success', 'Vente enregistrée !'); refetch() }} />
+          onSuccess={() => { showToast('success', 'Vente enregistrée !'); refetchAll() }} />
       )}
 
       {venteDetail && (

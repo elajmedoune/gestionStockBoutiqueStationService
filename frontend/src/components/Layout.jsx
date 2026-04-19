@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import appConfig from '../config/app'
 import {
   Bell, User, LogOut, Settings,
   LayoutDashboard, ShoppingCart, Package, Truck,
@@ -52,20 +53,23 @@ export default function Layout({ children }) {
 
   const SidebarContent = ({ isCollapsed = false, onNavigate, showToggle = false }) => (
     <div className="flex flex-col h-full">
-
+      
       {/* Logo + bouton toggle */}
       <div className={`flex items-center border-b border-base-200 h-16 shrink-0 ${isCollapsed ? 'justify-center px-3' : 'justify-between px-4'}`}>
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-primary-content text-lg shadow shrink-0">
-            ⛽
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <p className="font-bold text-base-content leading-tight truncate">Gestion Stock</p>
-              <p className="text-xs text-base-content/40">Station Service</p>
+            {appConfig.company.logo
+            ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-xl" />
+            : <span>⛽</span>
+            }
             </div>
-          )}
-        </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <p className="font-bold text-base-content leading-tight truncate">{appConfig.appName}</p>
+                <p className="text-xs text-base-content/40">{appConfig.company.slogan}</p>
+                </div>
+              )}
+              </div>
         
         {showToggle && (
           <button
@@ -210,32 +214,44 @@ export default function Layout({ children }) {
                   <User size={14} />
                   )}
                   </div>
-                <span className="hidden md:inline text-sm font-medium">
-                  {user?.prenom}
-                </span>
+                <div className="hidden md:flex flex-col items-start">
+                  <span className="text-sm font-semibold leading-tight">{user?.prenom}</span>
+                  <span className="text-xs text-base-content/40 capitalize">{user?.role}</span>
+                  </div>
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content bg-base-100 rounded-box shadow-lg w-56 mt-2 p-0 z-50 border border-base-200 overflow-hidden">
+                    
+                    {/* Header profil */}
+                    <div className="flex items-center gap-3 p-4 bg-base-200/50 border-b border-base-200">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center shrink-0">
+                      {user?.photo ? (
+                        <img src={`http://localhost:8000/storage/${user.photo}`} alt="avatar" className="w-full h-full object-cover" />
+                      ) : (
+                      <User size={16} />
+                      )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-base-content truncate">{user?.prenom} {user?.nom}</p>
+                        <span className="badge badge-primary badge-xs capitalize">{user?.role}</span>
+                        </div>
+                        </div>
+                        
+                        {/* Menu items */}
+                        <div className="p-2">
+                          <button onClick={() => navigate('/profil')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-lg hover:bg-base-200 transition">
+                            <User size={14} /> Mon profil
+                          </button>
+                          <button onClick={() => navigate('/parametres')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-lg hover:bg-base-200 transition">
+                            <Settings size={14} /> Paramètres
+                          </button>
+                            <div className="divider my-1"></div>
+                          <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-lg hover:bg-error/10 text-error transition">
+                            <LogOut size={14} /> Déconnexion
+                          </button>
+                      </div>
+                  </ul>
+                </div>
               </div>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box shadow-lg w-48 mt-2 p-2 z-50 border border-base-200">
-                <li className="menu-title text-xs">{user?.prenom} {user?.nom}</li>
-                <li>
-                  <button onClick={() => navigate('/profil')} className="gap-2 text-sm">
-                    <User size={14} /> Mon profil
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/parametres')} className="gap-2 text-sm">
-                    <Settings size={14} /> Paramètres
-                  </button>
-                </li>
-                <div className="divider my-1"></div>
-                <li>
-                  <button onClick={handleLogout} className="text-error gap-2 text-sm">
-                    <LogOut size={14} /> Déconnexion
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-          </div>
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
