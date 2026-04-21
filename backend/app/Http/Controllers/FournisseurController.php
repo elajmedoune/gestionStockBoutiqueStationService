@@ -14,7 +14,11 @@ class FournisseurController extends Controller
 
     public function store(StoreFournisseurRequest $request)
     {
-        $fournisseur = Fournisseur::create($request->validated());
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('photos', 'public');
+            $validated['photo'] = $path;
+        }
+        $fournisseur = Fournisseur::create($validated);
         return response()->json($fournisseur, 201);
     }
 

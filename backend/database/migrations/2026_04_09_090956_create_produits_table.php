@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('idProduit');
             $table->string('reference')->unique();
             $table->string('codeBarre')->unique()->nullable();
+            $table->string('photo')->nullable();
             $table->decimal('prixUnitaire', 10, 2)->default(0.00);
             $table->decimal('seuilSecurite')->default(0);
             $table->foreignId('idCategorie')

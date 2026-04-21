@@ -8,7 +8,7 @@ class Categorie extends Model
 {
     protected $table = 'categories';
     protected $primaryKey = 'idCategorie';
-    protected $fillable = ['libelle', 'description'];
+    protected $fillable = ['libelle', 'description', 'emoji'];
 
     public function produits() {
         return $this->hasMany(Produit::class, 'idCategorie');
