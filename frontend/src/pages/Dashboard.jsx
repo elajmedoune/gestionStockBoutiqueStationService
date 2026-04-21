@@ -118,7 +118,7 @@ function HeroBanner({ user, stats }) {
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-5 gap-3">
           {stats.map(({ label, value, ok }) => (
             <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
               <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
@@ -175,6 +175,15 @@ const ventesAuj  = useMemo(() => { const t = new Date().toDateString(); return v
 const caAuj      = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventesAuj])
 const ventes7j   = useMemo(() => ventesActives.filter(v => v.dateVente && new Date(v.dateVente) >= il7), [ventesActives])
 const ca7j       = useMemo(() => ventes7j.reduce((s, v) => s + (parseFloat(v.montantTotal) || 0), 0), [ventes7j])
+
+const beneficeTotal = useMemo(() => {
+  return ventesActives.reduce((s, v) => {
+    return s + (v.lignes?.reduce((ls, l) => {
+      const prixAchat = l.produit?.stocks?.[0]?.prixAchat ?? 0
+      return ls + (parseFloat(l.produit?.prixUnitaire || 0) - parseFloat(prixAchat)) * parseInt(l.quantite || 0)
+    }, 0) || 0)
+  }, 0)
+}, [ventesActives])
 
 const stockTotal = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
 
@@ -257,6 +266,7 @@ const stockParCat = useMemo(() => {
           { label: 'Ventes auj.', value: ventesAuj.length },
           { label: 'CA auj.',     value: `${fmt(caAuj)} F` },
           { label: 'CA 7j',       value: `${fmt(ca7j)} F` },
+          { label: 'Bénéfice',    value: `${fmt(beneficeTotal)} F` },
           { label: 'Alertes',     value: alertes.length, ok: alertes.length === 0 },
         ]} />
 

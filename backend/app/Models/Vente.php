@@ -17,6 +17,7 @@ class Vente extends Model
         'modePaiement',
         'totalTaxeComprise',
         'idUtilisateur',
+        'statut',
     ];
 
     protected $casts = [
