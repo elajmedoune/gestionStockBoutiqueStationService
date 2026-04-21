@@ -17,6 +17,7 @@ class StoreCategorieRequest extends FormRequest
         return [
             'libelle' =>'required|string|max:50',
             'description' =>'nullable|string|max:500',
+            'emoji' => 'nullable|string|max:10',
         ];
     }
 }

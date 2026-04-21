@@ -9,7 +9,7 @@ class Produit extends Model
     protected $table = 'produits';
     protected $primaryKey = 'idProduit';
     protected $fillable = [
-        'reference', 'codeBarre',
+        'reference', 'codeBarre', 'photo',
         'prixUnitaire', 'seuilSecurite', 'idCategorie'
     ];
 

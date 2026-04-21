@@ -16,7 +16,12 @@ class ProduitController extends Controller
 
     public function store(StoreProduitRequest $request)
     {
-        $produit = Produit::create($request->validated());
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('photos', 'public');
+            $validated['photo'] = $path;
+        }
+
+        $produit = Produit::create($validated);
         return response()->json($produit, 201);
     }
 
