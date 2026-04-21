@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Layout from '../components/Layout'
 import appConfig from '../config/app'
+import { useRef, useEffect } from 'react'
 import {
   Plus, Search, Download, Eye, Ban, Printer,
   ShoppingCart, DollarSign, TrendingUp, CreditCard,
@@ -19,7 +20,7 @@ const today = new Date()
 const MODE_LABELS = {
   especes: { label: 'Espèces',  cls: 'badge-success' },
   carte:   { label: 'Carte',    cls: 'badge-info'    },
-  credit:  { label: 'Crédit',   cls: 'badge-warning' },
+  mobile_money: { label: 'Mobile Money', cls: 'badge-warning' },
 }
 
 const TVA_RATE = 18
@@ -134,49 +135,90 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
   const [modePaiement, setModePaiement] = useState('especes')
   const [lignes, setLignes] = useState([])
   const [search, setSearch] = useState('')
-  const [qte, setQte] = useState(1)
-  const [produitSelectionne, setProduitSelectionne] = useState(null)
+  const [categorieActive, setCategorieActive] = useState('tous')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
+  const [flashId, setFlashId] = useState(null)
+  const searchRef = useRef(null)
+ 
+  // ── Focus automatique sur la barre de recherche (pour le scan)
+  useEffect(() => {
+    setTimeout(() => searchRef.current?.focus(), 100)
+  }, [])
+ 
+  // ── Catégories extraites depuis les produits
+  const categories = useMemo(() => {
+    const cats = {}
+    produits.forEach(p => {
+      if (p.categorie) cats[p.categorie.idCategorie] = p.categorie.libelle ?? p.categorie.nom ?? 'Autre'
+    })
+    return cats
+  }, [produits])
+ 
+  // ── Produits filtrés par catégorie + recherche
   const produitsFiltres = useMemo(() => {
-    if (!search.trim()) return []
-    return produits
-      .filter(p =>
+    return produits.filter(p => {
+      const matchCat = categorieActive === 'tous' || String(p.categorie?.idCategorie) === String(categorieActive)
+      const matchSearch = !search.trim() ||
         p.reference?.toLowerCase().includes(search.toLowerCase()) ||
-        p.codeBarre?.includes(search)
-      ).slice(0, 6)
-  }, [produits, search])
-  
-  const ajouterLigne = (produit) => {
+        p.codeBarre?.includes(search) ||
+        p.nomProduit?.toLowerCase().includes(search.toLowerCase())
+      return matchCat && matchSearch
+    })
+  }, [produits, search, categorieActive])
+ 
+  // ── Stock disponible d'un produit
+  const stockDispo = (produit) =>
+    produit.stocks?.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0) ?? 0
+ 
+  // ── Ajouter au panier
+  const ajouterLigne = useCallback((produit, qte = 1) => {
     if (!produit) return
-    const stockDispo = produit.stocks?.reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0) ?? 0
+    const dispo = stockDispo(produit)
     const qteExistante = lignes.find(l => l.produit.idProduit === produit.idProduit)?.quantite ?? 0
-    if (qte + qteExistante > stockDispo) {
-      setError(`Stock insuffisant. Disponible : ${stockDispo}`)
+    if (qteExistante + qte > dispo) {
+      setError(`Stock insuffisant pour "${produit.reference}". Disponible : ${dispo}`)
+      setTimeout(() => setError(''), 3000)
       return
     }
     setError('')
+    setFlashId(produit.idProduit)
+    setTimeout(() => setFlashId(null), 400)
     setLignes(prev => {
       const exist = prev.find(l => l.produit.idProduit === produit.idProduit)
       if (exist) return prev.map(l =>
-        l.produit.idProduit === produit.idProduit
-          ? { ...l, quantite: l.quantite + qte } : l
+        l.produit.idProduit === produit.idProduit ? { ...l, quantite: l.quantite + qte } : l
       )
       return [...prev, { produit, quantite: qte }]
     })
-    setSearch(''); setProduitSelectionne(null); setQte(1)
+  }, [lignes])
+ 
+  // ── Scan code barre : Enter dans la barre de recherche
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const produit = produits.find(p => p.codeBarre === search.trim())
+      if (produit) {
+        ajouterLigne(produit)
+        setSearch('')
+      } else if (produitsFiltres.length === 1) {
+        ajouterLigne(produitsFiltres[0])
+        setSearch('')
+      } else {
+        setError('Produit non trouvé')
+        setTimeout(() => setError(''), 2000)
+      }
+    }
   }
-
-  const supprimerLigne = id => setLignes(prev => prev.filter(l => l.produit.idProduit !== id))
+ 
+  const supprimerLigne = (id) => setLignes(prev => prev.filter(l => l.produit.idProduit !== id))
   const updateQte = (id, val) => setLignes(prev => prev.map(l =>
     l.produit.idProduit === id ? { ...l, quantite: Math.max(1, val) } : l
   ))
-
+ 
   const totalHT  = useMemo(() => lignes.reduce((s, l) => s + (parseFloat(l.produit.prixUnitaire) || 0) * l.quantite, 0), [lignes])
   const tva      = useMemo(() => Math.round(totalHT * TVA_RATE / 100 * 100) / 100, [totalHT])
   const totalTTC = useMemo(() => totalHT + tva, [totalHT, tva])
-
+ 
   const handleSubmit = async () => {
     if (lignes.length === 0) { setError('Ajoutez au moins un produit.'); return }
     setLoading(true); setError('')
@@ -194,157 +236,248 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
       setLoading(false)
     }
   }
-
+ 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-2xl w-full">
-        <div className="flex items-center justify-between mb-5">
+      <div className="modal-box max-w-6xl w-full h-[90vh] p-0 overflow-hidden flex flex-col">
+ 
+        {/* ── HEADER */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-base-200 bg-base-100 shrink-0">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-xl">
               <ShoppingCart size={18} className="text-primary" />
             </div>
             <div>
-              <h3 className="font-extrabold text-lg">Nouvelle vente</h3>
+              <h3 className="font-extrabold text-base leading-tight">Nouvelle vente</h3>
               <p className="text-xs text-base-content/40">Caissier : {user?.prenom} {user?.nom}</p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm btn-circle" onClick={onClose}><X size={16} /></button>
-        </div>
-
-        {/* Mode paiement */}
-        <div className="mb-4">
-          <label className="label pb-1">
-            <span className="label-text text-xs font-bold uppercase tracking-wider">Mode de paiement</span>
-          </label>
-          <div className="flex gap-2">
+ 
+          {/* Mode paiement */}
+          <div className="flex gap-1">
             {Object.entries(MODE_LABELS).map(([key, { label }]) => (
               <button key={key} onClick={() => setModePaiement(key)}
-                className={`btn btn-sm flex-1 ${modePaiement === key ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
+                className={`btn btn-xs ${modePaiement === key ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
                 {label}
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Recherche produit */}
-        <div className="mb-4">
-          <label className="label pb-1">
-            <span className="label-text text-xs font-bold uppercase tracking-wider">Ajouter un produit</span>
-          </label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
-              <input type="text"
-                className="input input-bordered input-sm w-full pl-8 pr-8"
-                placeholder="Référence ou code barre…"
-                value={search}
-                onChange={e => { setSearch(e.target.value); setProduitSelectionne(null) }}
-              />
-              {search && (
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40"
-                  onClick={() => { setSearch(''); setProduitSelectionne(null) }}>
-                  <X size={13} />
-                </button>
-              )}
-              {produitsFiltres.length > 0 && (
-                <ul className="absolute top-full left-0 right-0 bg-base-100 border border-base-200 rounded-xl shadow-lg z-50 mt-1 overflow-hidden">
-                  {produitsFiltres.map(p => (
-                    <li key={p.idProduit}>
-                      <button className="w-full text-left px-3 py-2 text-sm hover:bg-base-200 flex justify-between items-center"
-                        onClick={() => { setProduitSelectionne(p); setSearch(p.reference) }}>
-                        <span className="font-medium">{p.reference}</span>
-                        <div className="flex gap-2 items-center">
-                          <span className="text-xs text-base-content/50 badge badge-ghost">{fmt(p.prixUnitaire)} F</span>
-                          <span className="text-xs badge badge-outline badge-sm">
-                            Stock: {p.stocks?.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0) ?? 0}
-                            </span>
-                            </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <input type="number" min={1} value={qte}
-              onChange={e => setQte(Math.max(1, parseInt(e.target.value) || 1))}
-              className="input input-bordered input-sm w-20 text-center" placeholder="Qté" />
-            <button className="btn btn-primary btn-sm gap-1"
-              onClick={() => ajouterLigne(produitSelectionne)} disabled={!produitSelectionne}>
-              <Plus size={14} /> Ajouter
-            </button>
-          </div>
-        </div>
-
-        {/* Lignes */}
-        <div className="rounded-xl border border-base-200 overflow-hidden mb-4">
-          {lignes.length === 0
-            ? <div className="py-8 text-center text-base-content/30 text-sm">
-                <Package size={24} className="mx-auto mb-2 opacity-30" />
-                Aucun produit ajouté
-              </div>
-            : <table className="table table-sm w-full">
-                <thead><tr className="bg-base-200/50">
-                  <th>Produit</th>
-                  <th className="text-center w-24">Quantité</th>
-                  <th className="text-right">Prix unit.</th>
-                  <th className="text-right">Total</th>
-                  <th className="w-10"></th>
-                </tr></thead>
-                <tbody>
-                  {lignes.map(l => (
-                    <tr key={l.produit.idProduit} className="hover">
-                      <td className="font-semibold">{l.produit.reference}</td>
-                      <td>
-                        <input type="number" min={1} value={l.quantite}
-                          onChange={e => updateQte(l.produit.idProduit, parseInt(e.target.value) || 1)}
-                          className="input input-bordered input-xs w-full text-center" />
-                      </td>
-                      <td className="text-right text-base-content/60">{fmt(l.produit.prixUnitaire)} F</td>
-                      <td className="text-right font-bold text-primary">{fmt(parseFloat(l.produit.prixUnitaire) * l.quantite)} F</td>
-                      <td>
-                        <button className="btn btn-ghost btn-xs btn-circle text-error"
-                          onClick={() => supprimerLigne(l.produit.idProduit)}>
-                          <X size={13} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-          }
-        </div>
-
-        {/* Totaux */}
-        {lignes.length > 0 && (
-          <div className="bg-base-200/50 rounded-xl p-4 space-y-2 text-sm mb-4">
-            <div className="flex justify-between">
-              <span className="text-base-content/60">Sous-total HT</span>
-              <span className="font-semibold">{fmt(totalHT)} F</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-base-content/60">TVA (18%)</span>
-              <span className="font-semibold">{fmt(tva)} F</span>
-            </div>
-            <div className="divider my-1" />
-            <div className="flex justify-between text-base font-extrabold">
-              <span>Total TTC</span>
-              <span className="text-success text-lg">{fmt(totalTTC)} F</span>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="alert alert-error alert-sm mb-3 py-2 text-sm">
-            <AlertTriangle size={14} /> {error}
-          </div>
-        )}
-
-        <div className="modal-action">
-          <button className="btn btn-ghost btn-sm" onClick={onClose} disabled={loading}>Annuler</button>
-          <button className="btn btn-primary btn-sm gap-1" onClick={handleSubmit} disabled={loading || lignes.length === 0}>
-            {loading ? <span className="loading loading-spinner loading-xs" /> : <Check size={14} />}
-            Enregistrer la vente
+ 
+          <button className="btn btn-ghost btn-sm btn-circle" onClick={onClose}>
+            <X size={16} />
           </button>
+        </div>
+ 
+        {/* ── BODY : 2 colonnes */}
+        <div className="flex flex-1 overflow-hidden">
+ 
+          {/* ══ COLONNE GAUCHE : Produits */}
+          <div className="flex flex-col flex-1 overflow-hidden border-r border-base-200">
+ 
+            {/* Barre de recherche + scan */}
+            <div className="px-4 py-3 border-b border-base-200 shrink-0">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  className="input input-bordered input-sm w-full pl-9 pr-8"
+                  placeholder="🔍 Rechercher par nom, référence ou scanner le code barre…"
+                  value={search}
+                  onChange={e => { setSearch(e.target.value); setError('') }}
+                  onKeyDown={handleSearchKeyDown}
+                />
+                {search && (
+                  <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                    onClick={() => setSearch('')}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            </div>
+ 
+            {/* Filtres catégories */}
+            <div className="flex gap-2 px-4 py-2 border-b border-base-200 overflow-x-auto shrink-0">
+              <button
+                onClick={() => setCategorieActive('tous')}
+                className={`btn btn-xs shrink-0 ${categorieActive === 'tous' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
+                Tous
+              </button>
+              {Object.entries(categories).map(([id, libelle]) => (
+                <button key={id}
+                  onClick={() => setCategorieActive(id)}
+                  className={`btn btn-xs shrink-0 ${categorieActive === String(id) ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
+                  {libelle}
+                </button>
+              ))}
+            </div>
+ 
+            {/* Grille produits */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {produitsFiltres.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 text-base-content/30">
+                  <Package size={32} className="mb-2 opacity-30" />
+                  <p className="text-sm">Aucun produit trouvé</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {produitsFiltres.map(p => {
+                    const dispo = stockDispo(p)
+                    const enPanier = lignes.find(l => l.produit.idProduit === p.idProduit)
+                    const isFlash = flashId === p.idProduit
+                    return (
+                      <button
+                        key={p.idProduit}
+                        onClick={() => ajouterLigne(p)}
+                        disabled={dispo === 0}
+                        className={`
+                          relative flex flex-col items-center text-center p-3 rounded-2xl border-2 transition-all duration-150
+                          ${dispo === 0
+                            ? 'opacity-40 cursor-not-allowed border-base-200 bg-base-200/50'
+                            : isFlash
+                              ? 'border-primary bg-primary/10 scale-95'
+                              : enPanier
+                                ? 'border-primary/50 bg-primary/5 hover:bg-primary/10'
+                                : 'border-base-200 bg-base-100 hover:border-primary/40 hover:bg-base-200/50 hover:scale-[1.02]'
+                          }
+                        `}
+                      >
+                        {/* Badge panier */}
+                        {enPanier && (
+                          <div className="absolute -top-2 -right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                            <span className="text-primary-content text-xs font-bold">{enPanier.quantite}</span>
+                          </div>
+                        )}
+ 
+                        {/* Image produit */}
+                        <div className="w-14 h-14 rounded-xl bg-base-200 flex items-center justify-center mb-2 overflow-hidden">
+                          {p.photo
+                            ? <img src={p.photo} alt={p.reference} className="w-full h-full object-cover" />
+                            : <Package size={24} className="text-base-content/30" />
+                          }
+                        </div>
+ 
+                        {/* Nom */}
+                        <p className="text-xs font-bold leading-tight line-clamp-2 mb-1">
+                          {p.nomProduit ?? p.reference}
+                        </p>
+ 
+                        {/* Prix */}
+                        <p className="text-sm font-extrabold text-primary">{fmt(p.prixUnitaire)} F</p>
+ 
+                        {/* Stock */}
+                        <span className={`mt-1 text-xs badge badge-sm ${dispo === 0 ? 'badge-error' : dispo <= 5 ? 'badge-warning' : 'badge-ghost'}`}>
+                          {dispo === 0 ? 'Rupture' : `Stock: ${dispo}`}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+ 
+          {/* ══ COLONNE DROITE : Panier */}
+          <div className="w-72 flex flex-col bg-base-50 shrink-0">
+ 
+            <div className="px-4 py-3 border-b border-base-200 shrink-0">
+              <h4 className="font-extrabold text-sm flex items-center gap-2">
+                <ShoppingCart size={14} className="text-primary" />
+                Panier
+                {lignes.length > 0 && (
+                  <span className="badge badge-primary badge-sm">{lignes.length}</span>
+                )}
+              </h4>
+            </div>
+ 
+            {/* Lignes panier */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+              {lignes.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-base-content/20">
+                  <ShoppingCart size={28} className="mb-2" />
+                  <p className="text-xs">Panier vide</p>
+                </div>
+              ) : lignes.map(l => (
+                <div key={l.produit.idProduit}
+                  className="flex items-center gap-2 p-2 bg-base-100 rounded-xl border border-base-200">
+ 
+                  {/* Mini image */}
+                  <div className="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center overflow-hidden shrink-0">
+                    {l.produit.photo
+                      ? <img src={l.produit.photo} alt="" className="w-full h-full object-cover" />
+                      : <Package size={12} className="text-base-content/30" />
+                    }
+                  </div>
+ 
+                  {/* Nom + prix */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate">{l.produit.nomProduit ?? l.produit.reference}</p>
+                    <p className="text-xs text-base-content/50">{fmt(l.produit.prixUnitaire)} F</p>
+                  </div>
+ 
+                  {/* Quantité */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button className="btn btn-ghost btn-xs btn-circle w-5 h-5 min-h-0"
+                      onClick={() => l.quantite === 1 ? supprimerLigne(l.produit.idProduit) : updateQte(l.produit.idProduit, l.quantite - 1)}>
+                      <span className="text-xs">{l.quantite === 1 ? '🗑' : '−'}</span>
+                    </button>
+                    <span className="text-xs font-bold w-5 text-center">{l.quantite}</span>
+                    <button className="btn btn-ghost btn-xs btn-circle w-5 h-5 min-h-0"
+                      onClick={() => ajouterLigne(l.produit)}>
+                      <span className="text-xs">＋</span>
+                    </button>
+                  </div>
+ 
+                  {/* Total ligne */}
+                  <p className="text-xs font-extrabold text-primary shrink-0">
+                    {fmt(parseFloat(l.produit.prixUnitaire) * l.quantite)} F
+                  </p>
+                </div>
+              ))}
+            </div>
+ 
+            {/* Totaux + valider */}
+            <div className="px-4 py-3 border-t border-base-200 shrink-0 space-y-2">
+ 
+              {error && (
+                <div className="alert alert-error py-1.5 text-xs">
+                  <AlertTriangle size={12} /> {error}
+                </div>
+              )}
+ 
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between text-base-content/60">
+                  <span>Sous-total HT</span>
+                  <span className="font-semibold">{fmt(totalHT)} F</span>
+                </div>
+                <div className="flex justify-between text-base-content/60">
+                  <span>TVA (18%)</span>
+                  <span className="font-semibold">{fmt(tva)} F</span>
+                </div>
+                <div className="divider my-1" />
+                <div className="flex justify-between text-base font-extrabold">
+                  <span>Total TTC</span>
+                  <span className="text-success text-lg">{fmt(totalTTC)} F</span>
+                </div>
+              </div>
+ 
+              <div className="flex gap-2 pt-1">
+                <button className="btn btn-ghost btn-sm flex-1" onClick={onClose} disabled={loading}>
+                  Annuler
+                </button>
+                <button
+                  className="btn btn-primary btn-sm flex-1 gap-1"
+                  onClick={handleSubmit}
+                  disabled={loading || lignes.length === 0}>
+                  {loading
+                    ? <span className="loading loading-spinner loading-xs" />
+                    : <Check size={14} />
+                  }
+                  Valider
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div className="modal-backdrop" onClick={onClose} />
@@ -513,7 +646,7 @@ const handleDelete = async (id) => {
             <option value="">Tous les modes</option>
             <option value="especes">Espèces</option>
             <option value="carte">Carte</option>
-            <option value="credit">Crédit</option>
+            <option value="mobile_money">Mobile Money</option>
           </select>
           <input type="date" className="input input-bordered input-sm w-36"
             value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPage(1) }} />

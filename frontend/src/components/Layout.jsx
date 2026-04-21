@@ -7,7 +7,8 @@ import {
   LayoutDashboard, ShoppingCart, Package, Truck,
   Menu, X, ChevronRight, ChevronLeft,
   BarChart2, Archive, AlertTriangle, Users, Tag,
-  TrendingUp, Building2, Boxes
+  TrendingUp, Building2, Boxes,  ClipboardList,
+  ClipboardCheck
 } from 'lucide-react'
 
 export default function Layout({ children }) {
@@ -29,6 +30,7 @@ const menuGroups = [
     items: [
       { label: 'Dashboard',    icon: <LayoutDashboard size={18} />, path: '/dashboard',    roles: ['gérant', 'caissier', 'magasinier', 'gestionnaire_stock'] },
       { label: 'Rapport',      icon: <TrendingUp size={18} />,      path: '/rapport',      roles: ['gérant'] },
+      { label: 'Rapport Stock', icon: < ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock', 'magasinier'] },
     ]
   },
   {
@@ -51,7 +53,7 @@ const menuGroups = [
   {
     label: 'Gestion',
     items: [
-      { label: 'Inventaire',   icon: <Package size={18} />,         path: '/inventaire',   roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Inventaire',   icon: <ClipboardCheck size={18} />,         path: '/inventaire',   roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
       { label: 'Alertes',      icon: <AlertTriangle size={18} />,   path: '/alertes',      roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
       { label: 'Utilisateurs', icon: <Users size={18} />,           path: '/utilisateurs', roles: ['gérant'] },
     ]

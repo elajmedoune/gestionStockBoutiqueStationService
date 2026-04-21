@@ -7,59 +7,45 @@ import ResetPassword from './pages/ResetPassword'
 import Profil from './pages/Profil'
 import Ventes from './pages/Ventes'
 import Rapport from './pages/Rapport'
+import RapportStock from './pages/RapportStock'
 
-
-// Route protégée — redirige vers login si pas connecté
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   return user ? children : <Navigate to="/login" />
 }
 
-// Route publique — redirige vers dashboard si déjà connecté
 function PublicRoute({ children }) {
   const { user } = useAuth()
   return !user ? children : <Navigate to="/dashboard" />
 }
 
 function AppRoutes() {
+  const { user } = useAuth()
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" />} />
 
-      <Route path="/login" element={
-        <PublicRoute>
-          <Login />
-        </PublicRoute>
-      } />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Route path="/dashboard" element={
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
+      <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
+      <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
+
+      {/* Rapport stock — gestionnaire + magasinier uniquement */}
+      <Route path="/rapport-stock" element={
         <ProtectedRoute>
-          <Dashboard />
+          {user && ['gestionnaire_stock', 'magasinier', 'gérant'].includes(user.role)
+            ? <RapportStock />
+            : <Navigate to="/dashboard" />
+          }
         </ProtectedRoute>
       } />
 
-      <Route path="/ventes" element={
-        <ProtectedRoute>
-        <Ventes />
-      </ProtectedRoute>
-      } />
-
-      {/* Route par défaut */}
-      <Route path="/rapport" element={
-        <ProtectedRoute>
-        <Rapport />
-      </ProtectedRoute>
-      } />
-        
-      {/* Route par défaut */}
       <Route path="*" element={<Navigate to="/dashboard" />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/profil" element={
-        <ProtectedRoute>
-          <Profil />
-          </ProtectedRoute>
-        } />
     </Routes>
   )
 }
