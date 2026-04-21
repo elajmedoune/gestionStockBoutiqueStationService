@@ -45,30 +45,19 @@ class AuthController extends Controller
             [$utilisateur->role]   //abilities = role de l'utilisateur
         )->plainTextTocken;
         return response()->json([
-<<<<<<< HEAD
-            'token' => $token,
-            'user'  => [
-                'id'     => $user->idUtilisateur,
-                'nom'    => $user->nom,
-                'prenom' => $user->prenom,
-                'login'  => $user->login,
-                'email'  => $user->email,
-                'role'   => $user->role,
-                'photo'  => $user->photo,
-            ]
-=======
             'message'    => 'Connexion réussie',
             'token'      => $token,
             'token_type' => 'Bearer',
-            'utilisateur'  => [
+            'user'  => [
                 'idUtilisateur'     => $utilisateur->idUtilisateur,
                 'nom'               => $utilisateur->nom,
                 'prenom'            => $utilisateur->prenom,
                 'login'             => $utilisateur->login,
                 'email'             => $utilisateur->email,
                 'role'              => $utilisateur->role,
+                'photo'             => $user->photo,
             ],
->>>>>>> origin/badiene
+
         ]);
     }
 
@@ -116,15 +105,14 @@ class AuthController extends Controller
         ]);
         
         return response()->json([
-<<<<<<< HEAD
+
             'id'     => $user->idUtilisateur,
             'nom'    => $user->nom,
             'prenom' => $user->prenom,
             'login'  => $user->login,
             'email'  => $user->email,
             'role'   => $user->role,
-            'photo'  => $user->photo,
-=======
+
             'message'      => 'Utilisateur cree avec succes',
             'utilisateur'  => $utilisateur,
         ], 201);
@@ -139,7 +127,7 @@ class AuthController extends Controller
         return response()->json([
             'message'      =>"Compte $etat avec succés",
             'utilisateur'  =>$utilisateur,
->>>>>>> origin/badiene
+
         ]);
     }
     public function uploadPhoto(Request $request)

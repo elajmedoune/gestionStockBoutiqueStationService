@@ -23,6 +23,7 @@ class Utilisateur extends Authenticatable
         'motDePasse',
         'actif',
         'role',
+        'photo',
     ];
 
     protected $hidden = [
@@ -67,11 +68,15 @@ class Utilisateur extends Authenticatable
         return $this->role === 'admin';
     }
     
-     public function isGestionnaire(): bool{
-        return $this->role === 'gestionnaire';
+     public function isGestionnaireStock(): bool{
+        return $this->role === 'gestionnairestock';
     }
 
      public function isCaissier(): bool{
         return $this->role === 'caissier';
+    }
+
+     public function isGerant(): bool{
+        return $this->role === 'gerant';
     }
 }
