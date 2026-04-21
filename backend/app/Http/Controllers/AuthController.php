@@ -48,7 +48,7 @@ class AuthController extends Controller
             'message'    => 'Connexion réussie',
             'token'      => $token,
             'token_type' => 'Bearer',
-            'user'  => [
+            'utilisateur'  => [
                 'idUtilisateur'     => $utilisateur->idUtilisateur,
                 'nom'               => $utilisateur->nom,
                 'prenom'            => $utilisateur->prenom,

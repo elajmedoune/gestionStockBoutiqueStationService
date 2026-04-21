@@ -64,12 +64,12 @@ class Utilisateur extends Authenticatable
     //--------------------------------------------------------------------
     //Helpers roles
     //--------------------------------------------------------------------
-    public function isAdmin(): bool{
-        return $this->role === 'admin';
+    public function isMangasinier(): bool{
+        return $this->role === 'mangasinier';
     }
     
      public function isGestionnaireStock(): bool{
-        return $this->role === 'gestionnairestock';
+        return $this->role === 'gestionnaireStock';
     }
 
      public function isCaissier(): bool{
