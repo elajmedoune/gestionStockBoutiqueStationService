@@ -52,7 +52,7 @@ Route::middleware(['auth:sanctum', 'throttle:50,1'])->group(function () {
     Route::patch('/alertes/{id}/lire',   [AlerteController::class, 'marquerLue']);
 
     // Alertes — Création / suppression : admin + gestionnaire
-    Route::middleware('role:admin, gestionnaire')->group(function() {
+    Route::middleware('role:mangasinier, gestionnaireStock')->group(function() {
         Route::post('/alertes',         [AlerteController::class, 'store']);
         Route::delete('/alertes/{id}',  [AlerteController::class, 'destroy']);
     });
