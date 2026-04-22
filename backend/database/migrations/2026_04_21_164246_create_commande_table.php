@@ -9,20 +9,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('commandes', function (Blueprint $table) {
-            $table->increments('idCommande');
+            $table->id('idCommande');
             $table->date('dateCommande');
             $table->date('dateLivraisonPrevue')->nullable();
             $table->string('statut', 20)->default('en_attente');
             $table->decimal('montantTotal', 10, 2)->default(0);
-            $table->unsignedInteger('idLivraison')->nullable();
-            $table->unsignedInteger('idUtilisateur');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->unsignedBigInteger('idLivraison')->nullable();
+            $table->unsignedBigInteger('idUtilisateur');
+            $table->timestamps();
+
+            $table->foreign('idUtilisateur')
+                  ->references('idUtilisateur')
+                  ->on('utilisateurs')
+                  ->onDelete('restrict');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('commande');
+        Schema::dropIfExists('commandes');
     }
 };

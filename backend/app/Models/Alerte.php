@@ -10,14 +10,14 @@ class Alerte extends Model
     use HasFactory;
 
     protected $table = 'alertes';
-    protected $primaryKey = 'IdAlerte';
+    protected $primaryKey = 'idAlerte';
 
     protected $fillable = [
         'type',
         'message',
         'niveauUrgence',
-        'IdUtilisateur',
-        'IdProduit',
+        'idUtilisateur',
+        'idProduit',
     ];
     protected $casts = [
         'lue' => 'boolean',
@@ -29,11 +29,11 @@ class Alerte extends Model
     //-----------------------------------------------------------------------------------------------------
    
     public function utilisateur(){
-        return $this->belongsTo(Utilisateur::class, 'IdUtilisateur', 'IdUtilisateur');
+        return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
     public function produit(){
-        return $this->belongsTo(\App\Models\Produit::class, 'IdProduit', 'IdProduit');
+        return $this->belongsTo(Produit::class, 'idProduit', 'idProduit');
     }
 
     //-----------------------------------------------------------------------------------------------------
@@ -51,6 +51,6 @@ class Alerte extends Model
 
     /**Alertes d'un utilisateur donne */
      public function scopePourUtilisateur($query, int $idUtilisateur){
-        return $query->where('IdUtilisateur', '$idUtilisateur');
+        return $query->where('idUtilisateur', $idUtilisateur);
     }
 }

@@ -9,27 +9,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('alertes', function (Blueprint $table) {
-            $table->id(IdAlerte);
+            $table->id('idAlerte');
             $table->string('type', 20);
             $table->string('message', 300);
             $table->timestamp('dateCreation')->useCurrent();
             $table->boolean('lue')->default(false);
             $table->enum('niveauUrgence', ['faible', 'moyen', 'critique'])->default('moyen');
-            $table->unsignedBigInteger('IdUtilisateur');
-            $table->unsignedBigInteger('IdProduit');
+            $table->unsignedBigInteger('idUtilisateur');
+            $table->unsignedBigInteger('idProduit');
             $table->timestamps();
 
-            $table->foreign('IdUtilisateur')
-                  ->references('IdUtilisateur')->on('Utilisateur')
+            $table->foreign('idUtilisateur')
+                  ->references('idUtilisateur')
+                  ->on('utilisateurs')
                   ->onDelete('restrict');
 
-            $table->foreign('IdProduit')
-                  ->references('IdProduit')->on('Produit')
+            $table->foreign('idProduit')
+                  ->references('idProduit')
+                  ->on('produits')
                   ->onDelete('restrict');
         });
     }
     public function down(): void
     {
-        Schema::dropIfExists('Alerte');
+        Schema::dropIfExists('alertes');
     }
 };

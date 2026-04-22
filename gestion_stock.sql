@@ -21,6 +21,7 @@ CREATE TABLE `categories` (
   `idCategorie`  INT(11)       NOT NULL AUTO_INCREMENT,
   `libelle`      VARCHAR(50)   NOT NULL,
   `description`  VARCHAR(500)  DEFAULT NULL,
+  `emoji`        VARCHAR(10)   ,
   `created_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idCategorie`)

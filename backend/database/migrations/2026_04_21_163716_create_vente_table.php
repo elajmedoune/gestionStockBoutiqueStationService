@@ -9,22 +9,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ventes', function (Blueprint $table) {
-            $table->increments('idVente');
+            $table->id('idVente');
             $table->timestamp('dateVente')->useCurrent();
             $table->decimal('montantTotal', 10, 2)->default(0);
             $table->decimal('totalHorsTaxe', 10, 2)->default(0);
             $table->decimal('tva', 10, 2)->default(0);
-            $table->string('modePaiement', 20)->default('especes');
             $table->decimal('totalTaxeComprise', 10, 2)->default(0);
-            $table->unsignedInteger('idUtilisateur');
+            $table->string('modePaiement', 20)->default('especes');
+            $table->unsignedBigInteger('idUtilisateur');
             $table->string('statut', 255)->default('active');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
+
+            $table->foreign('idUtilisateur')
+                  ->references('idUtilisateur')
+                  ->on('utilisateurs')
+                  ->onDelete('restrict');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('vente');
+        Schema::dropIfExists('ventes');
     }
 };
