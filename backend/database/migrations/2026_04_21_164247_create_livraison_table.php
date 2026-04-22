@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('livraison', function (Blueprint $table) {
+        Schema::create('livraisons', function (Blueprint $table) {
             $table->increments('idLivraison');
             $table->date('dateLivraison');
             $table->decimal('montantTotal', 10, 2)->default(0);

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('Vente', function (Blueprint $table) {
+        Schema::table('ventes', function (Blueprint $table) {
             $table->string('statut')->default('active')->after('idUtilisateur');
             });
     }

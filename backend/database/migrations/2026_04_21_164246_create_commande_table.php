@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('commande', function (Blueprint $table) {
+        Schema::create('commandes', function (Blueprint $table) {
             $table->increments('idCommande');
             $table->date('dateCommande');
             $table->date('dateLivraisonPrevue')->nullable();

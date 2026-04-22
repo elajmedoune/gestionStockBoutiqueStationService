@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('vente', function (Blueprint $table) {
+        Schema::create('ventes', function (Blueprint $table) {
             $table->increments('idVente');
             $table->timestamp('dateVente')->useCurrent();
             $table->decimal('montantTotal', 10, 2)->default(0);
