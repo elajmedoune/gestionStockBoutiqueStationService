@@ -8,8 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('Inventaire', function (Blueprint $table) {
-            $table->id(IdInventaire);
+        Schema::create('inventaires', function (Blueprint $table) {
+            $table->id('idInventaire');
             $table->date('dateInventaire');
             $table->integer('quantiteTheorique')->default(0);
             $table->string('quantiteReelle')->default(0);

@@ -12,8 +12,8 @@ class Utilisateur extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     //Nom de la table personnalisé
-    protected $table      = 'Utilisateur';
-    protected $primaryKey = 'IdUtilisateur';
+    protected $table      = 'utilisateurs';
+    protected $primaryKey = 'idUtilisateur';
 
     protected $fillable = [
         'nom',
@@ -45,11 +45,11 @@ class Utilisateur extends Authenticatable
     //Relations
     //-------------------------------------------------------------------
     public function inventaires(){
-       return $this->hasMany(Inventaire::class, 'IdUtilisateur', 'IdUtilisateur'); 
+       return $this->hasMany(Inventaire::class, 'idUtilisateur', 'idUtilisateur'); 
     }
 
     public function alertes(){
-       return $this->hasMany(Alerte::class, 'IdUtilisateur', 'IdUtilisateur'); 
+       return $this->hasMany(Alerte::class, 'idUtilisateur', 'idUtilisateur'); 
     }
     public function ventes()
     {
@@ -65,11 +65,11 @@ class Utilisateur extends Authenticatable
     //Helpers roles
     //--------------------------------------------------------------------
     public function isMangasinier(): bool{
-        return $this->role === 'mangasinier';
+        return $this->role === 'magasinier';
     }
     
      public function isGestionnaireStock(): bool{
-        return $this->role === 'gestionnaireStock';
+        return $this->role === 'gestionnaire_stock';
     }
 
      public function isCaissier(): bool{

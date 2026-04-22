@@ -23,7 +23,7 @@ class VenteController extends Controller
         $request->validate([
             'modePaiement'       => 'required|string|max:20',
             'lignes'             => 'required|array|min:1',
-            'lignes.*.idProduit' => 'required|integer|exists:Produit,idProduit',
+            'lignes.*.idProduit' => 'required|integer|exists:produits,idProduit',
             'lignes.*.quantite'  => 'required|integer|min:1',
         ]);
 
