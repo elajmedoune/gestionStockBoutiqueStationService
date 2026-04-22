@@ -14,6 +14,13 @@ use App\Http\Controllers\LivraisonController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
+Route::get('/stats-publiques', function () {
+    return response()->json([
+        'produits'  => \App\Models\Produit::count(),
+        'caissiers' => \App\Models\Utilisateur::where('role', 'caissier')->count(),
+    ]);
+});
+
 Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
