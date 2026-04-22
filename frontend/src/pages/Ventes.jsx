@@ -7,7 +7,7 @@ import {
   Plus, Search, Download, Eye, Ban, Printer,
   ShoppingCart, DollarSign, TrendingUp, CreditCard,
   X, ChevronLeft, ChevronRight, AlertTriangle, Check,
-  Receipt, User, Calendar, Package
+  Receipt, User, Calendar, Package, Trash2
 } from 'lucide-react'
 import { createVente, deleteVente, getVente } from '../services/api'
 import { exportTicketCaisse } from '../services/pdf'
@@ -249,7 +249,10 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
             </div>
             <div>
               <h3 className="font-extrabold text-base leading-tight">Nouvelle vente</h3>
-              <p className="text-xs text-base-content/40">Caissier : {user?.prenom} {user?.nom}</p>
+              <p className="text-xs text-base-content/40">
+              {user?.role === 'gerant' ? 'Gérant' : 
+               user?.role === 'gestionnaire_stock' ? 'Gestionnaire' : 'Caissier'} : {user?.prenom} {user?.nom}
+              </p>
             </div>
           </div>
  
@@ -276,13 +279,14 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
  
             {/* Barre de recherche + scan */}
             <div className="px-4 py-3 border-b border-base-200 shrink-0">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+              <div style={{ position: 'relative' }}>
+                <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', zIndex: 10 }} />
                 <input
                   ref={searchRef}
                   type="text"
-                  className="input input-bordered input-sm w-full pl-9 pr-8"
-                  placeholder="🔍 Rechercher par nom, référence ou scanner le code barre…"
+                  className="input input-bordered input-sm w-full"
+                  style={{ paddingLeft: 36 }}
+                  placeholder="Rechercher par nom, référence ou scanner le code barre…"
                   value={search}
                   onChange={e => { setSearch(e.target.value); setError('') }}
                   onKeyDown={handleSearchKeyDown}
@@ -418,8 +422,11 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                   {/* Quantité */}
                   <div className="flex items-center gap-1 shrink-0">
                     <button className="btn btn-ghost btn-xs btn-circle w-5 h-5 min-h-0"
-                      onClick={() => l.quantite === 1 ? supprimerLigne(l.produit.idProduit) : updateQte(l.produit.idProduit, l.quantite - 1)}>
-                      <span className="text-xs">{l.quantite === 1 ? '🗑' : '−'}</span>
+                    onClick={() => l.quantite === 1 ? supprimerLigne(l.produit.idProduit) : updateQte(l.produit.idProduit, l.quantite - 1)}>
+                      {l.quantite === 1 
+                        ? <Trash2 size={11} className="text-error" />
+                        : <span className="text-xs">−</span>
+                      }
                     </button>
                     <span className="text-xs font-bold w-5 text-center">{l.quantite}</span>
                     <button className="btn btn-ghost btn-xs btn-circle w-5 h-5 min-h-0"
