@@ -16,6 +16,7 @@ class StoreStockRequest extends FormRequest
     {
         return [
             'quantiteInitiale' => 'required|integer|min:0',
+            'quantiteRestante' => 'required|integer|min:0',
             'dateEntree' => 'required|date',
             'dateExpiration' => 'required|date|after:dateEntree',
             'prixEnGros' => 'required|numeric|min:0',

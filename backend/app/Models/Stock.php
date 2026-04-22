@@ -10,7 +10,7 @@ class Stock extends Model
     protected $primaryKey = 'idStock';
     protected $fillable = [
         'quantiteInitiale', 'dateEntree',
-        'dateExpiration', 'prixEnGros',
+        'dateExpiration', 'quantiteRestante', 'prixEnGros',
         'prixAchat', 'idProduit',
     ];
 
