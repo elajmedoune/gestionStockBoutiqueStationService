@@ -1,0 +1,1 @@
+// src/components/s/.jsx
