@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Commande extends Model
 {
-    protected $table      = 'Commande';
+    protected $table = 'commandes';
     protected $primaryKey = 'idCommande';
 
     protected $fillable = [

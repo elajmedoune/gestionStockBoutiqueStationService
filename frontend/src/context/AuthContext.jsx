@@ -5,8 +5,13 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user')
-    return saved ? JSON.parse(saved) : null
+    try {
+      const saved = localStorage.getItem('user')
+      return saved && saved !== 'undefined' ? JSON.parse(saved) : null
+    } catch {
+      localStorage.removeItem('user')
+      return null
+    }
   })
 
   const [token, setToken] = useState(() => {
@@ -15,15 +20,15 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const response = await loginApi(credentials)
-    const { token, user } = response.data
+    const { token, utilisateur } = response.data
 
     localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('user', JSON.stringify(utilisateur)) 
 
     setToken(token)
-    setUser(user)
+    setUser(utilisateur)
 
-    return user
+    return utilisateur 
   }
 
   const logout = async () => {
@@ -31,9 +36,9 @@ export function AuthProvider({ children }) {
       await logoutApi()
     } catch (e) {}
 
+    
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-
     setToken(null)
     setUser(null)
   }

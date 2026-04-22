@@ -28,34 +28,34 @@ const menuGroups = [
   {
     label: 'Principal',
     items: [
-      { label: 'Dashboard',    icon: <LayoutDashboard size={18} />, path: '/dashboard',    roles: ['gérant', 'caissier', 'magasinier', 'gestionnaire_stock'] },
-      { label: 'Rapport',      icon: <TrendingUp size={18} />,      path: '/rapport',      roles: ['gérant'] },
-      { label: 'Rapport Stock', icon: < ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock', 'magasinier'] },
+      { label: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/dashboard',     roles: ['gerant', 'caissier', 'magasinier', 'gestionnaire_stock'] },
+      { label: 'Rapport',       icon: <TrendingUp size={18} />,      path: '/rapport',       roles: ['gerant'] },
+      { label: 'Rapport Stock', icon: <ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock', 'magasinier'] },
     ]
   },
   {
     label: 'Opérations',
     items: [
-      { label: 'Ventes',       icon: <ShoppingCart size={18} />,    path: '/ventes',       roles: ['gérant', 'caissier'] },
-      { label: 'Commandes',    icon: <Package size={18} />,         path: '/commandes',    roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
-      { label: 'Livraisons',   icon: <Truck size={18} />,           path: '/livraisons',   roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Ventes',        icon: <ShoppingCart size={18} />,    path: '/ventes',        roles: ['gerant', 'caissier'] },
+      { label: 'Commandes',     icon: <Package size={18} />,         path: '/commandes',     roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Livraisons',    icon: <Truck size={18} />,           path: '/livraisons',    roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
     ]
   },
   {
     label: 'Stock',
     items: [
-      { label: 'Produits',     icon: <Archive size={18} />,         path: '/produits',     roles: ['gérant', 'gestionnaire_stock', 'magasinier', 'caissier'] },
-      { label: 'Stock',        icon: <BarChart2 size={18} />,       path: '/stock',        roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
-      { label: 'Catégories',   icon: <Tag size={18} />,             path: '/categories',   roles: ['gérant', 'gestionnaire_stock'] },
-      { label: 'Fournisseurs', icon: <Users size={18} />,           path: '/fournisseurs', roles: ['gérant', 'gestionnaire_stock'] },
+      { label: 'Produits',      icon: <Archive size={18} />,         path: '/produits',      roles: ['gerant', 'gestionnaire_stock', 'magasinier', 'caissier'] },
+      { label: 'Stock',         icon: <BarChart2 size={18} />,       path: '/stock',         roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Catégories',    icon: <Tag size={18} />,             path: '/categories',    roles: ['gerant', 'gestionnaire_stock'] },
+      { label: 'Fournisseurs',  icon: <Users size={18} />,           path: '/fournisseurs',  roles: ['gerant', 'gestionnaire_stock'] },
     ]
   },
   {
     label: 'Gestion',
     items: [
-      { label: 'Inventaire',   icon: <ClipboardCheck size={18} />,         path: '/inventaire',   roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
-      { label: 'Alertes',      icon: <AlertTriangle size={18} />,   path: '/alertes',      roles: ['gérant', 'gestionnaire_stock', 'magasinier'] },
-      { label: 'Utilisateurs', icon: <Users size={18} />,           path: '/utilisateurs', roles: ['gérant'] },
+      { label: 'Inventaire',    icon: <ClipboardCheck size={18} />,  path: '/inventaire',    roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Alertes',       icon: <AlertTriangle size={18} />,   path: '/alertes',       roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+      { label: 'Utilisateurs',  icon: <Users size={18} />,           path: '/utilisateurs',  roles: ['gerant'] },
     ]
   },
 ]
@@ -102,7 +102,7 @@ const menuGroups = [
             {isCollapsed && <div className="border-t border-base-200 mx-2 mb-2" />}
 
             <ul className="flex flex-col gap-0.5">
-              {group.items.map((item) => {
+              {group.items.filter(item => item.roles.includes(user?.role)).map((item) => {
                 const isActive = location.pathname === item.path
                 return (
                   <li key={item.path}>

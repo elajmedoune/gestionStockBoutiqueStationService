@@ -68,8 +68,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
           {stats.map(({ label, value, ok }) => (
             <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
               <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
-              <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>
-            </div>
+              <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>            </div>
           ))}
         </div>
       </div>
