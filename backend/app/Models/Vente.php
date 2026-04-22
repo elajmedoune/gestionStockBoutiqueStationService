@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vente extends Model
 {
-    protected $table      = 'Vente';
+    protected $table = 'ventes';
     protected $primaryKey = 'idVente';
 
     protected $fillable = [
@@ -17,6 +17,7 @@ class Vente extends Model
         'modePaiement',
         'totalTaxeComprise',
         'idUtilisateur',
+        'statut',
     ];
 
     protected $casts = [

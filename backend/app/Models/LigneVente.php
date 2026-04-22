@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LigneVente extends Model
 {
-    protected $table        = 'LigneVente';
+    protected $table = 'lignevente';
     public    $incrementing = false;
     public    $timestamps   = false;
     protected $primaryKey   = 'idProduit';
