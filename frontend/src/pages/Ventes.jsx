@@ -812,4 +812,4 @@ const handleDelete = async (id) => {
       )}
     </Layout>
   )
-}à
+}

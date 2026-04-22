@@ -628,4 +628,4 @@ export default function RapportStock() {
       </div>
     </Layout>
   )
-}à
+}
