@@ -106,7 +106,7 @@ function HeroBanner({ user, stats }) {
         <div className="mb-4 relative">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold opacity-80">
-              {user?.role === 'gérant' ? 'Administration' : 'Mon espace'}
+              {user?.role === 'gerant' ? 'Administration' : 'Mon espace'}
             </span>
             <span className="badge badge-sm bg-white/20 border-0 text-primary-content font-bold text-xs">
               {(user?.role ?? '').toUpperCase()}
@@ -120,12 +120,11 @@ function HeroBanner({ user, stats }) {
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <div className={`grid grid-cols-2 sm:grid-cols-${Math.min(stats.length, 5)} gap-3`}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {stats.map(({ label, value, ok }) => (
             <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
               <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
-              <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>
-            </div>
+              <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-primary-content'}`}>{value}</p>            </div>
           ))}
         </div>
       </div>
@@ -344,7 +343,7 @@ function SectionDernieresLivraisons({ livraisons }) {
 ════════════════════════════════════ */
 
 /* ── GÉRANT ── */
-function DashboardGerant({ ventes, produits, stocks, categories, caissiers }) {
+function DashboardGerant({ ventes, produits, stocks, categories, caissiers, user }) {
   const [caConfig, setCaConfig] = useState({ dateDebut: toISO(il90), dateFin: toISO(today), groupBy: 'jour' })
 
   const ventesActives  = useMemo(() => ventes.filter(v => v.statut !== 'annulee'), [ventes])
@@ -414,8 +413,7 @@ function DashboardGerant({ ventes, produits, stocks, categories, caissiers }) {
 
   return (
     <div className="space-y-5">
-      <HeroBanner user={null} stats={[
-        { label: 'Ventes auj.', value: ventesAuj.length },
+      <HeroBanner user={user} stats={[        { label: 'Ventes auj.', value: ventesAuj.length },
         { label: 'CA auj.',     value: `${fmt(caAuj)} F` },
         { label: 'CA 7j',       value: `${fmt(ca7j)} F` },
         { label: 'Bénéfice',    value: `${fmt(beneficeTotal)} F` },
@@ -651,8 +649,7 @@ function DashboardGestionnaire({ produits, stocks, categories, commandes, livrai
             ].map(({ label, value, ok }) => (
               <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
                 <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
-                <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>
-              </div>
+                <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-primary-content'}`}>{value}</p>              </div>
             ))}
           </div>
         </div>
@@ -752,8 +749,7 @@ function DashboardMagasinier({ produits, stocks, livraisons }) {
             ].map(({ label, value, ok }) => (
               <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
                 <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
-                <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>
-              </div>
+                <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-primary-content'}`}>{value}</p>              </div>
             ))}
           </div>
         </div>
@@ -805,10 +801,11 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto font-sans">
-        {role === 'gérant' && (
+        {(role === 'gerant' || role === 'admin') && (
           <DashboardGerant
-            ventes={ventes} produits={produits}
-            stocks={stocks} categories={categories} />
+          ventes={ventes} produits={produits}
+          stocks={stocks} categories={categories}
+          user={user} />
         )}
         {role === 'caissier' && (
           <DashboardCaissier
