@@ -16,6 +16,7 @@ class ProduitController extends Controller
 
     public function store(StoreProduitRequest $request)
     {
+        $validated = $request->validated();
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('photos', 'public');
             $validated['photo'] = $path;

@@ -13,7 +13,9 @@ class StoreProduitRequest extends FormRequest
     }
 
     public function rules(): array
-    {
+    {   
+        $idProduit = $this->route('id');
+        
         return [
             'reference' => 'required|string|max:50|unique:produits,reference,'.$idProduit.',idProduit',
             'codeBarre' => 'nullable|string|max:50|unique:produits,codeBarre,'.$idProduit.',idProduit',
