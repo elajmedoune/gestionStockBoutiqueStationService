@@ -1,0 +1,1 @@
+// src/components/categories/CategorieModal.jsx
