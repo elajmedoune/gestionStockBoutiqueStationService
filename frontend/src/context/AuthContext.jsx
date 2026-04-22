@@ -36,6 +36,7 @@ export function AuthProvider({ children }) {
       await logoutApi()
     } catch (e) {}
 
+    
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setToken(null)
