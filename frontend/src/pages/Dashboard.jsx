@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useVentes, useProduits, useStocks, useCategories, useCommandes, useLivraisons } from '../hooks'
+import { useVentes, useProduits, useStocks, useCategories, useCommandes, useLivraisons, useUtilisateurs } from '../hooks'
 import Layout from '../components/Layout'
 import {
   TrendingUp, Package, AlertTriangle, DollarSign,
@@ -441,6 +441,26 @@ function DashboardGerant({ ventes, produits, stocks, categories, caissiers, user
               <p className="text-xs text-base-content/40">{fmt(caPeriode)} F sur la période</p>
             </div>
             <PeriodBar config={caConfig} onChange={setCaConfig} />
+              {/* ✅ Dates personnalisées */}
+  <div className="flex items-center gap-1.5">
+    <input
+      type="date"
+      className="input input-xs input-bordered"
+      value={caConfig.dateDebut}
+      max={caConfig.dateFin}
+      onChange={e => setCaConfig({ ...caConfig, dateDebut: e.target.value })}
+    />
+    <span className="text-xs text-base-content/40">→</span>
+    <input
+      type="date"
+      className="input input-xs input-bordered"
+      value={caConfig.dateFin}
+      min={caConfig.dateDebut}
+      max={toISO(today)}
+      onChange={e => setCaConfig({ ...caConfig, dateFin: e.target.value })}
+    />
+  </div>
+
           </div>
           <div className="flex gap-1.5 mb-3">
             {['jour', 'semaine', 'mois'].map(g => (
@@ -547,6 +567,9 @@ function DashboardCaissier({ ventes, produits, stocks, user }) {
   const maCaAuj = useMemo(() => mesVentesAuj.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [mesVentesAuj])
   const maCaTotal = useMemo(() => mesVentes.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [mesVentes])
   const panierMoyen = useMemo(() => mesVentes.length ? maCaTotal / mesVentes.length : 0, [maCaTotal, mesVentes])
+  const [caConfig, setCaConfig] = useState({ dateDebut: toISO(il90), dateFin: toISO(today), groupBy: 'jour' })
+  const caData    = useMemo(() => buildCAData(mesVentes, caConfig.dateDebut, caConfig.dateFin, caConfig.groupBy), [mesVentes, caConfig])
+  const caPeriode = useMemo(() => caData.data.reduce((s, v) => s + v, 0), [caData])
 
   const alertes = useMemo(() => produits.filter(p => {
     const qte = stocks.filter(s => s.idProduit === p.idProduit).reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)
@@ -572,6 +595,60 @@ function DashboardCaissier({ ventes, produits, stocks, user }) {
           pulse={alertes.length > 0} />
       </div>
 
+      {/* GRAPHIQUE MES VENTES */}
+<div className="card bg-base-100 shadow-sm border border-base-200">
+  <div className="card-body p-5">
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+      <div>
+        <h2 className="card-title text-base font-extrabold">Mes ventes</h2>
+        <p className="text-xs text-base-content/40">{fmt(caPeriode)} F sur la période</p>
+      </div>
+      <PeriodBar config={caConfig} onChange={setCaConfig} />
+        {/* ✅ Dates personnalisées */}
+  <div className="flex items-center gap-1.5">
+    <input
+      type="date"
+      className="input input-xs input-bordered"
+      value={caConfig.dateDebut}
+      max={caConfig.dateFin}
+      onChange={e => setCaConfig({ ...caConfig, dateDebut: e.target.value })}
+    />
+    <span className="text-xs text-base-content/40">→</span>
+    <input
+      type="date"
+      className="input input-xs input-bordered"
+      value={caConfig.dateFin}
+      min={caConfig.dateDebut}
+      max={toISO(today)}
+      onChange={e => setCaConfig({ ...caConfig, dateFin: e.target.value })}
+    />
+  </div>
+    </div>
+    <div className="flex gap-1.5 mb-3">
+      {['jour', 'semaine', 'mois'].map(g => (
+        <button key={g} onClick={() => setCaConfig({ ...caConfig, groupBy: g })}
+          className={`btn btn-xs rounded-lg font-bold ${caConfig.groupBy === g ? 'btn-secondary' : 'btn-ghost'}`}>
+          {g === 'jour' ? 'Jour' : g === 'semaine' ? 'Semaine' : 'Mois'}
+        </button>
+      ))}
+    </div>
+    {caData.labels.length === 0
+      ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune vente sur la période</div>
+      : <div className="h-56">
+          <Bar data={{
+            labels: caData.labels,
+            datasets: [{ 
+              data: caData.data, 
+              backgroundColor: caData.data.map(v => v > 0 ? 'rgba(247,100,149,0.7)' : '#f3f4f6'), 
+              hoverBackgroundColor: caData.data.map(v => v > 0 ? '#f64395' : '#e5e7eb'), 
+              borderRadius: 6, borderSkipped: false 
+            }]
+          }} options={chartOpts(ctx => ` ${fmt(ctx.raw)} F`)} />
+        </div>
+    }
+  </div>
+</div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <SectionDernieresVentes ventes={mesVentes.slice(0, 6)} />
@@ -583,7 +660,7 @@ function DashboardCaissier({ ventes, produits, stocks, user }) {
 }
 
 /* ── GESTIONNAIRE DE STOCK ── */
-function DashboardGestionnaire({ produits, stocks, categories, commandes, livraisons }) {
+function DashboardGestionnaire({ produits, stocks, categories, commandes, livraisons, user }) {
   const stockTotal   = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
   const enRupture    = useMemo(() => stocks.filter(s => (parseInt(s.quantiteRestante) || 0) === 0), [stocks])
   const sousSeuil    = useMemo(() => stocks.filter(s => {
@@ -634,7 +711,7 @@ function DashboardGestionnaire({ produits, stocks, categories, commandes, livrai
               <span className="text-xs font-semibold opacity-80">Gestion des stocks</span>
               <span className="badge badge-sm bg-white/20 border-0 text-primary-content font-bold text-xs">GESTIONNAIRE</span>
             </div>
-            <h1 className="text-2xl font-extrabold leading-tight mb-1">Tableau de bord Stock</h1>
+            <h1 className="text-2xl font-extrabold leading-tight mb-1">{user?.prenom} {user?.nom}</h1>
             <p className="text-xs opacity-60 flex items-center gap-1">
               <Calendar size={10} />
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -710,7 +787,7 @@ function DashboardGestionnaire({ produits, stocks, categories, commandes, livrai
 }
 
 /* ── MAGASINIER ── */
-function DashboardMagasinier({ produits, stocks, livraisons }) {
+function DashboardMagasinier({ produits, stocks, livraisons, user }) {
   const stockTotal = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
   const enRupture  = useMemo(() => stocks.filter(s => (parseInt(s.quantiteRestante) || 0) === 0), [stocks])
   const sousSeuil  = useMemo(() => stocks.filter(s => {
@@ -734,7 +811,7 @@ function DashboardMagasinier({ produits, stocks, livraisons }) {
               <span className="text-xs font-semibold opacity-80">Magasin</span>
               <span className="badge badge-sm bg-white/20 border-0 text-primary-content font-bold text-xs">MAGASINIER</span>
             </div>
-            <h1 className="text-2xl font-extrabold leading-tight mb-1">Tableau de bord</h1>
+            <h1 className="text-2xl font-extrabold leading-tight mb-1">{user?.prenom} {user?.nom}</h1>
             <p className="text-xs opacity-60 flex items-center gap-1">
               <Calendar size={10} />
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -786,8 +863,9 @@ export default function Dashboard() {
   const { data: categories, loading: lC }   = useCategories()
   const { data: commandes,  loading: lCom } = useCommandes()
   const { data: livraisons, loading: lL }   = useLivraisons()
+  const { data: utilisateurs, loading: lU }    = useUtilisateurs()
 
-  const loading = lV || lP || lS || lC || lCom || lL
+  const loading = lV || lP || lS || lC || lCom || lL || lU
   const role    = user?.role
 
   if (loading) return (
@@ -805,6 +883,7 @@ export default function Dashboard() {
           <DashboardGerant
           ventes={ventes} produits={produits}
           stocks={stocks} categories={categories}
+          caissiers={utilisateurs} 
           user={user} />
         )}
         {role === 'caissier' && (
@@ -816,12 +895,14 @@ export default function Dashboard() {
           <DashboardGestionnaire
             produits={produits} stocks={stocks}
             categories={categories} commandes={commandes}
-            livraisons={livraisons} />
+            livraisons={livraisons}
+            user={user} />
         )}
         {role === 'magasinier' && (
           <DashboardMagasinier
             produits={produits} stocks={stocks}
-            livraisons={livraisons} />
+            livraisons={livraisons}
+            user={user} />
         )}
       </div>
     </Layout>

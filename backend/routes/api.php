@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::get('/me',      [AuthController::class, 'me']);
 
     Route::middleware('role:gerant')->group(function() {
+        Route::get('/utilisateurs',                         [AuthController::class, 'index']); 
         Route::post('/register',                        [AuthController::class, 'register']);
         Route::patch('/utilisateurs/{id}/toggleActif',  [AuthController::class, 'toggleActif']);
     });
