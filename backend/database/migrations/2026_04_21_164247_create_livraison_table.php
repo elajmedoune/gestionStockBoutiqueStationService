@@ -8,19 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('livraison', function (Blueprint $table) {
-            $table->increments('idLivraison');
+        Schema::create('livraisons', function (Blueprint $table) {
+            $table->id('idLivraison');
             $table->date('dateLivraison');
             $table->decimal('montantTotal', 10, 2)->default(0);
             $table->string('observations', 300)->nullable();
-            $table->unsignedInteger('idCommande')->unique();
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->unsignedBigInteger('idCommande')->unique();
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('livraison');
+        Schema::dropIfExists('livraisons');
     }
 };

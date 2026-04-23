@@ -35,10 +35,9 @@ function AppRoutes() {
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
 
-      {/* Rapport stock — gestionnaire + magasinier uniquement */}
       <Route path="/rapport-stock" element={
         <ProtectedRoute>
-          {user && ['gestionnaire_stock', 'magasinier', 'gérant'].includes(user.role)
+          {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)
             ? <RapportStock />
             : <Navigate to="/dashboard" />
           }

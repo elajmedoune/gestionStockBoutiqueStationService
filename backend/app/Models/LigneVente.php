@@ -8,7 +8,7 @@ class LigneVente extends Model
     protected $table = 'lignevente';
     public    $incrementing = false;
     public    $timestamps   = false;
-    protected $primaryKey   = 'idProduit';
+    protected $primaryKey = ['idProduit', 'idVente'];
 
     protected $fillable = [
         'idProduit',

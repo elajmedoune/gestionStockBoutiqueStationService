@@ -18,7 +18,7 @@ return new class extends Migration
                 $table->decimal('sousTotal', 10, 2);
                 $table->timestamps();
 
-                $table->foreign('idCommande')->references('idCommande')->on('commande')->onDelete('cascade');
+                $table->foreign('idCommande')->references('idCommande')->on('commandes')->onDelete('cascade');
                 $table->foreign('idProduit')->references('idProduit')->on('produits')->onDelete('restrict');
             });
         }

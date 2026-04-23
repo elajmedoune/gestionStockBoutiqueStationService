@@ -72,8 +72,8 @@ class AuthController extends Controller
         $validated = $request->validate([
             'nom'        => 'required|string|max:50',
             'prenom'     => 'required|string|max:50',
-            'login'      => 'required|string|max:50|unique:utilisateur,login',
-            'email'      => 'required|string|max:100|unique:utilisateur,email',
+            'login'      => 'required|string|max:50|unique:utilisateurs,login',
+            'email'      => 'required|string|max:100|unique:utilisateurs,email',
             'motDePasse' => 'required|string|min:8|confirmed',
             'role'       => 'required|in:gerant,caissier,magasinier,gestionnaire_stock',
         ]);

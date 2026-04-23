@@ -12,29 +12,28 @@ return new class extends Migration
             $table->id('idInventaire');
             $table->date('dateInventaire');
             $table->integer('quantiteTheorique')->default(0);
-            $table->string('quantiteReelle')->default(0);
-            //ecart est calculé par trigger Mysql(GENERATED ALWAYS AS)
-            //On le laisse nullable pour comptabilité migration
-            $table->integer('ecart')->nullable()->storedAs('quantiteReelle - quantiteTheorique');
+            $table->integer('quantiteReelle')->default(0);        
+            // $table->integer('ecart')->nullable()->storedAs('quantiteReelle - quantiteTheorique'); // commenté, plus sûr
             $table->string('observations', 300)->nullable();
             $table->string('statut', 20)->default('en_cours');
-            $table->unsignedBigInteger('IdUtilisateur');
-            $table->unsignedBigInteger('IdProduit');
+            $table->unsignedBigInteger('idUtilisateur');        
+            $table->unsignedBigInteger('idProduit');           
             $table->timestamps();
 
-            $table->foreign('IdUtilisateur')
-                  ->references('IdUtilisateur')->on('Utilisateur')
+            $table->foreign('idUtilisateur')                     
+                  ->references('idUtilisateur')
+                  ->on('utilisateurs')
                   ->onDelete('restrict');
 
-            //IdProduit référencé sur la table Produit
-             $table->foreign('IdProduit')
-                  ->references('IdProduit')->on('Produit')
+            $table->foreign('idProduit')                         
+                  ->references('idProduit')
+                  ->on('produits')
                   ->onDelete('restrict');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('Inventaire');
+        Schema::dropIfExists('inventaires');
     }
 };

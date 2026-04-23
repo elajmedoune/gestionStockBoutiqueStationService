@@ -17,7 +17,7 @@ return new class extends Migration
 
                 $table->primary(['idProduit', 'idVente']);
 
-                $table->foreign('idVente')->references('idVente')->on('vente')->onDelete('cascade');
+                $table->foreign('idVente')->references('idVente')->on('ventes')  ->onDelete('cascade');
                 $table->foreign('idProduit')->references('idProduit')->on('produits')->onDelete('restrict');
             });
         }
