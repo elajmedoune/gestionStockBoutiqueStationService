@@ -43,12 +43,11 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::patch('/alertes/lire_tout',   [AlerteController::class, 'marquerToutLu']);
     Route::patch('/alertes/{id}/lire',   [AlerteController::class, 'marquerLue']);
 
-<<<<<<< HEAD
+
     // Alertes — Création / suppression : admin + gestionnaire
-    Route::middleware('role:mangasinier, gestionnaireStock')->group(function() {
-=======
+
     Route::middleware('role:gerant,gestionnaire_stock')->group(function() {
->>>>>>> 5a4f99ee5a091014743c40bcc320d062e9c388fc
+
         Route::post('/alertes',         [AlerteController::class, 'store']);
         Route::delete('/alertes/{id}',  [AlerteController::class, 'destroy']);
     });

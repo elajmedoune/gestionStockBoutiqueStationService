@@ -4,10 +4,16 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
-import Profil from './pages/Profil'
 import Ventes from './pages/Ventes'
 import Rapport from './pages/Rapport'
 import RapportStock from './pages/RapportStock'
+import MonProfil from './pages/MonProfil'
+import Parametres from './pages/Parametres'
+import Alertes from './pages/Alertes'
+import Inventaires from './pages/Inventaires'
+import Livraisons from './pages/Livraisons'
+import Utilisateurs from './pages/Utilisateurs'
+import TicketCaisse from './pages/TicketCaisse'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
@@ -33,7 +39,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
-      <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
+      <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
 
       {/* Rapport stock — gestionnaire + magasinier uniquement */}
       <Route path="/rapport-stock" element={
