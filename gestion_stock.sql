@@ -309,9 +309,9 @@ CREATE TABLE `alertes` (
   `updated_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idAlerte`),
   KEY `fk_alerte_utilisateur` (`idUtilisateur`),
-  KEY `fk_alerte_produit`     (`idProduit`),
+  KEY `fk_alerte_stock`     (`idstock`),
   CONSTRAINT `fk_alerte_utilisateur` FOREIGN KEY (`idUtilisateur`) REFERENCES `utilisateurs` (`idUtilisateur`),
-  CONSTRAINT `fk_alerte_produit`     FOREIGN KEY (`idProduit`)     REFERENCES `produits`     (`idProduit`)
+  CONSTRAINT `fk_alerte_stock`     FOREIGN KEY (`idstock`)     REFERENCES `produits`     (`idProduit`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ============================================================
