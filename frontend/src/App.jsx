@@ -40,7 +40,13 @@ function AppRoutes() {
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-
+       <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
+      <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
+       <Route path="/livraisons" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Livraisons /></ProtectedRoute>} />
+      <Route path="/alertes" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Alertes /></ProtectedRoute>} />
+      <Route path="/inventaire" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Inventaires /></ProtectedRoute>} />
+       <Route path="/utilisateurs" element={<ProtectedRoute roles={['gerant']}><Utilisateurs /></ProtectedRoute>} />
+       
       {/* Rapport stock — gestionnaire + magasinier uniquement */}
       <Route path="/rapport-stock" element={
         <ProtectedRoute>

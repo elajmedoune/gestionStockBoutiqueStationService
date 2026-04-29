@@ -1,8 +1,8 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const Parametres = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [theme, setTheme] = useState(
     localStorage.getItem("theme") || "cupcake"
   );

@@ -21,6 +21,7 @@ class ProduitController extends Controller
             $validated['photo'] = $path;
         }
 
+        $validated = $request->validated();
         $produit = Produit::create($validated);
         return response()->json($produit, 201);
     }

@@ -9,8 +9,8 @@ class Inventaire extends Model
 {
     use HasFactory;
 
-    protected $table = 'Inventaire';
-    protected $primaryKey = 'IdInventaire';
+    protected $table = 'inventaires';
+    protected $primaryKey = 'idInventaire';
 
     protected $fillable =[
         'dateInventaire',
@@ -18,8 +18,8 @@ class Inventaire extends Model
         'quantiteReelle',
         'observations',
         'statut',
-        'IdUtilisateur',
-        'IdProduit',
+        'idUtilisateur',
+        'idProduit',
     ];
     protected $casts =[
         'dateInventaire' =>'date',
@@ -32,11 +32,11 @@ class Inventaire extends Model
     //-----------------------------------------------------------------------------------------------------
    
     public function utilisateur(){
-        return $this->belongsTo(Utilisateur::class, 'IdUtilisateur', 'IdUtilisateur');
+        return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
     public function produit(){
-        return $this->belongsTo(\App\Models\Produit::class, 'IdProduit', 'IdProduit');
+        return $this->belongsTo(\App\Models\Produit::class, 'idProduit', 'idProduit');
     }
 
     //-----------------------------------------------------------------------------------------------------

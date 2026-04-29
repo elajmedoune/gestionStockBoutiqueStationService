@@ -1,11 +1,11 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth  } from "../context/AuthContext";
 
-const ROLES = ["admin", "gestionnaire", "caissier", "magasinier"];
+const ROLES = ["gerant", " gestionnaire_stock", "caissier", "magasinier"];
 
 const Utilisateurs = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,8 +55,8 @@ const Utilisateurs = () => {
 
   const getRoleBadge = (role) => {
     const styles = {
-      admin: "badge-error",
-      gestionnaire: "badge-warning",
+      gerant: "badge-error",
+      gestionnaire_stock: "badge-warning",
       caissier: "badge-info",
       magasinier: "badge-success",
     };
@@ -78,7 +78,7 @@ const Utilisateurs = () => {
         <div>
           <h1 className="text-2xl font-bold">👥 Gestion des Utilisateurs</h1>
           <p className="text-sm text-base-content/60 mt-1">
-            Administration des comptes et des rôles
+            gerantistration des comptes et des rôles
           </p>
         </div>
         <button

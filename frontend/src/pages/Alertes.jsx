@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const Alertes = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [alertes, setAlertes] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);

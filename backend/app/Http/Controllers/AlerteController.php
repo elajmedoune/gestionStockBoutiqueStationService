@@ -12,11 +12,11 @@ class AlerteController extends Controller
     //Get /api/alertes
     //-------------------------------------------------------------------
     public function index(Request $request): JsonResponse{
-        $query = Alerte::with(['utilisateur', 'produit']);
+        $query = Alerte::with(['utilisateur', 'stock.produit']);
 
         //Filtres
         if($request->filled('lue')){
-            $query->where('lue', filter_var($request-> lue, FILTER_VALIDATE_BOOLEAN));
+            $query->where('lue', filter_var($request-> lue, FILTER_VALiDATE_BOOLEAN));
         }
         if($request->filled('niveauUrgence')){
             $query->where('niveauUrgence', $request-> niveauUrgence);
@@ -24,24 +24,24 @@ class AlerteController extends Controller
         if($request->filled('type')){
             $query->where('type', $request-> type);
         }
-         if($request->filled('IdProduit')){
-            $query->where('IdProduit', $request-> IdProduit);
+         if($request->filled('idStock')){
+            $query->where('idStock', $request-> idStock);
         }
         //Un caissier ne voit que ses propres alertes
         $user = $request->user();
         if($user->role === 'caissier'){
-            $query->where('IdUtilisateur', $user-> IdUtilisateur);
+            $query->where('idUtilisateur', $user-> idUtilisateur);
         }
         $alertes = $query->orderBy('dateCreation', 'desc')->paginate(20);
-        return response()->json($alerte);
+        return response()->json($alertes);
     }
 
      //-------------------------------------------------------------------
     //Get /api/alertes/{id}
     //-------------------------------------------------------------------
     public function show(int $id): JsonResponse{
-        $alerte = Alerte::with(['utilisateur', 'produit'])->findOrFail($id);
-        return response()->json($alerte);
+        $alerte = Alerte::with(['utilisateur', 'stock.produit'])->findOrFail($id);
+        return response()->json($alertes);
     }
 
     //-------------------------------------------------------------------
@@ -52,25 +52,25 @@ class AlerteController extends Controller
             'type'              =>'required|string|max:20',
             'message'              =>'required|string|max:300',
             'niveauUrgence'              =>'required|in:faible, moyen, critique',
-            'IdProduit'              =>'required|exists:Produit, IdProduit',
-            'IdUtilisateur'              =>'required|exists:Utilisateur, IdUtilisateur',
+            'idStock'              =>'required|exists:stocks, idStock',
+            'idUtilisateur'              =>'required|exists:Utilisateur, idUtilisateur',
         ]);
         $alerte = Alerte::create($validated);
 
         return response()->json([
             'message'    =>'Alerte creee',
-            'alerte'     =>$alerte->load(['utilisateur', 'produit'])
+            'alerte'     =>$alerte->load(['utilisateur', 'stock.produit'])
         ], 201);
     }
 
     //-------------------------------------------------------------------
     //PATH /api/alertes{id}/lire-tout --Marquer comme lue
     //-------------------------------------------------------------------
-    public function marquerLue(int $id): JsonResponse{
+    public function marquerLue(Request $request, int $id): JsonResponse{
         $user = $request->user();
         $query = Alerte::where('lue', false);
         if($user->role === 'caissier'){
-            $query->where('IdUtilisateur', $user-> IdUtilisateur);
+            $query->where('idUtilisateur', $user-> idUtilisateur);
         }
 
         $count = $query->update(['lue' =>true]);
@@ -94,12 +94,12 @@ class AlerteController extends Controller
         $user = $request->user();
         $query = Alerte::query();
         if($user->role === 'caissier'){
-            $query->where('IdUtilisateur', $user->IdUtilisateeur);
+            $query->where('idUtilisateur', $user->idUtilisateeur);
         }
         return response()->json([
             'total'               =>(clone $query)->count(),
             'non_lues'            =>(clone $query)->where('lue', false)->count(),
-            'critiques'           =>(clone $query)->where('niveauUrgence')->count(),
+            'critiques'           =>(clone $query)->where('niveauUrgence', 'critique')->count(),
             'critiques_nonlues'   =>(clone $query)->where('niveauUrgence', 'critique')->where('lue', false)->count(),
             'stock_faible'        =>(clone $query)->where('type', 'stock_faible')->where('lue', false)->count(),
             'expiration'           =>(clone $query)->where('type', 'expiration')->where('lue', false)->count(),
