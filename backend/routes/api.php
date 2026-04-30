@@ -32,6 +32,8 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
         Route::get('/utilisateurs',                         [AuthController::class, 'index']); 
         Route::post('/register',                        [AuthController::class, 'register']);
         Route::patch('/utilisateurs/{id}/toggleActif',  [AuthController::class, 'toggleActif']);
+        Route::get('/utilisateurs',                     [AuthController::class, 'index']);
+        Route::get('/utilisateurs/{id}',                [AuthController::class, 'show']);
     });
 
     Route::post('/profil/photo',     [AuthController::class, 'uploadPhoto']);
@@ -53,7 +55,11 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::patch('/alertes/lire_tout',   [AlerteController::class, 'marquerToutLu']);
     Route::patch('/alertes/{id}/lire',   [AlerteController::class, 'marquerLue']);
 
+
+    // Alertes — Création / suppression : admin + gestionnaire
+
     Route::middleware('role:gerant,gestionnaire_stock')->group(function() {
+
         Route::post('/alertes',         [AlerteController::class, 'store']);
         Route::delete('/alertes/{id}',  [AlerteController::class, 'destroy']);
     });

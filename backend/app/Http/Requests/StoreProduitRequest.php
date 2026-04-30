@@ -17,8 +17,9 @@ class StoreProduitRequest extends FormRequest
         $idProduit = $this->route('id');
         
         return [
-            'reference' => 'required|string|max:50|unique:produits,reference,'.$idProduit.',idProduit',
-            'codeBarre' => 'nullable|string|max:50|unique:produits,codeBarre,'.$idProduit.',idProduit',
+            'nomProduit'    => 'required|string|max:100',
+            'reference' => 'required|string|max:50|unique:produits,reference',
+            'codeBarre' => 'nullable|string|max:50|unique:produits,codeBarre',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'prixUnitaire' => 'required|numeric|min:0',
             'seuilSecurite' => 'required|numeric|min:0',

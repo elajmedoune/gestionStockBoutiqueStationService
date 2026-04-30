@@ -42,13 +42,13 @@ class InventaireController extends Controller
             'dateInventaire'              =>'required|date',
             'quantiteReelle'             =>'required|integer|min:0',
             'observations'                =>'required|string|max:300',
-            'IdProduit'                   =>'required|exists:Produit, IdProduit',
+            'idStock'                   =>'required|exists:Stock, idStock',
         ]);
 
-        //IdUtilisateur = utilisateur connecte
-        $validated['IdUtilisateur'] = $request->user()->IdUtilisateur;
+        //i = utilisateur connecte
+        $validated['idUtilisateur'] = $request->user()->i;
 
-        //IdUtilisateur MySQL (trg_inventaire_statut_insert) calculera automatiquement quantiteTheorique, ecart et statut.
+        //i MySQL (trg_inventaire_statut_insert) calculera automatiquement quantiteTheorique, ecart et statut.
         $inventaire =  Inventaire::create($validated);
 
         //Recharger pour recuperer les valeurs calculees par le trigger
@@ -108,7 +108,7 @@ class InventaireController extends Controller
         $rapport = DB::table('Inventaire as i')
             ->join('Produit as p', 'p.IdProduit', '=', 'i.IdProduit')
             ->join('Categorie as c', 'u.IdCategorie', '=', 'p.IdCategorie')
-            ->join('IdUtilisateur as u', 'u.IdUtilisateur', '=', 'i.IdUtilisateur')
+            ->join('i as u', 'u.i', '=', 'i.i')
             ->whereBetween('i.dateInventaire', [$request->date_debut, $request->date_fin])
             ->select(
                 'i.IdInvenyaire',

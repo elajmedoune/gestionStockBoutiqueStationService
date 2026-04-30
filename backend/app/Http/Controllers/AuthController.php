@@ -105,6 +105,20 @@ class AuthController extends Controller
         ]);
     }
 
+    // GET /api/utilisateurs
+    public function index(): JsonResponse
+    {
+        $utilisateurs = Utilisateur::orderBy('nom')->paginate(20);
+        return response()->json($utilisateurs);
+    }
+
+    // GET /api/utilisateurs/{id}
+    public function show(int $id): JsonResponse
+    {
+        $utilisateur = Utilisateur::findOrFail($id);
+        return response()->json($utilisateur);
+    }
+
     public function uploadPhoto(Request $request)
     {
         $request->validate(['photo' => 'required|image|max:2048']);

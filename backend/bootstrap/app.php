@@ -14,10 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-        ]);
+         $middleware->alias([
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+    ]);
     })
+    
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {

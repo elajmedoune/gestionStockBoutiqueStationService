@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Databbase\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Alerte extends Model
@@ -17,12 +17,13 @@ class Alerte extends Model
         'message',
         'niveauUrgence',
         'idUtilisateur',
-        'idProduit',
+        'idStock',
     ];
     protected $casts = [
         'lue' => 'boolean',
         'dateCreation' => 'datetime',
     ];
+    public $timestamps = false;
 
     //-----------------------------------------------------------------------------------------------------
     //Relations
@@ -32,8 +33,8 @@ class Alerte extends Model
         return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
-    public function produit(){
-        return $this->belongsTo(Produit::class, 'idProduit', 'idProduit');
+    public function stock(){
+        return $this->belongsTo(\App\Models\Stock::class, 'idStock', 'idStock');
     }
 
     //-----------------------------------------------------------------------------------------------------
@@ -41,12 +42,12 @@ class Alerte extends Model
     //-----------------------------------------------------------------------------------------------------
     /**Alertes non lues */
     public function scopeNonLues($query){
-        return $query->where('lue', 'false');
+        return $query->where('lue', false);
     }
 
     /**Alertes critiques */
      public function scopeCritiques($query){
-        return $query->where('niveauUrgence', 'critique');
+        return $query->where('niveauUrgence', critique);
     }
 
     /**Alertes d'un utilisateur donne */
