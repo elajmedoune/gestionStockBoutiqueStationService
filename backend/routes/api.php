@@ -11,15 +11,25 @@ use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\LivraisonController;
+use App\Http\Controllers\AssistantController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+
+Route::get('/stats-publiques', function () {
+    return response()->json([
+        'produits'  => \App\Models\Produit::count(),
+        'caissiers' => \App\Models\Utilisateur::where('role', 'caissier')->count(),
+    ]);
+});
 
 Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
+    Route::post('/assistant', [AssistantController::class, 'ask']);
 
     Route::middleware('role:gerant')->group(function() {
+        Route::get('/utilisateurs',                         [AuthController::class, 'index']); 
         Route::post('/register',                        [AuthController::class, 'register']);
         Route::patch('/utilisateurs/{id}/toggleActif',  [AuthController::class, 'toggleActif']);
     });

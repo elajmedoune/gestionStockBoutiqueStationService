@@ -22,7 +22,7 @@ class LivraisonController extends Controller
             'dateLivraison' => 'required|date',
             'montantTotal'  => 'required|numeric|min:0',
             'observations'  => 'nullable|string|max:300',
-            'idCommande' => 'required|integer|exists:commande,idCommande|unique:livraison,idCommande',
+            'idCommande' => 'required|integer|exists:commandes,idCommande|unique:livraisons,idCommande',
         ]);
         $livraison = Livraison::create($request->all());
         return new LivraisonResource($livraison->load(['commande']));

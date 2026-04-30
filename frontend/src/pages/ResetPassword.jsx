@@ -62,11 +62,11 @@ export default function ResetPassword() {
         <div style={{ position: 'absolute', bottom: '-60px', right: '-60px', width: 250, height: 250, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
         <div style={{ position: 'absolute', inset: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-        <div style={{ position: 'relative', textAlign: 'center', color: 'white' }}>
+        <div style={{ position: 'relative', textAlign: 'center', color: '#0f4c4c' }}>
           <div style={{ width: 80, height: 80, borderRadius: 24, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
             {appConfig.company.logo
               ? <img src={appConfig.company.logo} alt={appConfig.company.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 20 }} />
-              : <Fuel size={36} color="white" />
+              : <Fuel size={36} color="#0f4c4c" />
             }
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.5px' }}>{appConfig.company.name}</h1>
@@ -84,7 +84,7 @@ export default function ResetPassword() {
               'Un caractère spécial',
             ].map((tip, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 14px' }}>
-                <Check size={13} color="white" opacity={0.7} />
+                <Check size={13} color="#0f4c4c" opacity={0.7} />
                 <span style={{ fontSize: 13, opacity: 0.8 }}>{tip}</span>
               </div>
             ))}

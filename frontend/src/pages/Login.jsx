@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Lock, User, Fuel, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import appConfig from '../config/app'
+import api from '../services/api'
+
+
 
 export default function Login() {
   const [form, setForm] = useState({ login: '', motDePasse: '' })
@@ -12,6 +15,11 @@ export default function Login() {
   const [focused, setFocused] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [stats, setStats] = useState({ produits: '…', caissiers: '…' })
+
+useEffect(() => {
+  api.get('/stats-publiques').then(res => setStats(res.data)).catch(() => {})
+}, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,7 +66,7 @@ export default function Login() {
         }} />
 
         {/* Contenu central */}
-        <div style={{ position: 'relative', textAlign: 'center', color: 'white' }}>
+        <div style={{ position: 'relative', textAlign: 'center', color: '#0f4c4c' }}>
           {/* Logo */}
           <div style={{
             width: 80, height: 80, borderRadius: 24,
@@ -70,7 +78,7 @@ export default function Login() {
           }}>
             {appConfig.company.logo
               ? <img src={appConfig.company.logo} alt={appConfig.company.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 20 }} />
-              : <Fuel size={36} color="white" />
+              : <Fuel size={36} color="#0f4c4c" />
             }
           </div>
 
@@ -84,8 +92,8 @@ export default function Login() {
           {/* Stats déco */}
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
             {[
-              { label: 'Produits', value: '19' },
-              { label: 'Caissiers', value: '3' },
+              { label: 'Produits', value: stats.produits },
+              { label: 'Caissiers', value: stats.caissiers },
               { label: 'Fiable', value: '100%' },
             ].map(s => (
               <div key={s.label} style={{
