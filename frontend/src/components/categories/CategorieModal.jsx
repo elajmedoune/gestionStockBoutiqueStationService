@@ -14,7 +14,7 @@ function CategorieModal({ isOpen, mode, categorie, onSubmit, onClose, loading })
                     ✕
                 </button>
                 <h3 className="font-bold text-lg mb-4">
-                    {mode === 'create' ? "➕ Nouvelle catégorie" : "✏️ Modifier a catégorie" }
+                    {mode === 'create' ? "➕ Nouvelle catégorie" : "✏️ Modifier la catégorie" }
                 </h3>
                 <CategorieForm initial={ mode === 'edit' ? categorie : null }
                     onSubmit={onSubmit}

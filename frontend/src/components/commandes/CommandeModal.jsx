@@ -1,8 +1,8 @@
-// src/components/stock/StockModal.jsx
+// src/components/commandes/CommandeModal.jsx
 
-import StockForm from "./StockForm"
+import CommandeForm from "./CommandeForm"
 
-function StockModal({isOpen, mode, stock, produits, onSubmit, onClose, loading}) {
+function CommandeModal({isOpen, mode, commande, onSubmit, onClose, loading}) {
     if(!isOpen) return null
 
     return(
@@ -14,10 +14,9 @@ function StockModal({isOpen, mode, stock, produits, onSubmit, onClose, loading})
                     ✕
                 </button>
                 <h3 className="font-bold text-lg mb-4">
-                    {mode === 'create' ? "➕ Nouvelle entrée stock" : "✏️ Modifier le stock"}
+                    {mode === 'create' ? "➕ Nouvelle commande" : "✏️ Modifier la commande"}
                 </h3>
-                <StockForm initial={ mode === 'edit' ? stock : null }
-                    produits={produits}
+                <CommandeForm initial={ mode === 'edit' ? commande : null }
                     onSubmit={onSubmit}
                     onCancel={onClose}
                     loading = {loading}
@@ -30,4 +29,4 @@ function StockModal({isOpen, mode, stock, produits, onSubmit, onClose, loading})
         </dialog>
     )
 }
-export default StockModal
+export default CommandeModal

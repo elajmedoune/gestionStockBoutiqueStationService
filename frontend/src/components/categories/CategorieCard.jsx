@@ -55,8 +55,6 @@ function CategorieCard({ categorie, onEdit, onDelete}) {
                         </button>
                     </div>
                 </div>
-                    
-                    
             </div>
         </div>
     )

@@ -20,7 +20,7 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
             setForm({
                 reference: initial.reference || '',
                 codeBarre: initial.codeBarre || '',
-                prixUntaire: initial.prixUnitaire || '',
+                prixUnitaire: initial.prixUnitaire || '',
                 seuilSecurite: initial.seuilSecurite || '',
                 idCategorie: initial.idCategorie || '',
                 photo: null, 
@@ -52,9 +52,9 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
         Object.entries(form).forEach(([k, v]) => {
             if(v !== null && v !== '') fd.append(k, v)
         })
-    if(initial) fd.append('_method', 'PUT')
-        onSubmit(fd)
-    }
+        if(initial) fd.append('_method', 'PUT')
+            onSubmit(fd)
+        }
 
     return (
         <form onSubmit={submit} 
@@ -93,14 +93,14 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                 {/* prix unitaire */}
                 <div className="form-control">
                     <label className="label">
-                        <span className="label-text font-medium">Prix unitaire</span>
+                        <span className="label-text font-medium">Prix unitaire (FCFA) *</span>
                     </label>
                     <input type="number" 
                         className="input input-bordered w-full"
                         name='prixUnitaire'
                         min="0"
                         step="0.01"
-                        value={form.prixUntaire}
+                        value={form.prixUnitaire}
                         onChange={handle}
                         required
                         placeholder= "0"
