@@ -14,7 +14,10 @@ class StockController extends Controller
 
     public function store(StoreStockRequest $request)
     {
-        $stock = Stock::create($request->validated());
+        $stock = Stock::create([
+            ...$request->validated(),
+            'quantiteRestante' => $request->quantiteInitiale,
+        ]);
         return response()->json($stock, 201);
     }
 
