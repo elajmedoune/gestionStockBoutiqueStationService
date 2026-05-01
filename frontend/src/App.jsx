@@ -39,10 +39,6 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
-<<<<<<< HEAD
-      <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
-
-=======
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
        <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
@@ -52,7 +48,6 @@ function AppRoutes() {
        <Route path="/utilisateurs" element={<ProtectedRoute roles={['gerant']}><Utilisateurs /></ProtectedRoute>} />
        
       {/* Rapport stock — gestionnaire + magasinier uniquement */}
->>>>>>> origin/feature/badiene-front
       <Route path="/rapport-stock" element={
         <ProtectedRoute>
           {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)

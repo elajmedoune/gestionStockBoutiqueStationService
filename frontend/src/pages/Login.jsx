@@ -5,8 +5,6 @@ import { useAuth } from '../context/AuthContext'
 import appConfig from '../config/app'
 import api from '../services/api'
 
-
-
 export default function Login() {
   const [form, setForm] = useState({ login: '', motDePasse: '' })
   const [error, setError] = useState('')

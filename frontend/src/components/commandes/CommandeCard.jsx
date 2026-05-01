@@ -37,12 +37,12 @@ function CommandeCard({ commande, onEdit, onDelete}) {
                 {/* details */}
                 <div className="grid grid-cols-2 gap-1 text-sm">
                     <span className="text-base-content/60">Créé par</span>
-                    <span className="text-right truncatue">
+                    <span className="text-right truncate">
                         {commande.utilisateur?.prenom || '-'}
                     </span>
 
                     <span className="text-base-content/60">Livraison prévue</span>
-                    <span className="text-right truncatue">
+                    <span className="text-right truncate">
                         {commande.dateLivraisonPrevue || '-'}
                     </span>
                     
@@ -71,7 +71,7 @@ function CommandeCard({ commande, onEdit, onDelete}) {
                 </div>
 
                 {/* actions */}
-                <div className="flex justify-end gap-1 pt-1 border-t boder-base-200">
+                <div className="flex justify-end gap-1 pt-1 border-t border-base-200">
                     <button className="btn btn-xs btn-ghost text-primary"
                         onClick={() => onEdit(commande)}
                         title="Modifier"
