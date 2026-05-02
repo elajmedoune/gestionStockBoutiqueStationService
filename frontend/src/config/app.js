@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const appConfig = {
   // Nom du logiciel (ne pas modifier)
-  appName: 'Gestion Stock',
+  appName: 'GestStock SN',
 
   // Informations de l'entreprise cliente
   company: {

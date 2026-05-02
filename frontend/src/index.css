@@ -1,15 +1,7 @@
-<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-=======
-@import "tailwindcss";
-/* @plugin "daisyui" */
- {
-  /* themes: cupcake --default, dark --prefersdark; */
-}
 
 * {
   scrollbar-width: none;
 }
->>>>>>> origin/feature/badiene-front

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ForgotPassword from './pages/ForgotPassword'
@@ -15,9 +16,16 @@ import Livraisons from './pages/Livraisons'
 import Utilisateurs from './pages/Utilisateurs'
 import TicketCaisse from './pages/TicketCaisse'
 
+// Pages qui ont déjà Layout intégré
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   return user ? children : <Navigate to="/login" />
+}
+
+// Pages qui n'ont pas Layout
+function ProtectedRouteWithLayout({ children }) {
+  const { user } = useAuth()
+  return user ? <Layout>{children}</Layout> : <Navigate to="/login" />
 }
 
 function PublicRoute({ children }) {
@@ -36,23 +44,20 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
+      {/* Pages avec Layout intégré */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
-<<<<<<< HEAD
-      <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
-
-=======
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-       <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
+      <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
-       <Route path="/livraisons" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Livraisons /></ProtectedRoute>} />
-      <Route path="/alertes" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Alertes /></ProtectedRoute>} />
-      <Route path="/inventaire" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Inventaires /></ProtectedRoute>} />
-       <Route path="/utilisateurs" element={<ProtectedRoute roles={['gerant']}><Utilisateurs /></ProtectedRoute>} />
-       
-      {/* Rapport stock — gestionnaire + magasinier uniquement */}
->>>>>>> origin/feature/badiene-front
+      <Route path="/utilisateurs" element={<ProtectedRoute><Utilisateurs /></ProtectedRoute>} />
+
+      {/* Pages sans Layout — on l'ajoute ici */}
+      <Route path="/livraisons" element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
+      <Route path="/alertes" element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />
+      <Route path="/inventaire" element={<ProtectedRouteWithLayout><Inventaires /></ProtectedRouteWithLayout>} />
+
       <Route path="/rapport-stock" element={
         <ProtectedRoute>
           {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)

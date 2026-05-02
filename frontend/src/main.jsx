@@ -2,13 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-<<<<<<< HEAD
 import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
-=======
-import 'daisyui/daisyui.css'
->>>>>>> origin/feature/badiene-front
+
+const savedTheme = localStorage.getItem('theme') || 'cupcake'
+document.documentElement.setAttribute('data-theme', savedTheme)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

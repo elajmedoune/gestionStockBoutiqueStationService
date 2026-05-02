@@ -3,7 +3,7 @@ import Layout from '../components/Layout'
 import { useVentes } from '../hooks'
 import {
   TrendingUp, DollarSign, ShoppingCart, Receipt,
-  Download, RefreshCw, AlertTriangle, Check, X,
+  Download, AlertTriangle, Check, X,
   CalendarDays, Wallet, FileText,
 } from 'lucide-react'
 import {
@@ -11,8 +11,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from 'recharts'
+import ExportPDF from '../components/exports/ExportPDF'
+import ExportExcel from '../components/exports/ExportExcel'
+import ExportCSV from '../components/exports/ExportCSV'
 
-/* ── Utilitaires ── */
 const fmt   = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
 const today = new Date()
@@ -26,15 +28,21 @@ const PERIODES = [
   { label: 'Tout', days: null },
 ]
 
-/* ── KpiCard — identique Dashboard ── */
+const PDF_COLS = [
+  { header: 'Date',         dataKey: 'jour'     },
+  { header: 'Ventes',       dataKey: 'nbVentes' },
+  { header: 'CA HT (F)',    dataKey: 'caHT'     },
+  { header: 'TVA (F)',      dataKey: 'tva'      },
+  { header: 'CA TTC (F)',   dataKey: 'caTTC'    },
+  { header: 'Bénéfice (F)', dataKey: 'benefice' },
+]
+
 function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse }) {
   return (
     <div className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-1 transition-transform duration-200">
       <div className="card-body p-4 gap-2">
         <div className="flex items-center justify-between">
-          <div className={`p-2 rounded-xl ${badgeClass}`}>
-            <Icon size={16} />
-          </div>
+          <div className={`p-2 rounded-xl ${badgeClass}`}><Icon size={16} /></div>
           {pulse && <span className="badge badge-error badge-xs animate-pulse">!</span>}
         </div>
         <div>
@@ -47,28 +55,42 @@ function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse 
   )
 }
 
-/* ── HeroBanner rapport — même style que Dashboard ── */
 function HeroBanner({ stats, dateDebut, dateFin }) {
+  const colors = [
+    { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30', icon: <ShoppingCart size={14} className="text-primary" /> },
+    { bg: 'bg-secondary/15', text: 'text-secondary', border: 'border-secondary/30', icon: <DollarSign size={14} className="text-secondary" /> },
+    { bg: 'bg-success/15', text: 'text-success', border: 'border-success/30', icon: <TrendingUp size={14} className="text-success" /> },
+    { bg: 'bg-warning/15', text: 'text-warning', border: 'border-warning/30', icon: <AlertTriangle size={14} className="text-warning" /> },
+  ]
   return (
-    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg overflow-hidden">
-      <div className="card-body p-6 relative">
-        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        <div className="mb-4 relative">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold opacity-80">Analyse financière</span>
-            <span className="badge badge-sm bg-white/20 border-0 text-primary-content font-bold text-xs">RAPPORT</span>
+    <div className="card bg-base-100 text-base-content shadow-md border border-base-300 overflow-hidden">
+      <div className="card-body p-0 relative">
+        <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-white/3 translate-y-1/2 pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-white/15 rounded-lg"><TrendingUp size={14} /></div>
+              <span className="text-xs font-bold opacity-60 uppercase tracking-widest">Analyse financière</span>
+              <div className="w-px h-3 bg-white/20" />
+              <span className="badge badge-sm bg-white/20 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
+            </div>
+            <h1 className="text-3xl font-extrabold leading-tight mb-2">Rapport de bénéfices</h1>
+            <div className="flex items-center gap-1.5 text-xs opacity-50">
+              <CalendarDays size={11} />
+              <span>{dateDebut}</span><span>→</span><span>{dateFin}</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold leading-tight mb-1">Rapport de bénéfices</h1>
-          <p className="text-xs opacity-60 flex items-center gap-1">
-            <CalendarDays size={10} />
-            {dateDebut} → {dateFin}
-          </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {stats.map(({ label, value, ok }) => (
-            <div key={label} className="bg-white/10 rounded-xl p-3 text-center border border-white/10">
-              <p className="text-xs font-semibold uppercase tracking-wider opacity-50 truncate mb-1">{label}</p>
-              <p className={`text-lg font-extrabold leading-none ${ok === false ? 'text-warning' : 'text-white'}`}>{value}</p>            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-5">
+          {stats.map(({ label, value, ok }, i) => (
+            <div key={label} className={`rounded-2xl p-4 border-2 shadow-sm hover:-translate-y-1 transition-all duration-200 cursor-default ${colors[i].bg} ${colors[i].border}`}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-base-content/40">{label}</p>
+                <div className={`p-1.5 rounded-lg border ${colors[i].bg} ${colors[i].border}`}>{colors[i].icon}</div>
+              </div>
+              <p className={`text-2xl font-extrabold ${ok === false ? 'text-warning' : colors[i].text}`}>{value}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -76,78 +98,64 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
   )
 }
 
-/* ── Tooltip Recharts — couleurs thème cupcake/primary ── */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ backgroundColor: '#fff0f5', border: '1px solid #fbcfe8', borderRadius: 8, padding: '10px 12px', fontSize: 11 }}>
-      <p style={{ fontWeight: 700, color: '#9d174d', marginBottom: 4 }}>{label}</p>
+    <div className="bg-base-100 border border-base-300 rounded-xl p-3 shadow-lg text-xs">
+      <p className="font-bold text-base-content mb-2">{label}</p>
       {payload.map((p, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#be185d' }}>
+        <div key={i} className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-base-content/60">
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: p.color, display: 'inline-block' }} />
             {p.name}
           </span>
-          <span style={{ fontWeight: 700, color: '#9d174d' }}>
-  {p.name === 'nbVentes' || p.name === 'annulees' ? p.value : `${fmt(p.value)} F`}
-</span>
+          <span className="font-bold text-base-content">
+            {p.name === 'nbVentes' || p.name === 'annulees' ? p.value : `${fmt(p.value)} F`}
+          </span>
         </div>
       ))}
     </div>
   )
 }
 
-/* ════════════════════════════════════════════ */
 export default function Rapport() {
-  const { data: ventes, loading, refetch } = useVentes()
+  const { data: ventes, loading } = useVentes()
 
   const [periodeActive, setPeriodeActive] = useState('1M')
   const [dateDebut, setDateDebut] = useState(() => {
     const d = new Date(today); d.setDate(d.getDate() - 30); return toISO(d)
   })
-  const [dateFin, setDateFin]             = useState(toISO(today))
+  const [dateFin, setDateFin] = useState(toISO(today))
   const [afficherAnnulees, setAfficherAnnulees] = useState(false)
-  const [graphType, setGraphType]         = useState('area')
+  const [graphType, setGraphType] = useState('area')
+  const [exportOpen, setExportOpen] = useState(false)
 
   const handlePeriode = (p) => {
     setPeriodeActive(p.label)
     if (p.days === null) {
       setDateDebut(toISO(new Date(2020, 0, 1)))
     } else {
-      const d = new Date(today)
-      d.setDate(d.getDate() - p.days)
+      const d = new Date(today); d.setDate(d.getDate() - p.days)
       setDateDebut(toISO(d))
     }
     setDateFin(toISO(today))
   }
 
-  /* ── Filtrage ── */
-  const ventesFiltrees = useMemo(() => ventes.filter(v => {
-    if (!v.dateVente) return false
-    const d = v.dateVente.split('T')[0]
-    return d >= dateDebut && d <= dateFin
-  }), [ventes, dateDebut, dateFin])
-
-  const ventesNormales = useMemo(() => ventesFiltrees.filter(v => v.statut !== 'annulee'), [ventesFiltrees])
-  const ventesAnnulees = useMemo(() => ventesFiltrees.filter(v => v.statut === 'annulee'), [ventesFiltrees])
+  const ventesFiltrees  = useMemo(() => ventes.filter(v => { if (!v.dateVente) return false; const d = v.dateVente.split('T')[0]; return d >= dateDebut && d <= dateFin }), [ventes, dateDebut, dateFin])
+  const ventesNormales  = useMemo(() => ventesFiltrees.filter(v => v.statut !== 'annulee'), [ventesFiltrees])
+  const ventesAnnulees  = useMemo(() => ventesFiltrees.filter(v => v.statut === 'annulee'), [ventesFiltrees])
   const ventesAffichees = useMemo(() => afficherAnnulees ? ventesFiltrees : ventesNormales, [ventesFiltrees, ventesNormales, afficherAnnulees])
-  /* ── KPIs ── */
-  const caTotal     = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.totalTaxeComprise || 0), 0), [ventesAffichees])
-  const totalHT     = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.totalHorsTaxe    || 0), 0), [ventesAffichees])
-  const totalTVA    = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.tva              || 0), 0), [ventesAffichees])
-  const benefice = useMemo(() => {
-  return ventesAffichees.reduce((s, v) => {
-    return s + (v.lignes?.reduce((ls, l) => {
-      const prixAchat = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
-      const prixVente = parseFloat(l.produit?.prixUnitaire || 0)
-      return ls + (prixVente - prixAchat) * parseInt(l.quantite || 0)
-    }, 0) || 0)
-  }, 0)
-}, [ventesAffichees])
+
+  const caTotal    = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.totalTaxeComprise || 0), 0), [ventesAffichees])
+  const totalHT    = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.totalHorsTaxe    || 0), 0), [ventesAffichees])
+  const totalTVA   = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.tva              || 0), 0), [ventesAffichees])
+  const benefice   = useMemo(() => ventesAffichees.reduce((s, v) => s + (v.lignes?.reduce((ls, l) => {
+    const pa = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
+    return ls + (parseFloat(l.produit?.prixUnitaire || 0) - pa) * parseInt(l.quantite || 0)
+  }, 0) || 0), 0), [ventesAffichees])
   const panierMoyen = useMemo(() => ventesNormales.length ? caTotal / ventesNormales.length : 0, [caTotal, ventesNormales])
   const txAnnul     = useMemo(() => ventesFiltrees.length ? Math.round((ventesAnnulees.length / ventesFiltrees.length) * 100) : 0, [ventesFiltrees, ventesAnnulees])
 
-  /* ── Données graphiques — tri croissant (gauche = passé) ── */
   const dataParJour = useMemo(() => {
     const map = {}
     ventesAffichees.forEach(v => {
@@ -157,16 +165,15 @@ export default function Rapport() {
       if (raw.getTime() < map[jour]._ts) map[jour]._ts = raw.getTime()
       map[jour].ca       += parseFloat(v.totalTaxeComprise || 0)
       map[jour].benefice += v.lignes?.reduce((ls, l) => {
-  const prixAchat = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
-  return ls + (parseFloat(l.produit?.prixUnitaire || 0) - prixAchat) * parseInt(l.quantite || 0)
-}, 0) || 0
+        const pa = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
+        return ls + (parseFloat(l.produit?.prixUnitaire || 0) - pa) * parseInt(l.quantite || 0)
+      }, 0) || 0
       map[jour].nbVentes += 1
       if (v.statut === 'annulee') map[jour].annulees += 1
     })
     return Object.values(map).sort((a, b) => a._ts - b._ts)
   }, [ventesAffichees])
 
-  /* ── Tableau — tri croissant ── */
   const tableauJours = useMemo(() => {
     const map = {}
     ventesAffichees.forEach(v => {
@@ -181,18 +188,38 @@ export default function Rapport() {
         map[jour].caTTC += parseFloat(v.totalTaxeComprise|| 0)
       }
       map[jour].benefice += v.lignes?.reduce((ls, l) => {
-        const prixAchat = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
-        return ls + (parseFloat(l.produit?.prixUnitaire || 0) - prixAchat) * parseInt(l.quantite || 0)
+        const pa = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
+        return ls + (parseFloat(l.produit?.prixUnitaire || 0) - pa) * parseInt(l.quantite || 0)
       }, 0) || 0
       if (v.statut === 'annulee') map[jour].annulees += 1
     })
     return Object.values(map).sort((a, b) => a._ts - b._ts)
   }, [ventesAffichees])
 
+  // ✅ exportData et exportDataExcel INSIDE le composant
+  const exportData = tableauJours.map(j => ({
+    jour:     j.jour,
+    nbVentes: j.nbVentes - j.annulees,
+    caHT:     Math.round(j.caHT),
+    tva:      Math.round(j.tva),
+    caTTC:    Math.round(j.caTTC),
+    benefice: Math.round(j.benefice),
+  }))
+
+  const exportDataExcel = tableauJours.map(j => ({
+    Date:           j.jour,
+    Ventes:         j.nbVentes - j.annulees,
+    Annulées:       j.annulees,
+    'CA HT (F)':    j.caHT,
+    'TVA (F)':      j.tva,
+    'CA TTC (F)':   j.caTTC,
+    'Bénéfice (F)': j.benefice,
+  }))
+
   if (loading) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+        <span className="loading loading-spinner loading-lg text-neutral" />
       </div>
     </Layout>
   )
@@ -201,217 +228,194 @@ export default function Rapport() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto space-y-5 font-sans">
+      <div className="max-w-6xl mx-auto space-y-5">
 
-        {/* ══ Hero ══ */}
-        <HeroBanner
-          dateDebut={dateDebut}
-          dateFin={dateFin}
+        <HeroBanner dateDebut={dateDebut} dateFin={dateFin}
           stats={[
-            { label: 'Ventes',   value: ventesNormales.length                   },
-            { label: 'CA TTC',   value: `${fmt(caTotal)} F`                     },
-            { label: 'Bénéfice', value: `${fmt(benefice)} F`                    },
+            { label: 'Ventes',   value: ventesNormales.length },
+            { label: 'CA TTC',   value: `${fmt(caTotal)} F` },
+            { label: 'Bénéfice', value: `${fmt(benefice)} F` },
             { label: 'Annulées', value: ventesAnnulees.length, ok: ventesAnnulees.length === 0 },
           ]}
         />
 
-        {/* ══ Filtres ══ */}
+        {/* Filtres */}
         <div className="card bg-base-100 shadow-sm border border-base-200">
           <div className="card-body p-4">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-
-              {/* Périodes rapides */}
               <div className="flex gap-1.5 flex-wrap">
                 {PERIODES.map(p => (
-                  <button
-                    key={p.label}
-                    onClick={() => handlePeriode(p)}
-                    className={`btn btn-xs rounded-lg font-bold ${periodeActive === p.label ? 'btn-primary' : 'btn-ghost'}`}
-                  >
+                  <button key={p.label} onClick={() => handlePeriode(p)}
+                    className={`btn btn-xs rounded-xl font-bold ${periodeActive === p.label ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
                     {p.label}
                   </button>
                 ))}
               </div>
-
               <div className="hidden sm:block w-px h-5 bg-base-300" />
-
-              {/* Dates */}
               <div className="flex items-center gap-2">
                 <CalendarDays size={13} className="text-base-content/30" />
-                <input type="date" className="input input-xs input-bordered rounded-lg"
-                  value={dateDebut}
-                  onChange={e => { setDateDebut(e.target.value); setPeriodeActive('') }} />
+                <input type="date" className="input input-xs input-bordered rounded-xl"
+                  value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPeriodeActive('') }} />
                 <span className="text-base-content/30 text-xs">—</span>
-                <input type="date" className="input input-xs input-bordered rounded-lg"
-                  value={dateFin}
-                  onChange={e => { setDateFin(e.target.value); setPeriodeActive('') }} />
+                <input type="date" className="input input-xs input-bordered rounded-xl"
+                  value={dateFin} onChange={e => { setDateFin(e.target.value); setPeriodeActive('') }} />
               </div>
-
               <div className="hidden sm:block w-px h-5 bg-base-300" />
-
-              {/* Toggle annulées */}
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" className="checkbox checkbox-xs checkbox-warning"
-                  checked={afficherAnnulees}
-                  onChange={e => setAfficherAnnulees(e.target.checked)} />
+                  checked={afficherAnnulees} onChange={e => setAfficherAnnulees(e.target.checked)} />
                 <span className="text-xs font-medium text-base-content/60">Ventes annulées</span>
-                {ventesAnnulees.length > 0 && (
-                  <span className="badge badge-warning badge-xs font-bold">{ventesAnnulees.length}</span>
-                )}
+                {ventesAnnulees.length > 0 && <span className="badge badge-warning badge-xs font-bold">{ventesAnnulees.length}</span>}
               </label>
-
               <div className="ml-auto flex gap-2">
                 {periodeActive === '' && (
-                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold"
-                  onClick={() => {
-                    setPeriodeActive('1M')
-                    const d = new Date(today)
-                    d.setDate(d.getDate() - 30)
-                    setDateDebut(toISO(d))
-                    setDateFin(toISO(today))
-                    }}>
-                  <X size={12} /> Effacer filtres
+                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold rounded-xl"
+                    onClick={() => { setPeriodeActive('1M'); const d = new Date(today); d.setDate(d.getDate() - 30); setDateDebut(toISO(d)); setDateFin(toISO(today)) }}>
+                    <X size={12} /> Effacer filtres
                   </button>
                 )}
-                <button className="btn btn-ghost btn-xs gap-1.5 font-semibold">
-                  <Download size={12} /> Exporter
-                </button>
+                <div className="relative">
+                  <button className="btn btn-ghost btn-xs gap-1.5 font-semibold rounded-xl border border-base-300"
+                    onClick={() => setExportOpen(!exportOpen)}>
+                    <Download size={12} /> Exporter
+                  </button>
+                  {exportOpen && (
+                    <div className="absolute right-0 mt-1 bg-base-100 rounded-xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                      <ExportPDF data={exportData} columns={PDF_COLS} filename="rapport" label="PDF" />
+                      <ExportExcel data={exportDataExcel} filename="rapport" label="Excel" />
+                      <ExportCSV data={exportData} filename="rapport" label="CSV" />
+                    </div>
+                  )}
+                </div>
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* ══ KPI Grid ══ */}
+        {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KpiCard label="Transactions" value={afficherAnnulees ? ventesAffichees.length : ventesNormales.length} sub={afficherAnnulees ? 'toutes ventes' : 'ventes valides'} icon={ShoppingCart} colorClass="text-primary" badgeClass="bg-primary/10 text-primary" />
-          <KpiCard
-            label="Annulées"
-            value={ventesAnnulees.length}
-            sub={`${txAnnul}% du total`}
-            icon={AlertTriangle}
+          <KpiCard label="Transactions"  value={afficherAnnulees ? ventesAffichees.length : ventesNormales.length} sub={afficherAnnulees ? 'toutes ventes' : 'ventes valides'} icon={ShoppingCart} colorClass="text-primary"   badgeClass="bg-primary/10 text-primary" />
+          <KpiCard label="Annulées"      value={ventesAnnulees.length} sub={`${txAnnul}% du total`} icon={AlertTriangle}
             colorClass={ventesAnnulees.length > 0 ? 'text-warning' : 'text-success'}
             badgeClass={ventesAnnulees.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}
-            pulse={ventesAnnulees.length > 0}
-          />
-          <KpiCard label="CA TTC"        value={`${fmt(caTotal)} F`}     sub="total encaissé"      icon={DollarSign}    colorClass="text-secondary"  badgeClass="bg-secondary/10 text-secondary" />
-          <KpiCard label="CA HT"         value={`${fmt(totalHT)} F`}     sub="hors taxes"          icon={Receipt}       colorClass="text-accent"     badgeClass="bg-accent/10 text-accent" />
-          <KpiCard label="Panier moyen"  value={`${fmt(panierMoyen)} F`} sub="par transaction"     icon={Wallet}        colorClass="text-info"       badgeClass="bg-info/10 text-info" />
-          <KpiCard label="Bénéfice est." value={`${fmt(benefice)} F`} sub={caTotal > 0 ? `marge ${Math.round((benefice / caTotal) * 100)}% TTC` : 'marge 0%'} icon={TrendingUp} colorClass="text-success" badgeClass="bg-success/10 text-success" />
+            pulse={ventesAnnulees.length > 0} />
+          <KpiCard label="CA TTC"        value={`${fmt(caTotal)} F`}     sub="total encaissé"  icon={DollarSign} colorClass="text-secondary" badgeClass="bg-secondary/10 text-secondary" />
+          <KpiCard label="CA HT"         value={`${fmt(totalHT)} F`}     sub="hors taxes"      icon={Receipt}    colorClass="text-accent"    badgeClass="bg-accent/10 text-accent" />
+          <KpiCard label="Panier moyen"  value={`${fmt(panierMoyen)} F`} sub="par transaction" icon={Wallet}     colorClass="text-info"      badgeClass="bg-info/10 text-info" />
+          <KpiCard label="Bénéfice est." value={`${fmt(benefice)} F`}
+            sub={caTotal > 0 ? `marge ${Math.round((benefice / caTotal) * 100)}% TTC` : 'marge 0%'}
+            icon={TrendingUp} colorClass="text-success" badgeClass="bg-success/10 text-success" />
         </div>
 
-        {/* ══ Graphiques ══ */}
+        {/* Graphiques */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          {/* CA + Bénéfice */}
           <div className="card bg-base-100 shadow-sm border border-base-200">
-            <div className="card-body p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+            <div className="card-body p-0">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-base-200">
                 <div>
-                  <h2 className="card-title text-base font-extrabold">Chiffre d'affaires</h2>
+                  <h2 className="font-extrabold text-sm">Chiffre d'affaires</h2>
                   <p className="text-xs text-base-content/40">{fmt(caTotal)} F sur la période</p>
                 </div>
                 <div className="flex gap-1.5">
                   {['area', 'bar'].map(t => (
                     <button key={t} onClick={() => setGraphType(t)}
-                      className={`btn btn-xs rounded-lg font-bold ${graphType === t ? 'btn-secondary' : 'btn-ghost'}`}>
+                      className={`btn btn-xs rounded-xl font-bold ${graphType === t ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
                       {t === 'area' ? 'Courbe' : 'Barres'}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {dataParJour.length === 0
-                ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune vente sur la période</div>
-                : <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      {graphType === 'area' ? (
-                        <AreaChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="gCA" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%"  stopColor="rgba(247,100,149,0.35)" />
-                              <stop offset="95%" stopColor="rgba(247,100,149,0)"    />
-                            </linearGradient>
-                            <linearGradient id="gBen" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%"  stopColor="rgba(54,211,153,0.25)" />
-                              <stop offset="95%" stopColor="rgba(54,211,153,0)"    />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false} />
-                          <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
-                          <YAxis tick={tick} tickLine={false} axisLine={false} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
-                          <Area type="monotone" dataKey="ca"       name="ca"       stroke="rgba(247,100,149,1)" strokeWidth={2} fill="url(#gCA)"  dot={false} activeDot={{ r: 4 }} />
-                          <Area type="monotone" dataKey="benefice" name="benefice" stroke="rgba(54,211,153,1)"  strokeWidth={2} fill="url(#gBen)" dot={false} activeDot={{ r: 4 }} />
-                        </AreaChart>
-                      ) : (
-                        <BarChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false} />
-                          <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
-                          <YAxis tick={tick} tickLine={false} axisLine={false} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
-                          <Bar dataKey="ca"       name="ca"       fill="rgba(247,100,149,0.75)" radius={[6, 6, 0, 0]} />
-                          <Bar dataKey="benefice" name="benefice" fill="rgba(54,211,153,0.75)"  radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                      )}
-                    </ResponsiveContainer>
-                  </div>
-              }
+              <div className="p-4">
+                {dataParJour.length === 0
+                  ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune vente sur la période</div>
+                  : <div className="h-56" style={{ minWidth: 0 }}>
+                      <ResponsiveContainer width="100%" height={224}>
+                        {graphType === 'area' ? (
+                          <AreaChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="gCA" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%"  stopColor="rgba(99,102,241,0.3)" />
+                                <stop offset="95%" stopColor="rgba(99,102,241,0)"   />
+                              </linearGradient>
+                              <linearGradient id="gBen" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%"  stopColor="rgba(34,197,94,0.25)" />
+                                <stop offset="95%" stopColor="rgba(34,197,94,0)"    />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                            <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
+                            <YAxis tick={tick} tickLine={false} axisLine={false} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
+                            <Area type="monotone" dataKey="ca"       name="ca"       stroke="rgba(99,102,241,1)"  strokeWidth={2} fill="url(#gCA)"  dot={false} activeDot={{ r: 4 }} />
+                            <Area type="monotone" dataKey="benefice" name="benefice" stroke="rgba(34,197,94,1)"   strokeWidth={2} fill="url(#gBen)" dot={false} activeDot={{ r: 4 }} />
+                          </AreaChart>
+                        ) : (
+                          <BarChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                            <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
+                            <YAxis tick={tick} tickLine={false} axisLine={false} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
+                            <Bar dataKey="ca"       name="ca"       fill="rgba(99,102,241,0.75)"  radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="benefice" name="benefice" fill="rgba(34,197,94,0.75)"   radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        )}
+                      </ResponsiveContainer>
+                    </div>
+                }
+              </div>
             </div>
           </div>
 
-          {/* Ventes par jour */}
           <div className="card bg-base-100 shadow-sm border border-base-200">
-            <div className="card-body p-5">
-              <div className="mb-3">
-                <h2 className="card-title text-base font-extrabold">Ventes par jour</h2>
+            <div className="card-body p-0">
+              <div className="px-5 pt-4 pb-3 border-b border-base-200">
+                <h2 className="font-extrabold text-sm">Ventes par jour</h2>
                 <p className="text-xs text-base-content/40">
                   {afficherAnnulees ? ventesAffichees.length : ventesNormales.length} {afficherAnnulees ? 'transactions (annulées incluses)' : 'transactions valides'}
                 </p>
               </div>
-
-              {dataParJour.length === 0
-                ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune vente sur la période</div>
-                : <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false} />
-                        <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
-                        <YAxis tick={tick} tickLine={false} axisLine={false} allowDecimals={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'nbVentes' ? 'Ventes' : 'Annulées'} />
-                        <Bar dataKey="nbVentes" name="nbVentes" fill="rgba(247,100,149,0.75)" radius={[6, 6, 0, 0]} />
-                        {afficherAnnulees && (
-                          <Bar dataKey="annulees" name="annulees" fill="rgba(248,114,114,0.65)" radius={[6, 6, 0, 0]} />
-                        )}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-              }
+              <div className="p-4">
+                {dataParJour.length === 0
+                  ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune vente sur la période</div>
+                  : <div className="h-56" style={{ minWidth: 0 }}>
+                      <ResponsiveContainer width="100%" height={224}>
+                        <BarChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                          <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
+                          <YAxis tick={tick} tickLine={false} axisLine={false} allowDecimals={false} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'nbVentes' ? 'Ventes' : 'Annulées'} />
+                          <Bar dataKey="nbVentes" name="nbVentes" fill="rgba(99,102,241,0.75)" radius={[6, 6, 0, 0]} />
+                          {afficherAnnulees && (
+                            <Bar dataKey="annulees" name="annulees" fill="rgba(251,191,36,0.65)" radius={[6, 6, 0, 0]} />
+                          )}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                }
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ══ Tableau détaillé ══ */}
+        {/* Tableau */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
           <div className="card-body p-0">
-
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-base-200">
-              <div>
-                <h2 className="font-extrabold text-sm">Détail par jour</h2>
-                <p className="text-xs text-base-content/40">
-                  {tableauJours.length} jour{tableauJours.length > 1 ? 's' : ''} dans la période
-                </p>
+            <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-white/10 rounded-lg"><FileText size={14} /></div>
+                <div>
+                  <h2 className="font-extrabold text-sm">Détail par jour</h2>
+                  <p className="text-xs opacity-50">{tableauJours.length} jour{tableauJours.length > 1 ? 's' : ''} dans la période</p>
+                </div>
               </div>
-              <FileText size={14} className="text-base-content/30" />
             </div>
-
             <div className="overflow-x-auto">
               <table className="table table-sm w-full">
                 <thead className="text-xs">
-                  <tr>
+                  <tr className="bg-base-200/50">
                     <th className="pl-5">Date</th>
                     <th className="text-center">Ventes</th>
                     <th className="text-center">Annulées</th>
@@ -427,42 +431,34 @@ export default function Rapport() {
                     : tableauJours.map((j, i) => (
                       <tr key={i} className="hover">
                         <td className="pl-5 font-semibold text-base-content">{j.jour}</td>
-                        <td className="text-center">
-                          <span className="badge badge-success badge-sm gap-1 font-bold">
-                            <Check size={9} /> {j.nbVentes - j.annulees}
-                          </span>
-                        </td>
+                        <td className="text-center"><span className="badge badge-success badge-sm gap-1 font-bold"><Check size={9} /> {j.nbVentes - j.annulees}</span></td>
                         <td className="text-center">
                           {j.annulees > 0
                             ? <span className="badge badge-warning badge-sm gap-1 font-bold"><X size={9} /> {j.annulees}</span>
-                            : <span className="text-base-content/20">—</span>
-                          }
+                            : <span className="text-base-content/20">—</span>}
                         </td>
                         <td className="text-right text-base-content/60">{fmt(j.caHT)} F</td>
                         <td className="text-right text-base-content/40">{fmt(j.tva)} F</td>
                         <td className="text-right font-extrabold text-success">{fmt(j.caTTC)} F</td>
-                        <td className="text-right font-extrabold text-secondary pr-5">{fmt(j.benefice)} F</td>
+                        <td className="text-right font-extrabold text-primary pr-5">{fmt(j.benefice)} F</td>
                       </tr>
                     ))
                   }
                 </tbody>
                 {tableauJours.length > 0 && (
                   <tfoot>
-                    <tr className="bg-base-200/50 text-xs font-black">
-                      <td className="pl-5 py-3 text-base-content">TOTAL</td>
-                      <td className="text-center">
-                        <span className="badge badge-success badge-sm font-bold">{ventesNormales.length}</span>
-                      </td>
+                    <tr className="bg-neutral text-neutral-content text-xs font-black">
+                      <td className="pl-5 py-3">TOTAL</td>
+                      <td className="text-center"><span className="badge badge-success badge-sm font-bold">{ventesNormales.length}</span></td>
                       <td className="text-center">
                         {ventesAnnulees.length > 0
                           ? <span className="badge badge-warning badge-sm font-bold">{ventesAnnulees.length}</span>
-                          : <span className="text-base-content/20">—</span>
-                        }
+                          : <span className="opacity-30">—</span>}
                       </td>
-                      <td className="text-right text-base-content/70">{fmt(totalHT)} F</td>
-                      <td className="text-right text-base-content/50">{fmt(totalTVA)} F</td>
-                      <td className="text-right text-success">{fmt(caTotal)} F</td>
-                      <td className="text-right text-secondary pr-5">{fmt(benefice)} F</td>
+                      <td className="text-right opacity-70">{fmt(totalHT)} F</td>
+                      <td className="text-right opacity-50">{fmt(totalTVA)} F</td>
+                      <td className="text-right text-success font-extrabold">{fmt(caTotal)} F</td>
+                      <td className="text-right text-primary font-extrabold pr-5">{fmt(benefice)} F</td>
                     </tr>
                   </tfoot>
                 )}
