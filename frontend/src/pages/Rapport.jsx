@@ -37,12 +37,23 @@ const PDF_COLS = [
   { header: 'Bénéfice (F)', dataKey: 'benefice' },
 ]
 
+/* 🧁 Palette charts cupcake */
+const CHART_COLORS = {
+  primary:      'rgba(101,195,200,1)',     // teal
+  primarySoft:  'rgba(101,195,200,0.85)',
+  primaryFill:  'rgba(101,195,200,0.4)',
+  benefit:      'rgba(116,206,183,1)',     // mint
+  benefitSoft:  'rgba(116,206,183,0.85)',
+  benefitFill:  'rgba(116,206,183,0.35)',
+  warn:         'rgba(238,175,58,0.8)',    // ambre cupcake
+}
+
 function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse }) {
   return (
     <div className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-1 transition-transform duration-200">
       <div className="card-body p-4 gap-2">
         <div className="flex items-center justify-between">
-          <div className={`p-2 rounded-xl ${badgeClass}`}><Icon size={16} /></div>
+          <div className={`p-2 rounded-2xl ${badgeClass}`}><Icon size={16} /></div>
           {pulse && <span className="badge badge-error badge-xs animate-pulse">!</span>}
         </div>
         <div>
@@ -57,26 +68,28 @@ function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse 
 
 function HeroBanner({ stats, dateDebut, dateFin }) {
   const colors = [
-    { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30', icon: <ShoppingCart size={14} className="text-primary" /> },
-    { bg: 'bg-secondary/15', text: 'text-secondary', border: 'border-secondary/30', icon: <DollarSign size={14} className="text-secondary" /> },
-    { bg: 'bg-success/15', text: 'text-success', border: 'border-success/30', icon: <TrendingUp size={14} className="text-success" /> },
-    { bg: 'bg-warning/15', text: 'text-warning', border: 'border-warning/30', icon: <AlertTriangle size={14} className="text-warning" /> },
+    { bg: 'bg-primary/15',   text: 'text-primary',   border: 'border-primary/30',   icon: <ShoppingCart  size={14} className="text-primary" /> },
+    { bg: 'bg-secondary/20', text: 'text-secondary', border: 'border-secondary/40', icon: <DollarSign    size={14} className="text-secondary" /> },
+    { bg: 'bg-success/15',   text: 'text-success',   border: 'border-success/30',   icon: <TrendingUp    size={14} className="text-success" /> },
+    { bg: 'bg-accent/15',    text: 'text-accent',    border: 'border-accent/30',    icon: <AlertTriangle size={14} className="text-accent" /> },
   ]
   return (
     <div className="card bg-base-100 text-base-content shadow-md border border-base-300 overflow-hidden">
       <div className="card-body p-0 relative">
         <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-white/3 translate-y-1/2 pointer-events-none" />
+          {/* 🧁 bulles pastel cupcake */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-secondary/20 -translate-y-1/2 translate-x-1/4 pointer-events-none blur-2xl" />
+          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-primary/30 translate-y-1/2 pointer-events-none blur-xl" />
+          <div className="absolute top-4 left-1/2 w-24 h-24 rounded-full bg-accent/20 pointer-events-none blur-xl" />
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-white/15 rounded-lg"><TrendingUp size={14} /></div>
-              <span className="text-xs font-bold opacity-60 uppercase tracking-widest">Analyse financière</span>
+              <div className="p-1.5 bg-white/20 rounded-2xl"><TrendingUp size={14} /></div>
+              <span className="text-xs font-bold opacity-70 uppercase tracking-widest">Analyse financière</span>
               <div className="w-px h-3 bg-white/20" />
-              <span className="badge badge-sm bg-white/20 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
+              <span className="badge badge-sm bg-secondary/30 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
             </div>
             <h1 className="text-3xl font-extrabold leading-tight mb-2">Rapport de bénéfices</h1>
-            <div className="flex items-center gap-1.5 text-xs opacity-50">
+            <div className="flex items-center gap-1.5 text-xs opacity-60">
               <CalendarDays size={11} />
               <span>{dateDebut}</span><span>→</span><span>{dateFin}</span>
             </div>
@@ -87,7 +100,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
             <div key={label} className={`rounded-2xl p-4 border-2 shadow-sm hover:-translate-y-1 transition-all duration-200 cursor-default ${colors[i].bg} ${colors[i].border}`}>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold uppercase tracking-widest text-base-content/40">{label}</p>
-                <div className={`p-1.5 rounded-lg border ${colors[i].bg} ${colors[i].border}`}>{colors[i].icon}</div>
+                <div className={`p-1.5 rounded-2xl border ${colors[i].bg} ${colors[i].border}`}>{colors[i].icon}</div>
               </div>
               <p className={`text-2xl font-extrabold ${ok === false ? 'text-warning' : colors[i].text}`}>{value}</p>
             </div>
@@ -101,7 +114,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-base-100 border border-base-300 rounded-xl p-3 shadow-lg text-xs">
+    <div className="bg-base-100 border border-primary/40 rounded-2xl p-3 shadow-lg text-xs">
       <p className="font-bold text-base-content mb-2">{label}</p>
       {payload.map((p, i) => (
         <div key={i} className="flex items-center justify-between gap-4">
@@ -196,7 +209,6 @@ export default function Rapport() {
     return Object.values(map).sort((a, b) => a._ts - b._ts)
   }, [ventesAffichees])
 
-  // ✅ exportData et exportDataExcel INSIDE le composant
   const exportData = tableauJours.map(j => ({
     jour:     j.jour,
     nbVentes: j.nbVentes - j.annulees,
@@ -219,7 +231,7 @@ export default function Rapport() {
   if (loading) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-neutral" />
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     </Layout>
   )
@@ -246,7 +258,7 @@ export default function Rapport() {
               <div className="flex gap-1.5 flex-wrap">
                 {PERIODES.map(p => (
                   <button key={p.label} onClick={() => handlePeriode(p)}
-                    className={`btn btn-xs rounded-xl font-bold ${periodeActive === p.label ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+                    className={`btn btn-xs font-bold ${periodeActive === p.label ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
                     {p.label}
                   </button>
                 ))}
@@ -254,10 +266,10 @@ export default function Rapport() {
               <div className="hidden sm:block w-px h-5 bg-base-300" />
               <div className="flex items-center gap-2">
                 <CalendarDays size={13} className="text-base-content/30" />
-                <input type="date" className="input input-xs input-bordered rounded-xl"
+                <input type="date" className="input input-xs input-bordered"
                   value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPeriodeActive('') }} />
                 <span className="text-base-content/30 text-xs">—</span>
-                <input type="date" className="input input-xs input-bordered rounded-xl"
+                <input type="date" className="input input-xs input-bordered"
                   value={dateFin} onChange={e => { setDateFin(e.target.value); setPeriodeActive('') }} />
               </div>
               <div className="hidden sm:block w-px h-5 bg-base-300" />
@@ -269,18 +281,18 @@ export default function Rapport() {
               </label>
               <div className="ml-auto flex gap-2">
                 {periodeActive === '' && (
-                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold rounded-xl"
+                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold"
                     onClick={() => { setPeriodeActive('1M'); const d = new Date(today); d.setDate(d.getDate() - 30); setDateDebut(toISO(d)); setDateFin(toISO(today)) }}>
                     <X size={12} /> Effacer filtres
                   </button>
                 )}
                 <div className="relative">
-                  <button className="btn btn-ghost btn-xs gap-1.5 font-semibold rounded-xl border border-base-300"
+                  <button className="btn btn-ghost btn-xs gap-1.5 font-semibold border border-base-300"
                     onClick={() => setExportOpen(!exportOpen)}>
                     <Download size={12} /> Exporter
                   </button>
                   {exportOpen && (
-                    <div className="absolute right-0 mt-1 bg-base-100 rounded-xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
                       <ExportPDF data={exportData} columns={PDF_COLS} filename="rapport" label="PDF" />
                       <ExportExcel data={exportDataExcel} filename="rapport" label="Excel" />
                       <ExportCSV data={exportData} filename="rapport" label="CSV" />
@@ -294,17 +306,17 @@ export default function Rapport() {
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KpiCard label="Transactions"  value={afficherAnnulees ? ventesAffichees.length : ventesNormales.length} sub={afficherAnnulees ? 'toutes ventes' : 'ventes valides'} icon={ShoppingCart} colorClass="text-primary"   badgeClass="bg-primary/10 text-primary" />
+          <KpiCard label="Transactions"  value={afficherAnnulees ? ventesAffichees.length : ventesNormales.length} sub={afficherAnnulees ? 'toutes ventes' : 'ventes valides'} icon={ShoppingCart} colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
           <KpiCard label="Annulées"      value={ventesAnnulees.length} sub={`${txAnnul}% du total`} icon={AlertTriangle}
             colorClass={ventesAnnulees.length > 0 ? 'text-warning' : 'text-success'}
-            badgeClass={ventesAnnulees.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}
+            badgeClass={ventesAnnulees.length > 0 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'}
             pulse={ventesAnnulees.length > 0} />
-          <KpiCard label="CA TTC"        value={`${fmt(caTotal)} F`}     sub="total encaissé"  icon={DollarSign} colorClass="text-secondary" badgeClass="bg-secondary/10 text-secondary" />
-          <KpiCard label="CA HT"         value={`${fmt(totalHT)} F`}     sub="hors taxes"      icon={Receipt}    colorClass="text-accent"    badgeClass="bg-accent/10 text-accent" />
-          <KpiCard label="Panier moyen"  value={`${fmt(panierMoyen)} F`} sub="par transaction" icon={Wallet}     colorClass="text-info"      badgeClass="bg-info/10 text-info" />
+          <KpiCard label="CA TTC"        value={`${fmt(caTotal)} F`}     sub="total encaissé"  icon={DollarSign} colorClass="text-secondary" badgeClass="bg-secondary/20 text-secondary" />
+          <KpiCard label="CA HT"         value={`${fmt(totalHT)} F`}     sub="hors taxes"      icon={Receipt}    colorClass="text-accent"    badgeClass="bg-accent/15 text-accent" />
+          <KpiCard label="Panier moyen"  value={`${fmt(panierMoyen)} F`} sub="par transaction" icon={Wallet}     colorClass="text-info"      badgeClass="bg-info/15 text-info" />
           <KpiCard label="Bénéfice est." value={`${fmt(benefice)} F`}
             sub={caTotal > 0 ? `marge ${Math.round((benefice / caTotal) * 100)}% TTC` : 'marge 0%'}
-            icon={TrendingUp} colorClass="text-success" badgeClass="bg-success/10 text-success" />
+            icon={TrendingUp} colorClass="text-success" badgeClass="bg-success/15 text-success" />
         </div>
 
         {/* Graphiques */}
@@ -319,7 +331,7 @@ export default function Rapport() {
                 <div className="flex gap-1.5">
                   {['area', 'bar'].map(t => (
                     <button key={t} onClick={() => setGraphType(t)}
-                      className={`btn btn-xs rounded-xl font-bold ${graphType === t ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+                      className={`btn btn-xs font-bold ${graphType === t ? 'btn-secondary' : 'btn-ghost border border-base-300'}`}>
                       {t === 'area' ? 'Courbe' : 'Barres'}
                     </button>
                   ))}
@@ -334,12 +346,12 @@ export default function Rapport() {
                           <AreaChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                             <defs>
                               <linearGradient id="gCA" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%"  stopColor="rgba(99,102,241,0.3)" />
-                                <stop offset="95%" stopColor="rgba(99,102,241,0)"   />
+                                <stop offset="5%"  stopColor={CHART_COLORS.primaryFill} />
+                                <stop offset="95%" stopColor="rgba(101,195,200,0)" />
                               </linearGradient>
                               <linearGradient id="gBen" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%"  stopColor="rgba(34,197,94,0.25)" />
-                                <stop offset="95%" stopColor="rgba(34,197,94,0)"    />
+                                <stop offset="5%"  stopColor={CHART_COLORS.benefitFill} />
+                                <stop offset="95%" stopColor="rgba(116,206,183,0)" />
                               </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
@@ -347,8 +359,8 @@ export default function Rapport() {
                             <YAxis tick={tick} tickLine={false} axisLine={false} />
                             <Tooltip content={<CustomTooltip />} />
                             <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
-                            <Area type="monotone" dataKey="ca"       name="ca"       stroke="rgba(99,102,241,1)"  strokeWidth={2} fill="url(#gCA)"  dot={false} activeDot={{ r: 4 }} />
-                            <Area type="monotone" dataKey="benefice" name="benefice" stroke="rgba(34,197,94,1)"   strokeWidth={2} fill="url(#gBen)" dot={false} activeDot={{ r: 4 }} />
+                            <Area type="monotone" dataKey="ca"       name="ca"       stroke={CHART_COLORS.primary} strokeWidth={2} fill="url(#gCA)"  dot={false} activeDot={{ r: 4 }} />
+                            <Area type="monotone" dataKey="benefice" name="benefice" stroke={CHART_COLORS.benefit} strokeWidth={2} fill="url(#gBen)" dot={false} activeDot={{ r: 4 }} />
                           </AreaChart>
                         ) : (
                           <BarChart data={dataParJour} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -357,8 +369,8 @@ export default function Rapport() {
                             <YAxis tick={tick} tickLine={false} axisLine={false} />
                             <Tooltip content={<CustomTooltip />} />
                             <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'ca' ? 'CA TTC' : 'Bénéfice'} />
-                            <Bar dataKey="ca"       name="ca"       fill="rgba(99,102,241,0.75)"  radius={[6, 6, 0, 0]} />
-                            <Bar dataKey="benefice" name="benefice" fill="rgba(34,197,94,0.75)"   radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="ca"       name="ca"       fill={CHART_COLORS.primarySoft} radius={[8, 8, 0, 0]} />
+                            <Bar dataKey="benefice" name="benefice" fill={CHART_COLORS.benefitSoft} radius={[8, 8, 0, 0]} />
                           </BarChart>
                         )}
                       </ResponsiveContainer>
@@ -387,9 +399,9 @@ export default function Rapport() {
                           <YAxis tick={tick} tickLine={false} axisLine={false} allowDecimals={false} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 11 }} formatter={v => v === 'nbVentes' ? 'Ventes' : 'Annulées'} />
-                          <Bar dataKey="nbVentes" name="nbVentes" fill="rgba(99,102,241,0.75)" radius={[6, 6, 0, 0]} />
+                          <Bar dataKey="nbVentes" name="nbVentes" fill={CHART_COLORS.primarySoft} radius={[8, 8, 0, 0]} />
                           {afficherAnnulees && (
-                            <Bar dataKey="annulees" name="annulees" fill="rgba(251,191,36,0.65)" radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="annulees" name="annulees" fill={CHART_COLORS.warn} radius={[8, 8, 0, 0]} />
                           )}
                         </BarChart>
                       </ResponsiveContainer>
@@ -403,12 +415,12 @@ export default function Rapport() {
         {/* Tableau */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
           <div className="card-body p-0">
-            <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center justify-between">
+            <div className="bg-primary text-primary-content px-5 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><FileText size={14} /></div>
+                <div className="p-1.5 bg-white/25 rounded-2xl"><FileText size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Détail par jour</h2>
-                  <p className="text-xs opacity-50">{tableauJours.length} jour{tableauJours.length > 1 ? 's' : ''} dans la période</p>
+                  <p className="text-xs opacity-70">{tableauJours.length} jour{tableauJours.length > 1 ? 's' : ''} dans la période</p>
                 </div>
               </div>
             </div>
@@ -440,14 +452,14 @@ export default function Rapport() {
                         <td className="text-right text-base-content/60">{fmt(j.caHT)} F</td>
                         <td className="text-right text-base-content/40">{fmt(j.tva)} F</td>
                         <td className="text-right font-extrabold text-success">{fmt(j.caTTC)} F</td>
-                        <td className="text-right font-extrabold text-primary pr-5">{fmt(j.benefice)} F</td>
+                        <td className="text-right font-extrabold text-secondary pr-5">{fmt(j.benefice)} F</td>
                       </tr>
                     ))
                   }
                 </tbody>
                 {tableauJours.length > 0 && (
                   <tfoot>
-                    <tr className="bg-neutral text-neutral-content text-xs font-black">
+                    <tr className="bg-primary text-primary-content text-xs font-black">
                       <td className="pl-5 py-3">TOTAL</td>
                       <td className="text-center"><span className="badge badge-success badge-sm font-bold">{ventesNormales.length}</span></td>
                       <td className="text-center">
@@ -455,10 +467,10 @@ export default function Rapport() {
                           ? <span className="badge badge-warning badge-sm font-bold">{ventesAnnulees.length}</span>
                           : <span className="opacity-30">—</span>}
                       </td>
-                      <td className="text-right opacity-70">{fmt(totalHT)} F</td>
-                      <td className="text-right opacity-50">{fmt(totalTVA)} F</td>
+                      <td className="text-right opacity-80">{fmt(totalHT)} F</td>
+                      <td className="text-right opacity-60">{fmt(totalTVA)} F</td>
                       <td className="text-right text-success font-extrabold">{fmt(caTotal)} F</td>
-                      <td className="text-right text-primary font-extrabold pr-5">{fmt(benefice)} F</td>
+                      <td className="text-right font-extrabold pr-5">{fmt(benefice)} F</td>
                     </tr>
                   </tfoot>
                 )}
