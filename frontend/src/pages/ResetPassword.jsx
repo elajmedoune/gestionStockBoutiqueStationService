@@ -47,49 +47,54 @@ export default function ResetPassword() {
     return s
   }
 
-  const strengthLabel = ['', 'Faible', 'Moyen', 'Bon', 'Fort']
+  const strengthLabel  = ['', 'Faible', 'Moyen', 'Bon', 'Fort']
   const strengthColors = ['', 'bg-error text-error', 'bg-warning text-warning', 'bg-info text-info', 'bg-success text-success']
-  const strengthBg = ['', 'bg-error', 'bg-warning', 'bg-info', 'bg-success']
+  const strengthBg     = ['', 'bg-error', 'bg-warning', 'bg-info', 'bg-success']
   const s = strength(form.password)
 
+  /* 🧁 chaque tip a sa propre teinte cupcake */
   const tips = [
-    '8 caractères minimum',
-    'Une majuscule',
-    'Un chiffre',
-    'Un caractère spécial',
+    { txt: '8 caractères minimum',  bg: 'bg-primary/15',   border: 'border-primary/30',   dot: 'bg-primary/30',   icon: 'text-primary' },
+    { txt: 'Une majuscule',         bg: 'bg-secondary/15', border: 'border-secondary/30', dot: 'bg-secondary/30', icon: 'text-secondary' },
+    { txt: 'Un chiffre',            bg: 'bg-accent/15',    border: 'border-accent/30',    dot: 'bg-accent/30',    icon: 'text-accent' },
+    { txt: 'Un caractère spécial',  bg: 'bg-info/15',      border: 'border-info/30',      dot: 'bg-info/30',      icon: 'text-info' },
   ]
 
   return (
     <div className="min-h-screen flex">
 
-      {/* Panneau gauche */}
+      {/* 🧁 Panneau gauche cupcake */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-neutral flex-col items-center justify-center p-12">
 
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-white/5 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-white/5 translate-x-1/3 translate-y-1/3 pointer-events-none" />
+        {/* Bulles pastel cupcake */}
+        <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-primary/30 -translate-x-1/2 -translate-y-1/2 pointer-events-none blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-secondary/30 translate-x-1/3 translate-y-1/3 pointer-events-none blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-accent/25 pointer-events-none blur-2xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-32 h-32 rounded-full bg-info/20 pointer-events-none blur-2xl" />
+
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '28px 28px'
         }} />
 
         <div className="relative text-center text-neutral-content z-10">
-          <div className="w-20 h-20 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+          <div className="w-20 h-20 rounded-2xl bg-primary/30 border border-primary/40 flex items-center justify-center mx-auto mb-6 shadow-2xl backdrop-blur-sm">
             {appConfig.company.logo
               ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-2xl" />
               : <Fuel size={36} className="text-neutral-content" />
             }
           </div>
           <h1 className="text-3xl font-extrabold mb-2 tracking-tight">{appConfig.company.name}</h1>
-          <p className="text-sm opacity-50 mb-10">{appConfig.company.slogan}</p>
+          <p className="text-sm opacity-60 mb-10">{appConfig.company.slogan}</p>
 
-          <p className="text-xs opacity-40 mb-6">Choisissez un mot de passe fort :</p>
+          <p className="text-xs opacity-60 mb-6 uppercase tracking-widest font-bold">Choisissez un mot de passe fort :</p>
           <div className="space-y-2 text-left">
             {tips.map((tip, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-xl px-4 py-2.5">
-                <div className="w-5 h-5 bg-white/15 rounded-lg flex items-center justify-center shrink-0">
-                  <Check size={11} className="text-neutral-content" />
+              <div key={i} className={`flex items-center gap-3 ${tip.bg} ${tip.border} border rounded-2xl px-4 py-2.5 backdrop-blur-sm`}>
+                <div className={`w-5 h-5 ${tip.dot} rounded-xl flex items-center justify-center shrink-0`}>
+                  <Check size={11} className={tip.icon} />
                 </div>
-                <span className="text-xs opacity-70">{tip}</span>
+                <span className="text-xs opacity-90 font-medium">{tip.txt}</span>
               </div>
             ))}
           </div>
@@ -97,15 +102,19 @@ export default function ResetPassword() {
       </div>
 
       {/* Panneau droit */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-base-100">
-        <div className="w-full max-w-sm">
+      <div className="flex-1 flex items-center justify-center p-8 bg-base-100 relative overflow-hidden">
+        {/* 🧁 décorations subtiles côté droit */}
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/10 -translate-y-1/2 translate-x-1/3 pointer-events-none blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-secondary/10 translate-y-1/2 -translate-x-1/3 pointer-events-none blur-2xl" />
+
+        <div className="w-full max-w-sm relative z-10">
 
           {/* Header mobile */}
           <div className="lg:hidden flex flex-col items-center mb-8">
-            <div className="w-14 h-14 bg-neutral rounded-2xl flex items-center justify-center shadow-lg mb-3">
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg mb-3">
               {appConfig.company.logo
                 ? <img src={appConfig.company.logo} alt="" className="w-full h-full object-contain rounded-2xl" />
-                : <Fuel size={24} className="text-neutral-content" />
+                : <Fuel size={24} className="text-primary-content" />
               }
             </div>
             <h1 className="text-xl font-extrabold text-base-content">{appConfig.appName}</h1>
@@ -123,10 +132,10 @@ export default function ResetPassword() {
 
           {/* Succès */}
           {success && (
-            <div className="card bg-success/10 border border-success/30 mb-6">
+            <div className="card bg-success/10 border border-success/30 mb-6 rounded-2xl">
               <div className="card-body p-4 gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-success/20 rounded-xl flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 bg-success/20 rounded-2xl flex items-center justify-center shrink-0">
                     <Check size={16} className="text-success" />
                   </div>
                   <div>
@@ -140,7 +149,7 @@ export default function ResetPassword() {
 
           {/* Erreur */}
           {error && (
-            <div className="alert alert-error mb-5 py-3 text-sm rounded-xl">
+            <div className="alert alert-error mb-5 py-3 text-sm rounded-2xl">
               <span>⚠️ {error}</span>
             </div>
           )}
@@ -154,10 +163,10 @@ export default function ResetPassword() {
                   <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Nouveau mot de passe</span>
                 </label>
                 <div className="relative">
-                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'pwd' ? 'text-neutral' : 'text-base-content/30'}`} />
+                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'pwd' ? 'text-primary' : 'text-base-content/30'}`} />
                   <input
                     type={showPwd ? 'text' : 'password'}
-                    className={`input input-bordered w-full pl-10 pr-10 rounded-xl transition-all duration-200 ${focused === 'pwd' ? 'border-neutral' : ''}`}
+                    className={`input input-bordered w-full pl-10 pr-10 transition-all duration-200 ${focused === 'pwd' ? 'border-primary' : ''}`}
                     placeholder="Nouveau mot de passe"
                     value={form.password}
                     onChange={e => setForm({ ...form, password: e.target.value })}
@@ -166,7 +175,7 @@ export default function ResetPassword() {
                     required
                   />
                   <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content transition-colors">
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-primary transition-colors">
                     {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
@@ -192,13 +201,13 @@ export default function ResetPassword() {
                   <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Confirmer le mot de passe</span>
                 </label>
                 <div className="relative">
-                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'confirm' ? 'text-neutral' : 'text-base-content/30'}`} />
+                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'confirm' ? 'text-primary' : 'text-base-content/30'}`} />
                   <input
                     type={showConfirm ? 'text' : 'password'}
-                    className={`input input-bordered w-full pl-10 pr-10 rounded-xl transition-all duration-200 ${
+                    className={`input input-bordered w-full pl-10 pr-10 transition-all duration-200 ${
                       form.confirmation && form.password !== form.confirmation ? 'input-error' :
                       form.confirmation && form.password === form.confirmation ? 'input-success' :
-                      focused === 'confirm' ? 'border-neutral' : ''
+                      focused === 'confirm' ? 'border-primary' : ''
                     }`}
                     placeholder="Confirmez le mot de passe"
                     value={form.confirmation}
@@ -208,7 +217,7 @@ export default function ResetPassword() {
                     required
                   />
                   <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-base-content transition-colors">
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-primary transition-colors">
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
@@ -223,7 +232,7 @@ export default function ResetPassword() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="btn btn-neutral w-full gap-2 rounded-xl h-12 text-base font-bold mt-2">
+                className="btn btn-primary w-full gap-2 h-12 text-base font-bold mt-2 shadow-lg">
                 {loading
                   ? <span className="loading loading-spinner loading-sm" />
                   : <> Réinitialiser <ArrowRight size={16} /> </>
@@ -233,12 +242,12 @@ export default function ResetPassword() {
             </form>
           )}
 
-          <button type="button" className="btn btn-ghost w-full gap-2 mt-3 rounded-xl"
+          <button type="button" className="btn btn-ghost w-full gap-2 mt-3"
             onClick={() => navigate('/login')}>
             <ArrowLeft size={16} /> Retour à la connexion
           </button>
 
-          <p className="text-center text-xs text-base-content/20 mt-8">
+          <p className="text-center text-xs text-base-content/30 mt-8">
             {appConfig.appName} © {new Date().getFullYear()}
           </p>
 

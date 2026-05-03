@@ -118,7 +118,7 @@ export default function MonProfil() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-extrabold text-base-content flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-xl">
+            <div className="p-2 bg-primary/15 rounded-2xl">
               <User size={18} className="text-primary" />
             </div>
             Mon Profil
@@ -128,9 +128,11 @@ export default function MonProfil() {
 
         {/* Photo */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/20 rounded-lg"><Camera size={14} /></div>
-            <h3 className="font-extrabold text-sm">Photo de profil</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+            {/* 🧁 bulles pastel décoratives */}
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-secondary/30 blur-xl pointer-events-none" />
+            <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Camera size={14} /></div>
+            <h3 className="font-extrabold text-sm relative z-10">Photo de profil</h3>
           </div>
           <div className="card-body items-center gap-4 py-6">
             <div className="relative group">
@@ -142,7 +144,7 @@ export default function MonProfil() {
               </div>
               <button
                 onClick={() => fileRef.current.click()}
-                className="absolute -bottom-2 -right-2 btn btn-circle btn-sm btn-primary shadow-lg"
+                className="absolute -bottom-2 -right-2 btn btn-circle btn-sm btn-secondary shadow-lg"
               >
                 <Camera size={14} />
               </button>
@@ -154,11 +156,11 @@ export default function MonProfil() {
               <span className="badge badge-primary badge-sm capitalize mt-1">{user?.role}</span>
             </div>
 
-            {successPhoto && <div className="alert alert-success text-sm py-2 rounded-xl w-full">{successPhoto}</div>}
-            {errorPhoto   && <div className="alert alert-error text-sm py-2 rounded-xl w-full">{errorPhoto}</div>}
+            {successPhoto && <div className="alert alert-success text-sm py-2 rounded-2xl w-full">{successPhoto}</div>}
+            {errorPhoto   && <div className="alert alert-error   text-sm py-2 rounded-2xl w-full">{errorPhoto}</div>}
 
             {photoFile && (
-              <button className="btn btn-primary btn-sm gap-2 rounded-xl" onClick={handleUploadPhoto} disabled={loadingPhoto}>
+              <button className="btn btn-primary btn-sm gap-2" onClick={handleUploadPhoto} disabled={loadingPhoto}>
                 {loadingPhoto ? <span className="loading loading-spinner loading-xs" /> : <Save size={14} />}
                 Enregistrer la photo
               </button>
@@ -172,13 +174,14 @@ export default function MonProfil() {
 
         {/* Informations */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/20 rounded-lg"><Mail size={14} /></div>
-            <h3 className="font-extrabold text-sm">Informations personnelles</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-accent/25 blur-xl pointer-events-none" />
+            <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Mail size={14} /></div>
+            <h3 className="font-extrabold text-sm relative z-10">Informations personnelles</h3>
           </div>
           <div className="card-body pt-5">
-            {successInfo && <div className="alert alert-success text-sm py-2 rounded-xl mb-3">{successInfo}</div>}
-            {errorInfo   && <div className="alert alert-error text-sm py-2 rounded-xl mb-3">{errorInfo}</div>}
+            {successInfo && <div className="alert alert-success text-sm py-2 rounded-2xl mb-3">{successInfo}</div>}
+            {errorInfo   && <div className="alert alert-error   text-sm py-2 rounded-2xl mb-3">{errorInfo}</div>}
 
             <form onSubmit={handleSaveInfo} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -187,7 +190,7 @@ export default function MonProfil() {
                     <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nom</span>
                   </label>
                   <input
-                    className="input input-bordered rounded-xl"
+                    className="input input-bordered"
                     value={form.nom}
                     onChange={e => setForm({ ...form, nom: e.target.value })}
                   />
@@ -197,7 +200,7 @@ export default function MonProfil() {
                     <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Prénom</span>
                   </label>
                   <input
-                    className="input input-bordered rounded-xl"
+                    className="input input-bordered"
                     value={form.prenom}
                     onChange={e => setForm({ ...form, prenom: e.target.value })}
                   />
@@ -209,7 +212,7 @@ export default function MonProfil() {
                 </label>
                 <input
                   type="email"
-                  className="input input-bordered rounded-xl"
+                  className="input input-bordered"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                 />
@@ -218,14 +221,14 @@ export default function MonProfil() {
                 <label className="label py-1">
                   <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Rôle</span>
                 </label>
-                <div className="input input-bordered rounded-xl bg-base-200 flex items-center gap-2">
-                  <Shield size={14} className="text-base-content/40" />
-                  <span className="capitalize text-base-content/60">{user?.role}</span>
-                  <span className="ml-auto badge badge-primary badge-xs">Non modifiable</span>
+                <div className="input input-bordered bg-base-200 flex items-center gap-2">
+                  <Shield size={14} className="text-primary" />
+                  <span className="capitalize text-base-content/70 font-medium">{user?.role}</span>
+                  <span className="ml-auto badge badge-secondary badge-xs">Non modifiable</span>
                 </div>
               </div>
               <div className="flex justify-end pt-1">
-                <button type="submit" className="btn btn-primary btn-sm gap-2 rounded-xl" disabled={loadingInfo}>
+                <button type="submit" className="btn btn-primary btn-sm gap-2" disabled={loadingInfo}>
                   {loadingInfo ? <span className="loading loading-spinner loading-xs" /> : <Save size={14} />}
                   Enregistrer
                 </button>
@@ -236,13 +239,14 @@ export default function MonProfil() {
 
         {/* Mot de passe */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/20 rounded-lg"><Lock size={14} /></div>
-            <h3 className="font-extrabold text-sm">Changer le mot de passe</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-info/30 blur-xl pointer-events-none" />
+            <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Lock size={14} /></div>
+            <h3 className="font-extrabold text-sm relative z-10">Changer le mot de passe</h3>
           </div>
           <div className="card-body pt-5">
-            {successPwd && <div className="alert alert-success text-sm py-2 rounded-xl mb-3">{successPwd}</div>}
-            {errorPwd   && <div className="alert alert-error text-sm py-2 rounded-xl mb-3">{errorPwd}</div>}
+            {successPwd && <div className="alert alert-success text-sm py-2 rounded-2xl mb-3">{successPwd}</div>}
+            {errorPwd   && <div className="alert alert-error   text-sm py-2 rounded-2xl mb-3">{errorPwd}</div>}
 
             <form onSubmit={handleSavePwd} className="space-y-4">
               {/* Ancien MDP */}
@@ -253,14 +257,14 @@ export default function MonProfil() {
                 <div className="relative">
                   <input
                     type={showPwd.ancien ? 'text' : 'password'}
-                    className="input input-bordered w-full rounded-xl pr-10"
+                    className="input input-bordered w-full pr-10"
                     value={passwords.ancien}
                     onChange={e => setPasswords({ ...passwords, ancien: e.target.value })}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd({ ...showPwd, ancien: !showPwd.ancien })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
                   >
                     {showPwd.ancien ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -275,14 +279,14 @@ export default function MonProfil() {
                 <div className="relative">
                   <input
                     type={showPwd.nouveau ? 'text' : 'password'}
-                    className="input input-bordered w-full rounded-xl pr-10"
+                    className="input input-bordered w-full pr-10"
                     value={passwords.nouveau}
                     onChange={e => setPasswords({ ...passwords, nouveau: e.target.value })}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd({ ...showPwd, nouveau: !showPwd.nouveau })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
                   >
                     {showPwd.nouveau ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -291,10 +295,10 @@ export default function MonProfil() {
                   <div className="mt-2 space-y-1">
                     <div className="flex gap-1">
                       {[1,2,3,4].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : 'bg-base-200'}`} />
+                        <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : 'bg-base-200'}`} />
                       ))}
                     </div>
-                    <p className={`text-xs font-semibold ${strengthColors[strength].replace('bg-', 'text-')}`}>
+                    <p className={`text-xs font-bold ${strengthColors[strength].replace('bg-', 'text-')}`}>
                       {strengthLabels[strength]}
                     </p>
                   </div>
@@ -309,7 +313,7 @@ export default function MonProfil() {
                 <div className="relative">
                   <input
                     type={showPwd.confirmation ? 'text' : 'password'}
-                    className={`input input-bordered w-full rounded-xl pr-10 ${
+                    className={`input input-bordered w-full pr-10 ${
                       passwords.confirmation && passwords.confirmation !== passwords.nouveau
                         ? 'input-error'
                         : passwords.confirmation && passwords.confirmation === passwords.nouveau
@@ -322,7 +326,7 @@ export default function MonProfil() {
                   <button
                     type="button"
                     onClick={() => setShowPwd({ ...showPwd, confirmation: !showPwd.confirmation })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
                   >
                     {showPwd.confirmation ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -333,7 +337,7 @@ export default function MonProfil() {
               </div>
 
               <div className="flex justify-end pt-1">
-                <button type="submit" className="btn btn-primary btn-sm gap-2 rounded-xl" disabled={loadingPwd}>
+                <button type="submit" className="btn btn-primary btn-sm gap-2" disabled={loadingPwd}>
                   {loadingPwd ? <span className="loading loading-spinner loading-xs" /> : <Lock size={14} />}
                   Modifier le mot de passe
                 </button>
