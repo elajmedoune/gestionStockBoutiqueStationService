@@ -1,7 +1,7 @@
 // src/pages/Categories.jsx
 
 import React from "react";
-import { useSate, useEffect } from React
+import { useState, useEffect } from 'react'
 import api from '../services/api'
 import CategorieList from '../components/categories/CategorieList'
 import CategorieModal from '../components/categories/CategorieModal'

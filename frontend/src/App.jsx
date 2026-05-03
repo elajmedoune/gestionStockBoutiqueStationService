@@ -15,6 +15,11 @@ import Inventaires from './pages/Inventaires'
 import Livraisons from './pages/Livraisons'
 import Utilisateurs from './pages/Utilisateurs'
 import TicketCaisse from './pages/TicketCaisse'
+import Produits    from './pages/Produits'
+import Stock       from './pages/Stock'
+import Categories  from './pages/Categories'
+import Fournisseurs from './pages/Fournisseurs'
+import Commandes   from './pages/Commandes'
 
 // Pages qui ont déjà Layout intégré
 function ProtectedRoute({ children }) {
@@ -52,6 +57,11 @@ function AppRoutes() {
       <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
       <Route path="/utilisateurs" element={<ProtectedRoute><Utilisateurs /></ProtectedRoute>} />
+      <Route path="/produits"    element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
+      <Route path="/stock"       element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
+      <Route path="/categories"  element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
+      <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
+      <Route path="/commandes"   element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
 
       {/* Pages sans Layout — on l'ajoute ici */}
       <Route path="/livraisons" element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
