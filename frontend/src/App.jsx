@@ -54,9 +54,9 @@ function AppRoutes() {
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-      <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
+      <Route path="/parametres"    element={<ProtectedRouteWithLayout><Parametres /></ProtectedRouteWithLayout>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
-      <Route path="/utilisateurs" element={<ProtectedRoute><Utilisateurs /></ProtectedRoute>} />
+      <Route path="/utilisateurs" element={<ProtectedRouteWithLayout><Utilisateurs /></ProtectedRouteWithLayout>} />
       <Route path="/produits"    element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
       <Route path="/stock"       element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
       <Route path="/categories"  element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
