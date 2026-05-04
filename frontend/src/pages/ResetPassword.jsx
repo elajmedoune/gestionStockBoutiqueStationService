@@ -28,8 +28,6 @@ export default function ResetPassword() {
     }
     setLoading(true)
     try {
-      // TODO: appel API
-      // await resetPassword({ token, password: form.password })
       setSuccess(true)
       setTimeout(() => navigate('/login'), 3000)
     } catch {
@@ -49,56 +47,71 @@ export default function ResetPassword() {
     return s
   }
 
-  const strengthLabel = ['', 'Faible', 'Moyen', 'Bon', 'Fort']
-  const strengthColor = ['', '#ef4444', '#f59e0b', '#3b82f6', '#10b981']
+  const strengthLabel  = ['', 'Faible', 'Moyen', 'Bon', 'Fort']
+  const strengthColors = ['', 'bg-error text-error', 'bg-warning text-warning', 'bg-info text-info', 'bg-success text-success']
+  const strengthBg     = ['', 'bg-error', 'bg-warning', 'bg-info', 'bg-success']
   const s = strength(form.password)
+
+  /* 🧁 chaque tip a sa propre teinte cupcake */
+  const tips = [
+    { txt: '8 caractères minimum',  bg: 'bg-primary/15',   border: 'border-primary/30',   dot: 'bg-primary/30',   icon: 'text-primary' },
+    { txt: 'Une majuscule',         bg: 'bg-secondary/15', border: 'border-secondary/30', dot: 'bg-secondary/30', icon: 'text-secondary' },
+    { txt: 'Un chiffre',            bg: 'bg-accent/15',    border: 'border-accent/30',    dot: 'bg-accent/30',    icon: 'text-accent' },
+    { txt: 'Un caractère spécial',  bg: 'bg-info/15',      border: 'border-info/30',      dot: 'bg-info/30',      icon: 'text-info' },
+  ]
 
   return (
     <div className="min-h-screen flex">
 
-      {/* ── PANNEAU GAUCHE ── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent flex-col items-center justify-center p-12">
-        <div style={{ position: 'absolute', top: '-80px', left: '-80px', width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: '-60px', right: '-60px', width: 250, height: 250, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+      {/* 🧁 Panneau gauche cupcake */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-neutral flex-col items-center justify-center p-12">
 
-        <div style={{ position: 'relative', textAlign: 'center', color: '#0f4c4c' }}>
-          <div style={{ width: 80, height: 80, borderRadius: 24, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+        {/* Bulles pastel cupcake */}
+        <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-primary/30 -translate-x-1/2 -translate-y-1/2 pointer-events-none blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-secondary/30 translate-x-1/3 translate-y-1/3 pointer-events-none blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-accent/25 pointer-events-none blur-2xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-32 h-32 rounded-full bg-info/20 pointer-events-none blur-2xl" />
+
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+          backgroundSize: '28px 28px'
+        }} />
+
+        <div className="relative text-center text-neutral-content z-10">
+          <div className="w-20 h-20 rounded-2xl bg-primary/30 border border-primary/40 flex items-center justify-center mx-auto mb-6 shadow-2xl backdrop-blur-sm">
             {appConfig.company.logo
-              ? <img src={appConfig.company.logo} alt={appConfig.company.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 20 }} />
-              : <Fuel size={36} color="#0f4c4c" />
+              ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-2xl" />
+              : <Fuel size={36} className="text-neutral-content" />
             }
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.5px' }}>{appConfig.company.name}</h1>
-          <p style={{ fontSize: 14, opacity: 0.75, marginBottom: 16 }}>{appConfig.company.slogan}</p>
-          <p style={{ fontSize: 13, opacity: 0.55, maxWidth: 280, margin: '0 auto', lineHeight: 1.6 }}>
-            Choisissez un mot de passe fort et unique pour sécuriser votre compte.
-          </p>
+          <h1 className="text-3xl font-extrabold mb-2 tracking-tight">{appConfig.company.name}</h1>
+          <p className="text-sm opacity-60 mb-10">{appConfig.company.slogan}</p>
 
-          {/* Tips */}
-          <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left' }}>
-            {[
-              '8 caractères minimum',
-              'Une majuscule',
-              'Un chiffre',
-              'Un caractère spécial',
-            ].map((tip, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 14px' }}>
-                <Check size={13} color="#0f4c4c" opacity={0.7} />
-                <span style={{ fontSize: 13, opacity: 0.8 }}>{tip}</span>
+          <p className="text-xs opacity-60 mb-6 uppercase tracking-widest font-bold">Choisissez un mot de passe fort :</p>
+          <div className="space-y-2 text-left">
+            {tips.map((tip, i) => (
+              <div key={i} className={`flex items-center gap-3 ${tip.bg} ${tip.border} border rounded-2xl px-4 py-2.5 backdrop-blur-sm`}>
+                <div className={`w-5 h-5 ${tip.dot} rounded-xl flex items-center justify-center shrink-0`}>
+                  <Check size={11} className={tip.icon} />
+                </div>
+                <span className="text-xs opacity-90 font-medium">{tip.txt}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── PANNEAU DROIT ── */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-base-100">
-        <div style={{ width: '100%', maxWidth: 400 }}>
+      {/* Panneau droit */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-base-100 relative overflow-hidden">
+        {/* 🧁 décorations subtiles côté droit */}
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/10 -translate-y-1/2 translate-x-1/3 pointer-events-none blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-secondary/10 translate-y-1/2 -translate-x-1/3 pointer-events-none blur-2xl" />
+
+        <div className="w-full max-w-sm relative z-10">
 
           {/* Header mobile */}
           <div className="lg:hidden flex flex-col items-center mb-8">
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow mb-3">
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg mb-3">
               {appConfig.company.logo
                 ? <img src={appConfig.company.logo} alt="" className="w-full h-full object-contain rounded-2xl" />
                 : <Fuel size={24} className="text-primary-content" />
@@ -108,46 +121,52 @@ export default function ResetPassword() {
           </div>
 
           {/* Titre */}
-          <div style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 26, fontWeight: 800, color: 'var(--bc)', margin: 0, letterSpacing: '-0.5px' }}>
+          <div className="mb-8">
+            <h2 className="text-2xl font-extrabold text-base-content tracking-tight mb-1">
               Nouveau mot de passe 🔑
             </h2>
-            <p style={{ fontSize: 14, color: 'var(--bc)', opacity: 0.45, marginTop: 6 }}>
+            <p className="text-sm text-base-content/40">
               Choisissez un mot de passe sécurisé pour votre compte
             </p>
           </div>
 
           {/* Succès */}
           {success && (
-            <div className="alert alert-success mb-6 text-sm flex flex-col items-start gap-1">
-              <span className="font-bold">✅ Mot de passe modifié !</span>
-              <span className="opacity-70">Redirection vers la connexion...</span>
+            <div className="card bg-success/10 border border-success/30 mb-6 rounded-2xl">
+              <div className="card-body p-4 gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-success/20 rounded-2xl flex items-center justify-center shrink-0">
+                    <Check size={16} className="text-success" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-success">Mot de passe modifié !</p>
+                    <p className="text-xs text-base-content/50">Redirection vers la connexion...</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Erreur */}
           {error && (
-            <div className="alert alert-error mb-6 text-sm">
+            <div className="alert alert-error mb-5 py-3 text-sm rounded-2xl">
               <span>⚠️ {error}</span>
             </div>
           )}
 
           {!success && (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* Nouveau mot de passe */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--bc)', opacity: 0.5, display: 'block', marginBottom: 8 }}>
-                  Nouveau mot de passe
+              {/* Nouveau MDP */}
+              <div className="form-control">
+                <label className="label py-1">
+                  <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Nouveau mot de passe</span>
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: focused === 'pwd' ? 'var(--p)' : 'var(--bc)', opacity: focused === 'pwd' ? 1 : 0.3, transition: 'all 0.2s' }}>
-                    <Lock size={16} />
-                  </div>
+                <div className="relative">
+                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'pwd' ? 'text-primary' : 'text-base-content/30'}`} />
                   <input
                     type={showPwd ? 'text' : 'password'}
-                    className="input input-bordered w-full"
-                    style={{ paddingLeft: 42, paddingRight: 44, borderColor: focused === 'pwd' ? 'var(--p)' : undefined, transition: 'all 0.2s' }}
+                    className={`input input-bordered w-full pl-10 pr-10 transition-all duration-200 ${focused === 'pwd' ? 'border-primary' : ''}`}
                     placeholder="Nouveau mot de passe"
                     value={form.password}
                     onChange={e => setForm({ ...form, password: e.target.value })}
@@ -156,20 +175,20 @@ export default function ResetPassword() {
                     required
                   />
                   <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--bc)', opacity: 0.4 }}>
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-primary transition-colors">
                     {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
 
-                {/* Indicateur de force */}
+                {/* Indicateur force */}
                 {form.password && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                  <div className="mt-2 space-y-1">
+                    <div className="flex gap-1">
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} style={{ flex: 1, height: 4, borderRadius: 4, background: i <= s ? strengthColor[s] : '#e5e7eb', transition: 'all 0.3s' }} />
+                        <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= s ? strengthBg[s] : 'bg-base-200'}`} />
                       ))}
                     </div>
-                    <p style={{ fontSize: 11, color: strengthColor[s], fontWeight: 600, marginTop: 4 }}>
+                    <p className={`text-xs font-bold ${strengthColors[s].split(' ')[1]}`}>
                       {strengthLabel[s]}
                     </p>
                   </div>
@@ -177,22 +196,19 @@ export default function ResetPassword() {
               </div>
 
               {/* Confirmation */}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--bc)', opacity: 0.5, display: 'block', marginBottom: 8 }}>
-                  Confirmer le mot de passe
+              <div className="form-control">
+                <label className="label py-1">
+                  <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Confirmer le mot de passe</span>
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: focused === 'confirm' ? 'var(--p)' : 'var(--bc)', opacity: focused === 'confirm' ? 1 : 0.3, transition: 'all 0.2s' }}>
-                    <Lock size={16} />
-                  </div>
+                <div className="relative">
+                  <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'confirm' ? 'text-primary' : 'text-base-content/30'}`} />
                   <input
                     type={showConfirm ? 'text' : 'password'}
-                    className="input input-bordered w-full"
-                    style={{
-                      paddingLeft: 42, paddingRight: 44,
-                      borderColor: form.confirmation && form.password !== form.confirmation ? '#ef4444' : focused === 'confirm' ? 'var(--p)' : undefined,
-                      transition: 'all 0.2s'
-                    }}
+                    className={`input input-bordered w-full pl-10 pr-10 transition-all duration-200 ${
+                      form.confirmation && form.password !== form.confirmation ? 'input-error' :
+                      form.confirmation && form.password === form.confirmation ? 'input-success' :
+                      focused === 'confirm' ? 'border-primary' : ''
+                    }`}
                     placeholder="Confirmez le mot de passe"
                     value={form.confirmation}
                     onChange={e => setForm({ ...form, confirmation: e.target.value })}
@@ -201,41 +217,37 @@ export default function ResetPassword() {
                     required
                   />
                   <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--bc)', opacity: 0.4 }}>
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-primary transition-colors">
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
                 {form.confirmation && form.password !== form.confirmation && (
-                  <p style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Les mots de passe ne correspondent pas</p>
+                  <p className="text-xs text-error mt-1">Les mots de passe ne correspondent pas</p>
+                )}
+                {form.confirmation && form.password === form.confirmation && (
+                  <p className="text-xs text-success mt-1 flex items-center gap-1">
+                    <Check size={11} /> Les mots de passe correspondent
+                  </p>
                 )}
               </div>
 
-              {/* Bouton */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn btn-primary w-full gap-2"
-                style={{ marginTop: 8, height: 48, fontSize: 15, fontWeight: 700 }}
-              >
+              <button type="submit" disabled={loading}
+                className="btn btn-primary w-full gap-2 h-12 text-base font-bold mt-2 shadow-lg">
                 {loading
                   ? <span className="loading loading-spinner loading-sm" />
-                  : <>Réinitialiser <ArrowRight size={16} /></>
+                  : <> Réinitialiser <ArrowRight size={16} /> </>
                 }
               </button>
 
             </form>
           )}
 
-          {/* Retour login */}
-          <button
-            type="button"
-            className="btn btn-ghost w-full gap-2 mt-3"
-            onClick={() => navigate('/login')}
-          >
+          <button type="button" className="btn btn-ghost w-full gap-2 mt-3"
+            onClick={() => navigate('/login')}>
             <ArrowLeft size={16} /> Retour à la connexion
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: 11, opacity: 0.3, marginTop: 32 }}>
+          <p className="text-center text-xs text-base-content/30 mt-8">
             {appConfig.appName} © {new Date().getFullYear()}
           </p>
 

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ForgotPassword from './pages/ForgotPassword'
@@ -14,10 +15,22 @@ import Inventaires from './pages/Inventaires'
 import Livraisons from './pages/Livraisons'
 import Utilisateurs from './pages/Utilisateurs'
 import TicketCaisse from './pages/TicketCaisse'
+import Produits    from './pages/Produits'
+import Stock       from './pages/Stock'
+import Categories  from './pages/Categories'
+import Fournisseurs from './pages/Fournisseurs'
+import Commandes   from './pages/Commandes'
 
+// Pages qui ont déjà Layout intégré
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   return user ? children : <Navigate to="/login" />
+}
+
+// Pages qui n'ont pas Layout
+function ProtectedRouteWithLayout({ children }) {
+  const { user } = useAuth()
+  return user ? <Layout>{children}</Layout> : <Navigate to="/login" />
 }
 
 function PublicRoute({ children }) {
@@ -36,18 +49,25 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
+      {/* Pages avec Layout intégré */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-       <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
+      <Route path="/parametres"    element={<ProtectedRouteWithLayout><Parametres /></ProtectedRouteWithLayout>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
-       <Route path="/livraisons" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Livraisons /></ProtectedRoute>} />
-      <Route path="/alertes" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Alertes /></ProtectedRoute>} />
-      <Route path="/inventaire" element={<ProtectedRoute roles={['gerant','gestionnaire_stock','magasinier']}><Inventaires /></ProtectedRoute>} />
-       <Route path="/utilisateurs" element={<ProtectedRoute roles={['gerant']}><Utilisateurs /></ProtectedRoute>} />
-       
-      {/* Rapport stock — gestionnaire + magasinier uniquement */}
+      <Route path="/utilisateurs" element={<ProtectedRouteWithLayout><Utilisateurs /></ProtectedRouteWithLayout>} />
+      <Route path="/produits"    element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
+      <Route path="/stock"       element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
+      <Route path="/categories"  element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
+      <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
+      <Route path="/commandes"   element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
+
+      {/* Pages sans Layout — on l'ajoute ici */}
+      <Route path="/livraisons" element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
+      <Route path="/alertes" element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />
+      <Route path="/inventaire" element={<ProtectedRouteWithLayout><Inventaires /></ProtectedRouteWithLayout>} />
+
       <Route path="/rapport-stock" element={
         <ProtectedRoute>
           {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)

@@ -149,5 +149,4 @@ class AuthController extends Controller
         $user->save();
         return response()->json(['message' => 'Mot de passe modifié']);
     }
-
 }
