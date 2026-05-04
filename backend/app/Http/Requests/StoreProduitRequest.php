@@ -13,7 +13,9 @@ class StoreProduitRequest extends FormRequest
     }
 
     public function rules(): array
-    {
+    {   
+        $idProduit = $this->route('id');
+        
         return [
             'nomProduit'    => 'required|string|max:100',
             'reference' => 'required|string|max:50|unique:produits,reference',

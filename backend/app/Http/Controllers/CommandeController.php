@@ -22,7 +22,7 @@ class CommandeController extends Controller
             'dateCommande'        => 'required|date',
             'dateLivraisonPrevue' => 'nullable|date',
             'montantTotal'        => 'required|numeric|min:0',
-            'idUtilisateur' => 'required|integer|exists:utilisateur,idUtilisateur',
+            'idUtilisateur' => 'required|integer|exists:utilisateurs,idUtilisateur',
         ]);
         $commande = Commande::create($request->all());
         return new CommandeResource($commande->load(['utilisateur']));

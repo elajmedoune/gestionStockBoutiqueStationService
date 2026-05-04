@@ -36,7 +36,7 @@ class Inventaire extends Model
     }
 
     public function produit(){
-        return $this->belongsTo(\App\Models\Produit::class, 'idProduit', 'idProduit');
+        return $this->belongsTo(Produit::class, 'idProduit', 'idProduit');
     }
 
     //-----------------------------------------------------------------------------------------------------

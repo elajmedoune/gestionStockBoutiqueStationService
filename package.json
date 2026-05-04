@@ -1,10 +1,5 @@
 {
   "devDependencies": {
-    "autoprefixer": "^10.5.0",
-    "postcss": "^8.5.12",
-    "tailwindcss": "^3.4.19"
-  },
-  "dependencies": {
-    "daisyui": "^4.12.24"
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

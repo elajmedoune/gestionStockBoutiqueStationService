@@ -17,4 +17,8 @@ class Stock extends Model
     public function produit() {
         return $this->belongsTo(Produit::class, 'idProduit');
     }
+    public function alertes(){
+        return $this->hasMany(Alerte::class, 'idStock', 'idStock');
+    }
+
 }

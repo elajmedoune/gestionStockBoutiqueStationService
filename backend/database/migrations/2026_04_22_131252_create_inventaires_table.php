@@ -12,24 +12,22 @@ return new class extends Migration
             $table->id('idInventaire');
             $table->date('dateInventaire');
             $table->integer('quantiteTheorique')->default(0);
-            $table->integer('quantiteReelle')->default(0);
-            //ecart est calculé par trigger Mysql(GENERATED ALWAYS AS)
-            //On le laisse nullable pour comptabilité migration
-            // $table->integer('ecart')->nullable()->storedAs('quantiteReelle - quantiteTheorique');
+            $table->integer('quantiteReelle')->default(0);        
+            // $table->integer('ecart')->nullable()->storedAs('quantiteReelle - quantiteTheorique'); // commenté, plus sûr
             $table->string('observations', 300)->nullable();
             $table->string('statut', 20)->default('en_cours');
-            $table->unsignedBigInteger('idUtilisateur');
-            $table->unsignedBigInteger('idProduit');
+            $table->unsignedBigInteger('idUtilisateur');        
+            $table->unsignedBigInteger('idProduit');           
             $table->timestamps();
 
-            $table->foreign('idUtilisateur')
+            $table->foreign('idUtilisateur')                     
                   ->references('idUtilisateur')
                   ->on('utilisateurs')
                   ->onDelete('restrict');
 
-            //idProduit référencé sur la table Produit
-             $table->foreign('idProduit')
-                  ->references('idProduit')->on('produits')
+            $table->foreign('idProduit')                         
+                  ->references('idProduit')
+                  ->on('produits')
                   ->onDelete('restrict');
             
         });
