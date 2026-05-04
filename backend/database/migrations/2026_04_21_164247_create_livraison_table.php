@@ -11,13 +11,20 @@ return new class extends Migration
         Schema::create('livraison', function (Blueprint $table) {
             $table->id('idLivraison');
             $table->date('dateLivraison');
-            $table->decimal('montantTotal', 10, 2)->default(0);
+            $table->decimal('montantTotal', 10, 2)->default(0.00);
+            $table->enum('statut', ['en_attente', 'livree', 'annulee'])
+                ->default('en_attente');
             $table->string('observations', 300)->nullable();
-            $table->unsignedInteger('idCommande')->unique();
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->unsignedBigInteger('idCommande')->unique();
+            $table->timestamps();
+
+            $table->foreign('idCommande')
+                ->reference('idCommande')
+                ->on('commandes')
+                ->onDelete('cascade');
         });
     }
+
 
     public function down(): void
     {
