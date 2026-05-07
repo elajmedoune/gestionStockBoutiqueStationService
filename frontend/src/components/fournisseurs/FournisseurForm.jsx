@@ -148,7 +148,7 @@ function FournisseurForm ({initial = null, onSubmit, onCancel, loading = false})
                         className="file-input file-input-bordered file-input-sm flex-1" 
                         name='photo'
                         onChange={handle}
-                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                        accept="image/jpeg,image/png,image/jpg,image/webp"o
                     />
                 </div>
             </div>
