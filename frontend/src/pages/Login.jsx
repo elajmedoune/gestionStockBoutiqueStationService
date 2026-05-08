@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Lock, User, Fuel, ArrowRight, ShoppingCart, Users, TrendingUp } from 'lucide-react'
+import { Eye, EyeOff, Lock, User, Fuel, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import appConfig from '../config/app'
 import api from '../services/api'
@@ -15,9 +15,9 @@ export default function Login() {
   const navigate = useNavigate()
   const [stats, setStats] = useState({ produits: '…', caissiers: '…' })
 
-  useEffect(() => {
-    api.get('/stats-publiques').then(res => setStats(res.data)).catch(() => {})
-  }, [])
+useEffect(() => {
+  api.get('/stats-publiques').then(res => setStats(res.data)).catch(() => {})
+}, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -36,78 +36,85 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
 
-      {/* 🧁 Panneau gauche cupcake */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-neutral flex-col items-center justify-center p-12">
+      {/* ── PANNEAU GAUCHE (déco) ── */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-secondary to-accent flex-col items-center justify-center p-12">
 
-        {/* Bulles pastel cupcake */}
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-primary/30 -translate-x-1/2 -translate-y-1/2 pointer-events-none blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-secondary/30 translate-x-1/3 translate-y-1/3 pointer-events-none blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-48 h-48 rounded-full bg-accent/25 translate-x-1/2 pointer-events-none blur-2xl" />
-        <div className="absolute top-1/4 left-1/3 w-32 h-32 rounded-full bg-info/20 pointer-events-none blur-2xl" />
+        {/* Cercles décoratifs */}
+        <div style={{
+          position: 'absolute', top: '-80px', left: '-80px',
+          width: 300, height: 300, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.08)'
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-60px', right: '-60px',
+          width: 250, height: 250, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.06)'
+        }} />
+        <div style={{
+          position: 'absolute', top: '40%', right: '-30px',
+          width: 150, height: 150, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.05)'
+        }} />
 
         {/* Grille de points */}
-        <div className="absolute inset-0 opacity-10" style={{
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.15,
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '28px 28px'
         }} />
 
-        {/* Contenu */}
-        <div className="relative text-center text-neutral-content z-10">
+        {/* Contenu central */}
+        <div style={{ position: 'relative', textAlign: 'center', color: '#0f4c4c' }}>
           {/* Logo */}
-          <div className="w-20 h-20 rounded-2xl bg-primary/30 border border-primary/40 flex items-center justify-center mx-auto mb-6 shadow-2xl backdrop-blur-sm">
+          <div style={{
+            width: 80, height: 80, borderRadius: 24,
+            background: 'rgba(255,255,255,0.2)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          }}>
             {appConfig.company.logo
-              ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-2xl" />
-              : <Fuel size={36} className="text-neutral-content" />
+              ? <img src={appConfig.company.logo} alt={appConfig.company.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 20 }} />
+              : <Fuel size={36} color="#0f4c4c" />
             }
           </div>
 
-          <h1 className="text-3xl font-extrabold mb-2 tracking-tight">{appConfig.company.name}</h1>
-          <p className="text-sm opacity-60 mb-10">{appConfig.company.slogan} — {appConfig.company.address}</p>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.5px' }}>
+            {appConfig.company.name}
+          </h1>
+          <p style={{ fontSize: 14, opacity: 0.75, marginBottom: 40 }}>
+            {appConfig.company.slogan} — {appConfig.company.address}
+          </p>
 
-          {/* Stats */}
-          <div className="flex gap-3 justify-center mb-10">
+          {/* Stats déco */}
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
             {[
-              { label: 'Produits',  value: stats.produits,  icon: <ShoppingCart size={16} />, accent: 'bg-primary/20 border-primary/30' },
-              { label: 'Caissiers', value: stats.caissiers, icon: <Users size={16} />,        accent: 'bg-secondary/25 border-secondary/40' },
-              { label: 'Fiable',    value: '100%',          icon: <TrendingUp size={16} />,   accent: 'bg-accent/20 border-accent/30' },
+              { label: 'Produits', value: stats.produits },
+              { label: 'Caissiers', value: stats.caissiers },
+              { label: 'Fiable', value: '100%' },
             ].map(s => (
-              <div key={s.label} className={`${s.accent} border rounded-2xl p-4 text-center backdrop-blur-sm hover:-translate-y-1 transition-transform duration-200`}>
-                <div className="flex items-center justify-center gap-1.5 opacity-80 mb-1">
-                  {s.icon}
-                  <span className="text-xs font-semibold uppercase tracking-widest">{s.label}</span>
-                </div>
-                <p className="text-2xl font-extrabold">{s.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Feature list */}
-          <div className="space-y-2 text-left">
-            {[
-              { txt: 'Gestion des ventes en temps réel', dot: 'bg-primary' },
-              { txt: 'Suivi des stocks et alertes',      dot: 'bg-secondary' },
-              { txt: 'Rapports financiers détaillés',    dot: 'bg-accent' },
-            ].map((feat, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm opacity-70">
-                <div className={`w-2 h-2 rounded-full ${feat.dot} shrink-0`} />
-                {feat.txt}
+              <div key={s.label} style={{
+                background: 'rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 14, padding: '12px 18px', textAlign: 'center'
+              }}>
+                <p style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>{s.value}</p>
+                <p style={{ fontSize: 11, opacity: 0.7, margin: 0, marginTop: 2 }}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Panneau droit */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-base-100 relative overflow-hidden">
-        {/* 🧁 décorations subtiles côté droit */}
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/10 -translate-y-1/2 translate-x-1/3 pointer-events-none blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-secondary/10 translate-y-1/2 -translate-x-1/3 pointer-events-none blur-2xl" />
-
-        <div className="w-full max-w-sm relative z-10">
+      {/* ── PANNEAU DROIT (formulaire) ── */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-base-100">
+        <div style={{ width: '100%', maxWidth: 400 }}>
 
           {/* Header mobile */}
           <div className="lg:hidden flex flex-col items-center mb-8">
-            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow-lg mb-3">
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center shadow mb-3">
               {appConfig.company.logo
                 ? <img src={appConfig.company.logo} alt="" className="w-full h-full object-contain rounded-2xl" />
                 : <Fuel size={24} className="text-primary-content" />
@@ -117,35 +124,48 @@ export default function Login() {
           </div>
 
           {/* Titre */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-extrabold text-base-content tracking-tight mb-1">
+          <div style={{ marginBottom: 32 }}>
+            <h2 style={{ fontSize: 26, fontWeight: 800, color: 'var(--bc)', margin: 0, letterSpacing: '-0.5px' }}>
               Bon retour 👋
             </h2>
-            <p className="text-sm text-base-content/40">
+            <p style={{ fontSize: 14, color: 'var(--bc)', opacity: 0.45, marginTop: 6 }}>
               Connectez-vous à votre espace de gestion
             </p>
           </div>
 
           {/* Erreur */}
           {error && (
-            <div className="alert alert-error mb-5 py-3 text-sm rounded-2xl">
+            <div className="alert alert-error mb-5 py-3 text-sm">
               <span>⚠️ {error}</span>
             </div>
           )}
 
           {/* Formulaire */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* Login */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Login</span>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--bc)', opacity: 0.5, display: 'block', marginBottom: 8 }}>
+                Login
               </label>
-              <div className="relative">
-                <User size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'login' ? 'text-primary' : 'text-base-content/30'}`} />
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                  color: focused === 'login' ? 'var(--p)' : 'var(--bc)',
+                  opacity: focused === 'login' ? 1 : 0.3,
+                  transition: 'all 0.2s'
+                }}>
+                  <User size={16} />
+                </div>
                 <input
                   type="text"
-                  className={`input input-bordered w-full pl-10 transition-all duration-200 ${focused === 'login' ? 'border-primary' : ''}`}
+                  className="input input-bordered w-full"
+                  style={{
+                    paddingLeft: 42,
+                    borderColor: focused === 'login' ? 'var(--p)' : undefined,
+                    boxShadow: focused === 'login' ? '0 0 0 3px rgba(var(--p), 0.1)' : undefined,
+                    transition: 'all 0.2s'
+                  }}
                   placeholder="Votre identifiant"
                   value={form.login}
                   onChange={e => setForm({ ...form, login: e.target.value })}
@@ -157,15 +177,28 @@ export default function Login() {
             </div>
 
             {/* Mot de passe */}
-            <div className="form-control">
-              <label className="label py-1">
-                <span className="label-text text-xs font-bold uppercase tracking-widest text-base-content/40">Mot de passe</span>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--bc)', opacity: 0.5, display: 'block', marginBottom: 8 }}>
+                Mot de passe
               </label>
-              <div className="relative">
-                <Lock size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 ${focused === 'pwd' ? 'text-primary' : 'text-base-content/30'}`} />
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                  color: focused === 'pwd' ? 'var(--p)' : 'var(--bc)',
+                  opacity: focused === 'pwd' ? 1 : 0.3,
+                  transition: 'all 0.2s'
+                }}>
+                  <Lock size={16} />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className={`input input-bordered w-full pl-10 pr-10 transition-all duration-200 ${focused === 'pwd' ? 'border-primary' : ''}`}
+                  className="input input-bordered w-full"
+                  style={{
+                    paddingLeft: 42, paddingRight: 44,
+                    borderColor: focused === 'pwd' ? 'var(--p)' : undefined,
+                    boxShadow: focused === 'pwd' ? '0 0 0 3px rgba(var(--p), 0.1)' : undefined,
+                    transition: 'all 0.2s'
+                  }}
                   placeholder="Votre mot de passe"
                   value={form.motDePasse}
                   onChange={e => setForm({ ...form, motDePasse: e.target.value })}
@@ -173,34 +206,48 @@ export default function Login() {
                   onBlur={() => setFocused('')}
                   required
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-primary transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--bc)', opacity: 0.4
+                  }}
+                >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
             {/* Mot de passe oublié */}
-            <div className="flex justify-end -mt-1">
-              <button type="button" className="text-primary text-xs font-semibold hover:underline"
-                onClick={() => navigate('/forgot-password')}>
+            <div style={{ textAlign: 'right', marginTop: -8 }}>
+              <button
+                type="button"
+                className="text-primary text-xs font-semibold hover:underline"
+                onClick={() => navigate('/forgot-password')}
+              >
                 Mot de passe oublié ?
               </button>
             </div>
 
             {/* Bouton */}
-            <button type="submit" disabled={loading}
-              className="btn btn-primary w-full gap-2 h-12 text-base font-bold mt-2 shadow-lg">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full gap-2"
+              style={{ marginTop: 8, height: 48, fontSize: 15, fontWeight: 700 }}
+            >
               {loading
                 ? <span className="loading loading-spinner loading-sm" />
-                : <> Se connecter <ArrowRight size={16} /> </>
+                : <>Se connecter <ArrowRight size={16} /></>
               }
             </button>
 
           </form>
 
           {/* Footer */}
-          <p className="text-center text-xs text-base-content/30 mt-8">
+          <p style={{ textAlign: 'center', fontSize: 11, opacity: 0.3, marginTop: 32 }}>
             {appConfig.appName} © {new Date().getFullYear()}
           </p>
 

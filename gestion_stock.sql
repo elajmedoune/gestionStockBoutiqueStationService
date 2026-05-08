@@ -348,7 +348,7 @@ BEGIN
     SET s.quantiteRestante = s.quantiteRestante - NEW.quantite
     WHERE s.idProduit = NEW.idProduit;
 
-    INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idProduit)
+    INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
     SELECT
         'stock_faible',
         CONCAT('Stock faible pour le produit réf : ', p.reference,
@@ -360,7 +360,7 @@ BEGIN
             ELSE 'moyen'
         END,
         v.idUtilisateur,
-        NEW.idProduit
+        s.idStock
     FROM produits p
     JOIN stocks s ON s.idProduit = p.idProduit
     JOIN ventes v ON v.idVente   = NEW.idVente
@@ -401,7 +401,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.dateExpiration IS NOT NULL
        AND NEW.dateExpiration <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) THEN
-        INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idProduit)
+        INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
         SELECT
             'expiration',
             CONCAT('Produit expire dans moins de 30 jours — Réf : ',
@@ -411,7 +411,7 @@ BEGIN
                 ELSE 'moyen'
             END,
             1,
-            p.idProduit
+            NEW.idStock
         FROM produits p
         WHERE p.idProduit = NEW.idProduit;
     END IF;
