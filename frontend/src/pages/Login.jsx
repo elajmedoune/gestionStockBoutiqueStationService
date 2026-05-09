@@ -26,8 +26,11 @@ useEffect(() => {
     try {
       await login(form)
       navigate('/dashboard')
-    } catch {
-      setError('Identifiants incorrects. Veuillez réessayer.')
+    } catch (err) {
+        const message = err.response?.data?.errors?.login?.[0] 
+          ?? err.response?.data?.message 
+          ?? 'Identifiants incorrects. Veuillez réessayer.'
+      setError(message)
     } finally {
       setLoading(false)
     }

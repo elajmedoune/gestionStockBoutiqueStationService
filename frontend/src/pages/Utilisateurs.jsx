@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { Eye, EyeOff } from 'lucide-react'
 import api from "../services/api";
 import { useAuth  } from "../context/AuthContext";
 
-const ROLES = ["gerant", " gestionnaire_stock", "caissier", "magasinier"];
+const ROLES = ["gerant", "gestionnaire_stock", "caissier", "magasinier"];
 
 const Utilisateurs = () => {
   const { user } = useAuth();
@@ -10,11 +11,14 @@ const Utilisateurs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(null)
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     nom: "", prenom: "", login: "", email: "",
-    password: "", role: "caissier", actif: 1,
+    motDePasse: "", motDePasse_confirmation: "", role: "caissier",
   });
+
+  const [showPwd, setShowPwd] = useState(false)
 
   useEffect(() => {
     fetchUtilisateurs();
@@ -32,15 +36,27 @@ const Utilisateurs = () => {
     }
   };
 
+  const fermerModal = () => {
+    setShowModal(false)
+    setErrorModal(null)
+    setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", motDePasse_confirmation: "", role: "caissier" })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await api.post("/register", form);
-      setShowModal(false);
-      setForm({ nom: "", prenom: "", login: "", email: "", password: "", role: "caissier", actif: 1 });
+      fermerModal();
+      setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", motDePasse_confirmation: "", role: "caissier"});
       fetchUtilisateurs();
     } catch (err) {
-      setError(err.response?.data?.message || "Erreur lors de la création");
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorModal(premier)
+      } else {
+          setErrorModal(err.response?.data?.message ?? 'Erreur lors de la création.')
+      }
     }
   };
 
@@ -78,7 +94,7 @@ const Utilisateurs = () => {
         <div>
           <h1 className="text-2xl font-bold">👥 Gestion des Utilisateurs</h1>
           <p className="text-sm text-base-content/60 mt-1">
-            gerantistration des comptes et des rôles
+            Administration des comptes et des rôles
           </p>
         </div>
         <button
@@ -197,7 +213,13 @@ const Utilisateurs = () => {
         <dialog className="modal modal-open">
           <div className="modal-box max-w-lg">
             <h3 className="font-bold text-lg mb-4">➕ Nouvel Utilisateur</h3>
-            <form onSubmit={handleSubmit} className="space-y-3">
+            {errorModal && (
+              <div className="alert alert-error text-sm py-2 mb-3">
+                  <span>{errorModal}</span>
+                  <button type="button" className="btn btn-xs btn-ghost ml-auto" onClick={() => setErrorModal(null)}>✕</button>
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-3" noValidate>
               <div className="grid grid-cols-2 gap-3">
                 <div className="form-control">
                   <label className="label"><span className="label-text">Prénom *</span></label>
@@ -222,8 +244,27 @@ const Utilisateurs = () => {
               </div>
               <div className="form-control">
                 <label className="label"><span className="label-text">Mot de passe *</span></label>
-                <input type="password" className="input input-bordered" required minLength={8}
-                  value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                <div className="relative">
+                  <input type={showPwd ? 'text' : 'password'}
+                    className="input input-bordered" required minLength={8}
+                    value={form.motDePasse} onChange={(e) => setForm({ ...form, motDePasse: e.target.value })} />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-3 text-base-content/40">
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              <div className="form-control">
+                <label className="label"><span className="label-text">Confirmer mot de passe *</span></label>
+                <div className="relative">
+                  <input type={showPwd ? 'text' : 'password'}
+                    className="input input-bordered" required minLength={8}
+                    value={form.motDePasse_confirmation} onChange={(e) => setForm({ ...form, motDePasse_confirmation: e.target.value })}/>
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-3 text-base-content/40">
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div className="form-control">
                 <label className="label"><span className="label-text">Rôle *</span></label>
@@ -233,14 +274,14 @@ const Utilisateurs = () => {
                 </select>
               </div>
               <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn btn-ghost" onClick={() => fermerModal()}>
                   Annuler
                 </button>
                 <button type="submit" className="btn btn-primary">Créer</button>
               </div>
             </form>
           </div>
-          <div className="modal-backdrop" onClick={() => setShowModal(false)} />
+          <div className="modal-backdrop" onClick={() => fermerModal()} />
         </dialog>
       )}
     </div>

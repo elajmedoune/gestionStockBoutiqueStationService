@@ -89,8 +89,14 @@ export default function MonProfil() {
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       setSuccessInfo('Informations mises à jour !')
-    } catch {
-      setErrorInfo('Erreur lors de la mise à jour.')
+    } catch (err) {
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorInfo(premier)
+      } else {
+          setErrorInfo(err.response?.data?.message ?? 'Erreur lors de la mise à jour.')
+      }
     }
   }
 
@@ -110,8 +116,14 @@ export default function MonProfil() {
       })
       setSuccessPwd('Mot de passe modifié avec succès !')
       setPasswords({ ancien: '', nouveau: '', confirmation: '' })
-    } catch {
-      setErrorPwd('Ancien mot de passe incorrect.')
+    } catch (err) {
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorPwd(premier)
+      } else {
+          setErrorPwd(err.response?.data?.message ?? 'Erreur lors de la modification.')
+      }
     }
   }
 
@@ -176,7 +188,7 @@ export default function MonProfil() {
         </div>
 
         {/* ── Informations ── */}
-        <div className="card bg-base-100 shadow-sm">
+        <div className="card bg-base-100 shadow-sm" noValidate>
           <div className="card-body">
             <h3 className="font-semibold text-base-content mb-4">Informations personnelles</h3>
 
@@ -205,7 +217,7 @@ export default function MonProfil() {
               <div>
                 <label className="label text-xs">Email</label>
                 <input
-                  type="email"
+                  type="text"
                   className="input input-bordered w-full"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
