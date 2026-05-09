@@ -32,15 +32,37 @@ class VenteController extends Controller
             $vente = Vente::create([
                 'modePaiement'  => $request->modePaiement,
                 'idUtilisateur' => $request->user()->idUtilisateur,
+                'statut'        =>'validee',
             ]);
+            $montantTotal = 0;
 
             foreach ($request->lignes as $ligne) {
-                DB::statement('CALL sp_ajouter_ligne_vente(?, ?, ?)', [
-                    $vente->idVente,
-                    $ligne['idProduit'],
-                    $ligne['quantite'],
+                //Recuperer le stock disponible
+                $stock = \App\Models\Stock::with('produit')
+                    ->where('idProduit', $ligne['idProduit'])
+                    ->where('quantiteRestante', '>', 0)
+                    ->first();
+                if(!$stock){
+                    throw new \Exception("Quantite insuffisante pour le produit{$ligne['idProduit']}");
+                }
+                $prixUnitaire = $stock->produit->prixUnitaire ?? 0;
+                $sousTotal = $prixUnitaire * $ligne['quantite'];
+                $montantTotal += $sousTotal;
+                //Creer la ligne de vente
+                LigneVente::create([
+                    'idVente'             =>$vente->idVente,
+                    'idProduit'           =>$ligne['idProduit'],
+                    'quantite'            =>$ligne['quantite'],
+                    'totalPartielle'      =>$sousTotal,
                 ]);
+                //Decrementer le stock
+                $stock->quantiteRestante -= $ligne['quantite'];
+                $stock->save();
             }
+            //Mettre a jour le montant total
+            $vente->montantTotal = $montantTotal;
+            $vente->save();
+            
 
             DB::commit();
             $vente->refresh();

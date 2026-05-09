@@ -39,6 +39,7 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::post('/profil/photo',     [AuthController::class, 'uploadPhoto']);
     Route::put('/profil',            [AuthController::class, 'updateProfil']);
     Route::put('/profil/password',   [AuthController::class, 'updatePassword']);
+    Route::delete('/profil/photo',   [AuthController::class, 'removePhoto']);
 
     Route::middleware('role:gerant,gestionnaire_stock')->group(function() {
         Route::get('/inventaires/rapport',  [InventaireController::class, 'rapport']);

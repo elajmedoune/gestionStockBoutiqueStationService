@@ -129,13 +129,30 @@ class AuthController extends Controller
         return response()->json(['photo' => $path]);
     }
 
+    public function removePhoto(Request $request)
+    {
+        $user = $request->user();
+        $user->photo = null;
+        $user->save();
+        return response()->json(['message' => 'Photo supprimée']);
+    }
+
     public function updateProfil(Request $request)
     {
         $user = $request->user();
-        $user->nom    = $request->nom;
-        $user->prenom = $request->prenom;
-        $user->email  = $request->email;
+
+        $request->validate([
+            'login' => 'sometimes|string|max:50|unique:utilisateurs,login,' . $user->idUtilisateur . ',idUtilisateur',
+            'nom'   => 'sometimes|string|max:50',
+            'prenom'=> 'sometimes|string|max:50',
+            'email' => 'sometimes|email|max:100|unique:utilisateurs,email,' . $user->idUtilisateur . ',idUtilisateur',
+        ]);
+        $user->nom    = $request->nom ?? $user->nom;
+        $user->prenom = $request->prenom ?? $user->prenom;
+        $user->email  = $request->email ?? $user->email;
+        $user->login  = $request->login ?? $user->login;
         $user->save();
+        
         return response()->json(['message' => 'Profil mis à jour']);
     }
 

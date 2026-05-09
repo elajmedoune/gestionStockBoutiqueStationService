@@ -38,7 +38,7 @@ function Commandes() {
         try {
             setLoading(true)
             const { data } = await api.get('/commandes')
-            setCommandes(data)
+            setCommandes(Array.isArray(data) ? data : data.data ?? [])
         } catch {
             showToast('Erreur lors du chargement', 'error')
         } finally {

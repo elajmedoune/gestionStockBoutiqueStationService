@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('idCommande')
-                ->reference('idCommande')
+                ->references('idCommande')
                 ->on('commandes')
                 ->onDelete('cascade');
         });

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Camera, User, Save, Eye, EyeOff } from 'lucide-react'
+import { Camera, User, Save, Eye, EyeOff, X } from 'lucide-react'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -18,6 +18,7 @@ export default function MonProfil() {
     nom: user?.nom ?? '',
     prenom: user?.prenom ?? '',
     email: user?.email ?? '',
+    login: user?.login ?? '',
   })
 
   const [passwords, setPasswords] = useState({
@@ -63,6 +64,20 @@ export default function MonProfil() {
     }
   }
 
+  async function handleRemovePhoto() {
+    try {
+        await api.delete('/profil/photo')
+        const updatedUser = { ...user, photo: null }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        setUser(updatedUser)
+        setPreview(null)
+        setPhotoFile(null)
+        fileRef.current.value = ''
+    } catch {
+        setErrorPhoto('Erreur lors de la suppression.')
+    }
+  }
+
   /* ── Infos ── */
   async function handleSaveInfo(e) {
     e.preventDefault()
@@ -72,6 +87,7 @@ export default function MonProfil() {
       await api.put('/profil', form)
       const updatedUser = { ...user, ...form }
       localStorage.setItem('user', JSON.stringify(updatedUser))
+      setUser(updatedUser)
       setSuccessInfo('Informations mises à jour !')
     } catch {
       setErrorInfo('Erreur lors de la mise à jour.')
@@ -148,6 +164,14 @@ export default function MonProfil() {
                 Enregistrer la photo
               </button>
             )}
+            {preview && (
+              <button
+                className="btn btn-ghost btn-sm text-error"
+                onClick={handleRemovePhoto}
+              >
+                <X size={14} /> Réinitialiser
+              </button>
+            )}
           </div>
         </div>
 
@@ -185,6 +209,14 @@ export default function MonProfil() {
                   className="input input-bordered w-full"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="label text-xs">Login</label>
+                <input
+                  className="input input-bordered w-full"
+                  value={form.login}
+                  onChange={e => setForm({ ...form, login: e.target.value })}
                 />
               </div>
               <div>
@@ -228,21 +260,33 @@ export default function MonProfil() {
               </div>
               <div>
                 <label className="label text-xs">Nouveau mot de passe</label>
-                <input
-                  type="password"
-                  className="input input-bordered w-full"
-                  value={passwords.nouveau}
-                  onChange={e => setPasswords({ ...passwords, nouveau: e.target.value })}
-                />
+                <div className="relative">
+                  <input
+                    type={showPwd ? 'text' : 'password'}
+                    className="input input-bordered w-full"
+                    value={passwords.nouveau}
+                    onChange={e => setPasswords({ ...passwords, nouveau: e.target.value })}
+                  />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-3 text-base-content/40">
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="label text-xs">Confirmer le mot de passe</label>
-                <input
-                  type="password"
-                  className="input input-bordered w-full"
-                  value={passwords.confirmation}
-                  onChange={e => setPasswords({ ...passwords, confirmation: e.target.value })}
-                />
+                <div className="relative">
+                  <input
+                    type={showPwd ? 'text' : 'password'}
+                    className="input input-bordered w-full"
+                    value={passwords.confirmation}
+                    onChange={e => setPasswords({ ...passwords, confirmation: e.target.value })}
+                  />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-3 text-base-content/40">
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <button type="submit" className="btn btn-primary btn-sm">
                 <Save size={14} /> Modifier le mot de passe
