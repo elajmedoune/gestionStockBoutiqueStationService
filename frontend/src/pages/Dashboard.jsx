@@ -133,7 +133,7 @@ function HeroBanner({ user, stats, role }) {
   return (
     <div className="card bg-base-100 shadow-md border border-base-300 overflow-hidden">
       <div className="card-body p-0">
-        <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
+        <div className="bg-primary text-primary-content px-6 py-5 relative overflow-hidden">
           {/* 🧁 bulles pastel cupcake en fond */}
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-secondary/20 -translate-y-1/2 translate-x-1/4 pointer-events-none blur-2xl" />
           <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-primary/30 translate-y-1/2 pointer-events-none blur-xl" />
@@ -142,7 +142,7 @@ function HeroBanner({ user, stats, role }) {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold opacity-60 uppercase tracking-widest">{config.label}</span>
               <div className="w-px h-3 bg-white/20" />
-              <span className="badge badge-sm bg-secondary/30 border-0 text-neutral-content font-bold text-xs px-3">{config.badge}</span>
+              <span className="badge badge-sm bg-white text-primary font-bold text-xs px-3">{config.badge}</span>
             </div>
             <h1 className="text-2xl font-extrabold leading-tight mb-1">{user?.prenom} {user?.nom}</h1>
             <p className="text-xs opacity-50 flex items-center gap-1">
@@ -405,7 +405,9 @@ function SectionDernieresLivraisons({ livraisons }) {
 
 function DashboardGerant({ ventes, produits, stocks, categories, user }) {
   const ventesActives = useMemo(() => ventes.filter(v => v.statut !== 'annulee'), [ventes])
-  const caTotal       = useMemo(() => ventesActives.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [ventesActives])
+  const il30 = new Date(); il30.setDate(il30.getDate() - 29)
+  const ventes30j = useMemo(() => ventesActives.filter(v => v.dateVente && new Date(v.dateVente) >= il30), [ventesActives])
+  const caTotal   = useMemo(() => ventesActives.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [ventesActives])
   const ventesAuj     = useMemo(() => { const t = new Date().toDateString(); return ventesActives.filter(v => v.dateVente && new Date(v.dateVente).toDateString() === t) }, [ventesActives])
   const caAuj         = useMemo(() => ventesAuj.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [ventesAuj])
   const ca7j          = useMemo(() => ventesActives.filter(v => v.dateVente && new Date(v.dateVente) >= il7).reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [ventesActives])
@@ -476,7 +478,7 @@ function DashboardGerant({ ventes, produits, stocks, categories, user }) {
       ]} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KpiCard label="Total ventes"  value={ventes.length}        sub="transactions"    icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
+        <KpiCard label="Total ventes" value={ventes30j.length} sub="30 derniers jours"    icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
         <KpiCard label="CA global"     value={`${fmt(caTotal)} F`}  sub="toutes périodes" icon={DollarSign}    colorClass="text-secondary" badgeClass="bg-secondary/20 text-secondary" />
         <KpiCard label="Produits"      value={produits.length}      sub="références"      icon={Package}       colorClass="text-accent"    badgeClass="bg-accent/15 text-accent" />
         <KpiCard label="Stock total"   value={fmt(stockTotal)}      sub="unités"          icon={ArrowUpDown}   colorClass="text-success"   badgeClass="bg-success/15 text-success" />
@@ -715,9 +717,8 @@ export default function Dashboard() {
   const { data: categories,   loading: lC }   = useCategories()
   const { data: commandes,    loading: lCom } = useCommandes()
   const { data: livraisons,   loading: lL }   = useLivraisons()
-  const { data: utilisateurs, loading: lU }   = useUtilisateurs()
 
-  const loading = lV || lP || lS || lC || lCom || lL || lU
+  const loading = lV || lP || lS || lC || lCom || lL
   const role    = user?.role
 
   if (loading) return (
