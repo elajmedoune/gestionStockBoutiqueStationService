@@ -311,64 +311,62 @@ export default function Layout({ children }) {
           <div className="flex-none flex items-center gap-1">
 
             {/* Notifications */}
-            {user?.role !== 'caissier' && (
-              <div className="dropdown dropdown-end">
-                <button tabIndex={0} className="btn btn-ghost btn-circle btn-sm relative">
-                  <Bell size={18} />
+            <div className="dropdown dropdown-end">
+              <button tabIndex={0} className="btn btn-ghost btn-circle btn-sm relative">
+                <Bell size={18} />
+                {notifsNonLues.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-secondary-content text-xs rounded-full flex items-center justify-center font-bold leading-none shadow-sm">
+                    {notifsNonLues.length > 9 ? '9+' : notifsNonLues.length}
+                  </span>
+                )}
+              </button>
+              <ul tabIndex={0} className="dropdown-content z-50 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-80 p-0 mt-2 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border-b border-base-200">
+                  <p className="font-bold text-sm">Notifications</p>
                   {notifsNonLues.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-secondary-content text-xs rounded-full flex items-center justify-center font-bold leading-none shadow-sm">
-                      {notifsNonLues.length > 9 ? '9+' : notifsNonLues.length}
-                    </span>
+                    <button onClick={marquerToutLu} className="text-xs text-primary font-semibold hover:underline">Tout marquer lu</button>
                   )}
-                </button>
-                <ul tabIndex={0} className="dropdown-content z-50 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-80 p-0 mt-2 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border-b border-base-200">
-                    <p className="font-bold text-sm">Notifications</p>
-                    {notifsNonLues.length > 0 && (
-                      <button onClick={marquerToutLu} className="text-xs text-primary font-semibold hover:underline">Tout marquer lu</button>
-                    )}
-                  </div>
-                  {notifsVisibles.length === 0
-                    ? <div className="py-8 text-center">
-                        <Bell size={24} className="mx-auto text-base-content/20 mb-2" />
-                        <p className="text-sm text-base-content/40">Aucune notification</p>
-                      </div>
-                    : notifsVisibles.slice(0, 6).map(n => {
-                        const estLue = luues.includes(n.id)
-                        return (
-                          <div key={n.id} onClick={() => marquerLue(n.id)}
-                            className={`flex items-start gap-3 px-4 py-3 border-b border-base-200/50 hover:bg-primary/5 transition-colors cursor-pointer ${estLue ? 'opacity-50' : ''}`}>
-                            <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
-                              n.niveau === 'error' ? 'bg-error/15 text-error' : n.niveau === 'warning' ? 'bg-warning/15 text-warning' :
-                              n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
-                            }`}>
-                              {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
-                              n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
-                              <p className="text-xs text-base-content/60 mt-0.5 truncate">{n.message}</p>
-                              {n.date && <p className="text-xs text-base-content/30 mt-1">{new Date(n.date).toLocaleDateString('fr-FR')}</p>}
-                            </div>
-                            <div className="flex flex-col items-center gap-2 shrink-0">
-                              {!estLue && <span className={`w-2 h-2 rounded-full ${n.niveau === 'error' ? 'bg-error' : n.niveau === 'warning' ? 'bg-warning' : n.niveau === 'success' ? 'bg-success' : 'bg-info'}`} />}
-                              <button onClick={e => { e.stopPropagation(); supprimer(n.id) }} className="text-base-content/20 hover:text-error transition-colors">
-                                <X size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })
-                  }
-                  {notifsVisibles.length > 6 && (
-                    <div className="px-4 py-3 border-t border-base-200 text-center">
-                      <p className="text-xs text-base-content/40">+{notifsVisibles.length - 6} autres</p>
+                </div>
+                {notifsVisibles.length === 0
+                  ? <div className="py-8 text-center">
+                      <Bell size={24} className="mx-auto text-base-content/20 mb-2" />
+                      <p className="text-sm text-base-content/40">Aucune notification</p>
                     </div>
-                  )}
-                </ul>
-              </div>
-            )}
-          
+                  : notifsVisibles.slice(0, 6).map(n => {
+                      const estLue = luues.includes(n.id)
+                      return (
+                        <div key={n.id} onClick={() => marquerLue(n.id)}
+                          className={`flex items-start gap-3 px-4 py-3 border-b border-base-200/50 hover:bg-primary/5 transition-colors cursor-pointer ${estLue ? 'opacity-50' : ''}`}>
+                          <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            n.niveau === 'error' ? 'bg-error/15 text-error' : n.niveau === 'warning' ? 'bg-warning/15 text-warning' :
+                            n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
+                          }`}>
+                            {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
+                            n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
+                            <p className="text-xs text-base-content/60 mt-0.5 truncate">{n.message}</p>
+                            {n.date && <p className="text-xs text-base-content/30 mt-1">{new Date(n.date).toLocaleDateString('fr-FR')}</p>}
+                          </div>
+                          <div className="flex flex-col items-center gap-2 shrink-0">
+                            {!estLue && <span className={`w-2 h-2 rounded-full ${n.niveau === 'error' ? 'bg-error' : n.niveau === 'warning' ? 'bg-warning' : n.niveau === 'success' ? 'bg-success' : 'bg-info'}`} />}
+                            <button onClick={e => { e.stopPropagation(); supprimer(n.id) }} className="text-base-content/20 hover:text-error transition-colors">
+                              <X size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })
+                }
+                {notifsVisibles.length > 6 && (
+                  <div className="px-4 py-3 border-t border-base-200 text-center">
+                    <p className="text-xs text-base-content/40">+{notifsVisibles.length - 6} autres</p>
+                  </div>
+                )}
+              </ul>
+            </div>
+            
 
             {/* Profil dans header — visible seulement si sidebar collapsed (desktop) ou mobile */}
             <div className={collapsed ? 'block' : 'lg:hidden block'}>
