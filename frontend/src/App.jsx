@@ -15,6 +15,11 @@ import Inventaires from './pages/Inventaires'
 import Livraisons from './pages/Livraisons'
 import Utilisateurs from './pages/Utilisateurs'
 import TicketCaisse from './pages/TicketCaisse'
+import Categories  from './pages/Categories'
+import Produits    from './pages/Produits'
+import Stock       from './pages/Stock'
+import Fournisseurs from './pages/Fournisseurs'
+import Commandes   from './pages/Commandes'
 
 // Pages qui ont déjà Layout intégré
 function ProtectedRoute({ children }) {
@@ -49,9 +54,14 @@ function AppRoutes() {
       <Route path="/ventes" element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
       <Route path="/rapport" element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
       <Route path="/profil" element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-      <Route path="/parametres" element={<ProtectedRoute><Parametres /></ProtectedRoute>} />
+      <Route path="/parametres"    element={<ProtectedRouteWithLayout><Parametres /></ProtectedRouteWithLayout>} />
       <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
-      <Route path="/utilisateurs" element={<ProtectedRoute><Utilisateurs /></ProtectedRoute>} />
+      <Route path="/utilisateurs" element={<ProtectedRouteWithLayout><Utilisateurs /></ProtectedRouteWithLayout>} />
+      <Route path="/produits"    element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
+      <Route path="/stock"       element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
+      <Route path="/categories"  element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
+      <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
+      <Route path="/commandes"   element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
 
       {/* Pages sans Layout — on l'ajoute ici */}
       <Route path="/livraisons" element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />

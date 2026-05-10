@@ -33,15 +33,27 @@ const PERIODS = [
   { label: 'Tout', days: null },
 ]
 
+/* 🧁 Palette cupcake — teal, rose, ambre, lavande, menthe, ciel */
 const DOUGHNUT_COLORS = [
-  'rgba(99,102,241,0.85)',
-  'rgba(34,197,94,0.85)',
-  'rgba(56,189,248,0.85)',
-  'rgba(251,191,36,0.85)',
-  'rgba(236,72,153,0.85)',
-  'rgba(248,114,114,0.85)',
-  'rgba(52,211,153,0.85)',
+  'rgba(101,195,200,0.85)', // primary teal
+  'rgba(239,159,188,0.85)', // secondary rose
+  'rgba(238,175,58,0.85)',  // accent ambre
+  'rgba(180,144,202,0.85)', // lavande
+  'rgba(116,206,183,0.85)', // menthe
+  'rgba(247,202,201,0.85)', // rose poudré
+  'rgba(155,206,235,0.85)', // ciel
 ]
+
+/* 🧁 Tooltip charts façon cupcake */
+const TOOLTIP_STYLE = {
+  backgroundColor: '#291334',  // neutral cupcake
+  titleColor: '#faf7f5',       // base-100
+  bodyColor: '#ef9fbc',        // secondary
+  borderColor: '#65c3c8',      // primary
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 12,
+}
 
 const toDateKey = (ds, g) => {
   const d = new Date(ds)
@@ -88,7 +100,7 @@ function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse 
     <div className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-1 transition-transform duration-200">
       <div className="card-body p-4 gap-2">
         <div className="flex items-center justify-between">
-          <div className={`p-2 rounded-xl ${badgeClass}`}><Icon size={16} /></div>
+          <div className={`p-2 rounded-2xl ${badgeClass}`}><Icon size={16} /></div>
           {pulse && <span className="badge badge-error badge-xs animate-pulse">!</span>}
         </div>
         <div>
@@ -111,27 +123,29 @@ function HeroBanner({ user, stats, role }) {
   const config = roleConfig[role] ?? { label: 'Mon espace', badge: role?.toUpperCase() }
 
   const statColors = [
-    { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30' },
-    { bg: 'bg-secondary/15', text: 'text-secondary', border: 'border-secondary/30' },
-    { bg: 'bg-success/15', text: 'text-success', border: 'border-success/30' },
-    { bg: 'bg-info/15', text: 'text-info', border: 'border-info/30' },
-    { bg: 'bg-accent/15', text: 'text-accent', border: 'border-accent/30' },
+    { bg: 'bg-primary/15',   text: 'text-primary',   border: 'border-primary/30' },
+    { bg: 'bg-secondary/20', text: 'text-secondary', border: 'border-secondary/40' },
+    { bg: 'bg-accent/15',    text: 'text-accent',    border: 'border-accent/30' },
+    { bg: 'bg-info/15',      text: 'text-info',      border: 'border-info/30' },
+    { bg: 'bg-success/15',   text: 'text-success',   border: 'border-success/30' },
   ]
 
   return (
     <div className="card bg-base-100 shadow-md border border-base-300 overflow-hidden">
       <div className="card-body p-0">
         <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-white/3 translate-y-1/2 pointer-events-none" />
+          {/* 🧁 bulles pastel cupcake en fond */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-secondary/20 -translate-y-1/2 translate-x-1/4 pointer-events-none blur-2xl" />
+          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-primary/30 translate-y-1/2 pointer-events-none blur-xl" />
+          <div className="absolute top-4 left-1/2 w-24 h-24 rounded-full bg-accent/20 pointer-events-none blur-xl" />
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold opacity-50 uppercase tracking-widest">{config.label}</span>
+              <span className="text-xs font-bold opacity-60 uppercase tracking-widest">{config.label}</span>
               <div className="w-px h-3 bg-white/20" />
-              <span className="badge badge-sm bg-white/20 border-0 text-neutral-content font-bold text-xs px-3">{config.badge}</span>
+              <span className="badge badge-sm bg-secondary/30 border-0 text-neutral-content font-bold text-xs px-3">{config.badge}</span>
             </div>
             <h1 className="text-2xl font-extrabold leading-tight mb-1">{user?.prenom} {user?.nom}</h1>
-            <p className="text-xs opacity-40 flex items-center gap-1">
+            <p className="text-xs opacity-50 flex items-center gap-1">
               <Calendar size={10} />
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
@@ -163,7 +177,7 @@ function PeriodBar({ config, onChange }) {
         return (
           <button key={label}
             onClick={() => onChange({ ...config, dateDebut: ad, dateFin: toISO(today) })}
-            className={`btn btn-xs rounded-xl font-bold ${isActive ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+            className={`btn btn-xs font-bold ${isActive ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
             {label}
           </button>
         )
@@ -177,11 +191,7 @@ const chartOpts = (cb) => ({
   interaction: { mode: 'index', intersect: false },
   plugins: {
     legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1e1b4b', titleColor: '#fff', bodyColor: '#c7d2fe',
-      borderColor: '#3730a3', borderWidth: 1, padding: 10, cornerRadius: 8,
-      callbacks: { label: cb }
-    }
+    tooltip: { ...TOOLTIP_STYLE, callbacks: { label: cb } }
   },
   scales: {
     x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 9 }, maxTicksLimit: 6 } },
@@ -193,16 +203,16 @@ const chartOpts = (cb) => ({
 
 function SectionHeader({ title, subtitle, icon: Icon, iconClass, link, linkTo }) {
   return (
-    <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center justify-between">
+    <div className="bg-primary text-primary-content px-5 py-3 flex items-center justify-between">
       <div className="flex items-center gap-2">
-        {Icon && <div className="p-1.5 bg-white/10 rounded-lg"><Icon size={14} /></div>}
+        {Icon && <div className="p-1.5 bg-white/25 rounded-2xl"><Icon size={14} /></div>}
         <div>
           <h2 className="font-extrabold text-sm">{title}</h2>
-          {subtitle && <p className="text-xs opacity-50">{subtitle}</p>}
+          {subtitle && <p className="text-xs opacity-70">{subtitle}</p>}
         </div>
       </div>
       {link && (
-        <Link to={linkTo} className="text-xs text-neutral-content/60 font-semibold flex items-center gap-1 hover:text-neutral-content transition-colors">
+        <Link to={linkTo} className="text-xs text-primary-content/70 font-semibold flex items-center gap-1 hover:text-primary-content transition-colors">
           Voir tout <ChevronRight size={11} />
         </Link>
       )}
@@ -222,11 +232,11 @@ function GraphiqueCA({ ventes, title = 'Chiffre d\'affaires' }) {
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <PeriodBar config={caConfig} onChange={setCaConfig} />
           <div className="flex items-center gap-1.5">
-            <input type="date" className="input input-xs input-bordered rounded-xl"
+            <input type="date" className="input input-xs input-bordered"
               value={caConfig.dateDebut} max={caConfig.dateFin}
               onChange={e => setCaConfig({ ...caConfig, dateDebut: e.target.value })} />
             <span className="text-xs text-base-content/40">→</span>
-            <input type="date" className="input input-xs input-bordered rounded-xl"
+            <input type="date" className="input input-xs input-bordered"
               value={caConfig.dateFin} min={caConfig.dateDebut} max={toISO(today)}
               onChange={e => setCaConfig({ ...caConfig, dateFin: e.target.value })} />
           </div>
@@ -234,7 +244,7 @@ function GraphiqueCA({ ventes, title = 'Chiffre d\'affaires' }) {
         <div className="flex gap-1.5 mb-4 justify-end -mt-8">
           {['jour', 'semaine', 'mois'].map(g => (
             <button key={g} onClick={() => setCaConfig({ ...caConfig, groupBy: g })}
-              className={`btn btn-xs rounded-xl font-bold ${caConfig.groupBy === g ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+              className={`btn btn-xs font-bold ${caConfig.groupBy === g ? 'btn-secondary' : 'btn-ghost border border-base-300'}`}>
               {g === 'jour' ? 'Jour' : g === 'semaine' ? 'Semaine' : 'Mois'}
             </button>
           ))}
@@ -244,7 +254,12 @@ function GraphiqueCA({ ventes, title = 'Chiffre d\'affaires' }) {
           : <div className="h-56">
               <Bar data={{
                 labels: caData.labels,
-                datasets: [{ data: caData.data, backgroundColor: caData.data.map(v => v > 0 ? 'rgba(99,102,241,0.7)' : '#f3f4f6'), hoverBackgroundColor: caData.data.map(v => v > 0 ? 'rgba(99,102,241,0.9)' : '#e5e7eb'), borderRadius: 6, borderSkipped: false }]
+                datasets: [{
+                  data: caData.data,
+                  backgroundColor: caData.data.map(v => v > 0 ? 'rgba(101,195,200,0.8)' : '#f5e9e2'),
+                  hoverBackgroundColor: caData.data.map(v => v > 0 ? 'rgba(239,159,188,0.9)' : '#ecdcd2'),
+                  borderRadius: 8, borderSkipped: false
+                }]
               }} options={chartOpts(ctx => ` ${fmt(ctx.raw)} F`)} />
             </div>
         }
@@ -259,7 +274,7 @@ function SectionAlertes({ alertes }) {
       <SectionHeader title="Alertes stock" subtitle={`${alertes.length} produit(s) critique(s)`} icon={AlertTriangle} link linkTo="/alertes" />
       {alertes.length === 0
         ? <div className="p-6 text-center">
-            <div className="w-10 h-10 bg-success/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <div className="w-10 h-10 bg-success/15 rounded-2xl flex items-center justify-center mx-auto mb-2">
               <span className="text-success text-lg">✓</span>
             </div>
             <p className="text-xs text-base-content/40">Aucune alerte</p>
@@ -289,8 +304,8 @@ function SectionStockParCat({ stockParCat }) {
           : <>
               <div className="h-36 flex items-center justify-center">
                 <Doughnut
-                  data={{ labels: stockParCat.labels, datasets: [{ data: stockParCat.data, backgroundColor: DOUGHNUT_COLORS, borderWidth: 3, borderColor: 'white' }] }}
-                  options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e1b4b', titleColor: '#fff', bodyColor: '#c7d2fe', borderColor: '#3730a3', borderWidth: 1, padding: 8, cornerRadius: 8 } }, cutout: '68%' }}
+                  data={{ labels: stockParCat.labels, datasets: [{ data: stockParCat.data, backgroundColor: DOUGHNUT_COLORS, borderWidth: 3, borderColor: '#faf7f5' }] }}
+                  options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: TOOLTIP_STYLE }, cutout: '68%' }}
                 />
               </div>
               <div className="mt-3 space-y-2">
@@ -334,7 +349,7 @@ function SectionDernieresVentes({ ventes }) {
               ? <tr><td colSpan={7} className="text-center text-base-content/40 py-6">Aucune vente</td></tr>
               : ventes.map(v => (
                   <tr key={v.idVente} className="hover">
-                    <td className="font-bold text-neutral">#{v.idVente}</td>
+                    <td className="font-bold text-primary">#{v.idVente}</td>
                     <td className="text-base-content/60">{v.dateVente ? new Date(v.dateVente).toLocaleDateString('fr-FR') : '—'}</td>
                     <td>{v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—'}</td>
                     <td><span className="badge badge-ghost badge-xs font-semibold">{v.modePaiement}</span></td>
@@ -367,7 +382,7 @@ function SectionDernieresLivraisons({ livraisons }) {
               ? <tr><td colSpan={5} className="text-center text-base-content/40 py-6">Aucune livraison</td></tr>
               : livraisons.slice(0, 6).map(l => (
                   <tr key={l.idLivraison} className="hover">
-                    <td className="font-bold text-neutral">#{l.idLivraison}</td>
+                    <td className="font-bold text-primary">#{l.idLivraison}</td>
                     <td className="text-base-content/60">{l.dateLivraison ? new Date(l.dateLivraison).toLocaleDateString('fr-FR') : '—'}</td>
                     <td className="font-semibold">{l.commande?.fournisseur?.nomFournisseur ?? '—'}</td>
                     <td><span className="badge badge-info badge-xs">{l.lignes?.length ?? 0} art.</span></td>
@@ -443,9 +458,9 @@ function DashboardGerant({ ventes, produits, stocks, categories, user }) {
   }, [produits, stocks, categories])
 
   const MEDAL_ICONS = [
-    <Crown size={13} className="text-yellow-500" />,
-    <Medal size={13} className="text-gray-400" />,
-    <Medal size={13} className="text-amber-600" />,
+    <Crown size={13} className="text-accent" />,
+    <Medal size={13} className="text-secondary" />,
+    <Medal size={13} className="text-primary" />,
     <Star  size={13} className="text-base-content/30" />,
     <Star  size={13} className="text-base-content/30" />,
   ]
@@ -461,13 +476,13 @@ function DashboardGerant({ ventes, produits, stocks, categories, user }) {
       ]} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KpiCard label="Total ventes"  value={ventes.length}        sub="transactions"    icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/10 text-primary" />
-        <KpiCard label="CA global"     value={`${fmt(caTotal)} F`}  sub="toutes périodes" icon={DollarSign}    colorClass="text-secondary" badgeClass="bg-secondary/10 text-secondary" />
-        <KpiCard label="Produits"      value={produits.length}      sub="références"      icon={Package}       colorClass="text-accent"    badgeClass="bg-accent/10 text-accent" />
-        <KpiCard label="Stock total"   value={fmt(stockTotal)}      sub="unités"          icon={ArrowUpDown}   colorClass="text-success"   badgeClass="bg-success/10 text-success" />
+        <KpiCard label="Total ventes"  value={ventes.length}        sub="transactions"    icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
+        <KpiCard label="CA global"     value={`${fmt(caTotal)} F`}  sub="toutes périodes" icon={DollarSign}    colorClass="text-secondary" badgeClass="bg-secondary/20 text-secondary" />
+        <KpiCard label="Produits"      value={produits.length}      sub="références"      icon={Package}       colorClass="text-accent"    badgeClass="bg-accent/15 text-accent" />
+        <KpiCard label="Stock total"   value={fmt(stockTotal)}      sub="unités"          icon={ArrowUpDown}   colorClass="text-success"   badgeClass="bg-success/15 text-success" />
         <KpiCard label="Alertes stock" value={alertes.length}       sub="sous seuil"      icon={AlertTriangle}
           colorClass={alertes.length > 0 ? 'text-warning' : 'text-success'}
-          badgeClass={alertes.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}
+          badgeClass={alertes.length > 0 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'}
           pulse={alertes.length > 0} />
       </div>
 
@@ -487,7 +502,7 @@ function DashboardGerant({ ventes, produits, stocks, categories, user }) {
                     <p className="text-xs font-semibold truncate">{p.nom}</p>
                     <p className="text-xs text-base-content/40">{fmt(p.total)} F</p>
                   </div>
-                  <span className="badge badge-neutral badge-sm font-bold">×{p.qte}</span>
+                  <span className="badge badge-primary badge-sm font-bold">×{p.qte}</span>
                 </div>
               ))
           }
@@ -544,12 +559,12 @@ function DashboardCaissier({ ventes, produits, stocks, user }) {
       ]} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Ventes auj."    value={mesVentesAuj.length}     sub="aujourd'hui"     icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/10 text-primary" />
-        <KpiCard label="CA aujourd'hui" value={`${fmt(maCaAuj)} F`}     sub="encaissé"        icon={DollarSign}    colorClass="text-secondary" badgeClass="bg-secondary/10 text-secondary" />
-        <KpiCard label="Panier moyen"   value={`${fmt(panierMoyen)} F`} sub="par transaction" icon={TrendingUp}    colorClass="text-accent"    badgeClass="bg-accent/10 text-accent" />
+        <KpiCard label="Ventes auj."    value={mesVentesAuj.length}     sub="aujourd'hui"     icon={ShoppingCart}  colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
+        <KpiCard label="CA aujourd'hui" value={`${fmt(maCaAuj)} F`}     sub="encaissé"        icon={DollarSign}    colorClass="text-secondary" badgeClass="bg-secondary/20 text-secondary" />
+        <KpiCard label="Panier moyen"   value={`${fmt(panierMoyen)} F`} sub="par transaction" icon={TrendingUp}    colorClass="text-accent"    badgeClass="bg-accent/15 text-accent" />
         <KpiCard label="Alertes stock"  value={alertes.length}          sub="produits critiques" icon={AlertTriangle}
           colorClass={alertes.length > 0 ? 'text-warning' : 'text-success'}
-          badgeClass={alertes.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}
+          badgeClass={alertes.length > 0 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'}
           pulse={alertes.length > 0} />
       </div>
 
@@ -608,13 +623,13 @@ function DashboardGestionnaire({ produits, stocks, categories, commandes, livrai
       ]} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Produits"       value={produits.length}           sub="références"      icon={Package}       colorClass="text-accent"  badgeClass="bg-accent/10 text-accent" />
-        <KpiCard label="Stock total"    value={fmt(stockTotal)}           sub="unités restantes" icon={ArrowUpDown}  colorClass="text-primary" badgeClass="bg-primary/10 text-primary" />
+        <KpiCard label="Produits"       value={produits.length}           sub="références"      icon={Package}       colorClass="text-accent"  badgeClass="bg-accent/15 text-accent" />
+        <KpiCard label="Stock total"    value={fmt(stockTotal)}           sub="unités restantes" icon={ArrowUpDown}  colorClass="text-primary" badgeClass="bg-primary/15 text-primary" />
         <KpiCard label="Ruptures"       value={enRupture.length}          sub="stock à zéro"    icon={TrendingDown}
           colorClass={enRupture.length > 0 ? 'text-error' : 'text-success'}
-          badgeClass={enRupture.length > 0 ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}
+          badgeClass={enRupture.length > 0 ? 'bg-error/15 text-error' : 'bg-success/15 text-success'}
           pulse={enRupture.length > 0} />
-        <KpiCard label="Cmdes en cours" value={commandesEnCours.length}   sub="à réceptionner"  icon={Truck}         colorClass="text-info"   badgeClass="bg-info/10 text-info" />
+        <KpiCard label="Cmdes en cours" value={commandesEnCours.length}   sub="à réceptionner"  icon={Truck}         colorClass="text-info"   badgeClass="bg-info/15 text-info" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -635,7 +650,7 @@ function DashboardGestionnaire({ produits, stocks, categories, commandes, livrai
                     <div className="w-full bg-base-200 rounded-full h-1.5">
                       <div className="h-1.5 rounded-full" style={{
                         width: `${ratio}%`,
-                        background: ratio >= 80 ? 'rgba(248,114,114,0.8)' : ratio >= 50 ? 'rgba(251,191,36,0.8)' : 'rgba(99,102,241,0.8)'
+                        background: ratio >= 80 ? 'rgba(239,159,188,0.85)' : ratio >= 50 ? 'rgba(238,175,58,0.85)' : 'rgba(101,195,200,0.85)'
                       }} />
                     </div>
                   </div>
@@ -672,14 +687,14 @@ function DashboardMagasinier({ produits, stocks, livraisons, user }) {
       ]} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Stock total" value={fmt(stockTotal)}  sub="unités restantes"   icon={ArrowUpDown}  colorClass="text-success"   badgeClass="bg-success/10 text-success" />
+        <KpiCard label="Stock total" value={fmt(stockTotal)}  sub="unités restantes"   icon={ArrowUpDown}  colorClass="text-success"   badgeClass="bg-success/15 text-success" />
         <KpiCard label="Ruptures"    value={enRupture.length} sub="stock à zéro"       icon={TrendingDown}
           colorClass={enRupture.length > 0 ? 'text-error' : 'text-success'}
-          badgeClass={enRupture.length > 0 ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}
+          badgeClass={enRupture.length > 0 ? 'bg-error/15 text-error' : 'bg-success/15 text-success'}
           pulse={enRupture.length > 0} />
         <KpiCard label="Sous seuil"  value={sousSeuil.length} sub="à réapprovisionner" icon={ShieldAlert}
           colorClass={sousSeuil.length > 0 ? 'text-warning' : 'text-success'}
-          badgeClass={sousSeuil.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'}
+          badgeClass={sousSeuil.length > 0 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'}
           pulse={sousSeuil.length > 0} />
       </div>
 
@@ -708,7 +723,7 @@ export default function Dashboard() {
   if (loading) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-neutral" />
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     </Layout>
   )

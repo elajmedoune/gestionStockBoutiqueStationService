@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Camera, User, Save, Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
+import { Camera, User, Save, Eye, EyeOff, Lock, Mail, Shield , X} from 'lucide-react'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -18,6 +18,7 @@ export default function MonProfil() {
     nom: user?.nom ?? '',
     prenom: user?.prenom ?? '',
     email: user?.email ?? '',
+    login: user?.login ?? '',
   })
 
   const [passwords, setPasswords] = useState({ ancien: '', nouveau: '', confirmation: '' })
@@ -60,6 +61,21 @@ export default function MonProfil() {
     }
   }
 
+  async function handleRemovePhoto() {
+    try {
+        await api.delete('/profil/photo')
+        const updatedUser = { ...user, photo: null }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        setUser(updatedUser)
+        setPreview(null)
+        setPhotoFile(null)
+        fileRef.current.value = ''
+    } catch {
+        setErrorPhoto('Erreur lors de la suppression.')
+    }
+  }
+
+  /* ── Infos ── */
   async function handleSaveInfo(e) {
     e.preventDefault()
     setLoadingInfo(true); setErrorInfo(null); setSuccessInfo(null)
@@ -69,8 +85,14 @@ export default function MonProfil() {
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       setSuccessInfo('Informations mises à jour !')
-    } catch {
-      setErrorInfo('Erreur lors de la mise à jour.')
+    } catch (err) {
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorInfo(premier)
+      } else {
+          setErrorInfo(err.response?.data?.message ?? 'Erreur lors de la mise à jour.')
+      }
     } finally {
       setLoadingInfo(false)
     }
@@ -90,8 +112,14 @@ export default function MonProfil() {
       })
       setSuccessPwd('Mot de passe modifié !')
       setPasswords({ ancien: '', nouveau: '', confirmation: '' })
-    } catch {
-      setErrorPwd('Ancien mot de passe incorrect.')
+    } catch (err) {
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorPwd(premier)
+      } else {
+          setErrorPwd(err.response?.data?.message ?? 'Erreur lors de la modification.')
+      }
     } finally {
       setLoadingPwd(false)
     }
@@ -118,8 +146,8 @@ export default function MonProfil() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-extrabold text-base-content flex items-center gap-2">
-            <div className="p-2 bg-neutral/10 rounded-xl">
-              <User size={18} className="text-neutral" />
+            <div className="p-2 bg-primary/15 rounded-2xl">
+              <User size={18} className="text-primary" />
             </div>
             Mon Profil
           </h1>
@@ -128,13 +156,15 @@ export default function MonProfil() {
 
         {/* Photo */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/10 rounded-lg"><Camera size={14} /></div>
-            <h3 className="font-extrabold text-sm">Photo de profil</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+            {/* 🧁 bulles pastel décoratives */}
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-secondary/30 blur-xl pointer-events-none" />
+            <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Camera size={14} /></div>
+            <h3 className="font-extrabold text-sm relative z-10">Photo de profil</h3>
           </div>
           <div className="card-body items-center gap-4 py-6">
             <div className="relative group">
-              <div className="w-28 h-28 rounded-2xl overflow-hidden bg-neutral text-neutral-content flex items-center justify-center shadow-lg border-4 border-base-200">
+              <div className="w-28 h-28 rounded-2xl overflow-hidden bg-primary text-primary-content flex items-center justify-center shadow-lg border-4 border-base-200">
                 {preview
                   ? <img src={preview} alt="avatar" className="w-full h-full object-cover" />
                   : <User size={40} />
@@ -142,7 +172,7 @@ export default function MonProfil() {
               </div>
               <button
                 onClick={() => fileRef.current.click()}
-                className="absolute -bottom-2 -right-2 btn btn-circle btn-sm btn-neutral shadow-lg"
+                className="absolute -bottom-2 -right-2 btn btn-circle btn-sm btn-secondary shadow-lg"
               >
                 <Camera size={14} />
               </button>
@@ -151,65 +181,93 @@ export default function MonProfil() {
 
             <div className="text-center">
               <p className="font-bold text-base-content">{user?.prenom} {user?.nom}</p>
-              <span className="badge badge-neutral badge-sm capitalize mt-1">{user?.role}</span>
+              <span className="badge badge-primary badge-sm capitalize mt-1">{user?.role}</span>
             </div>
 
-            {successPhoto && <div className="alert alert-success text-sm py-2 rounded-xl w-full">{successPhoto}</div>}
-            {errorPhoto   && <div className="alert alert-error text-sm py-2 rounded-xl w-full">{errorPhoto}</div>}
+            {successPhoto && <div className="alert alert-success text-sm py-2 rounded-2xl w-full">{successPhoto}</div>}
+            {errorPhoto   && <div className="alert alert-error   text-sm py-2 rounded-2xl w-full">{errorPhoto}</div>}
 
             {photoFile && (
-              <button className="btn btn-neutral btn-sm gap-2 rounded-xl" onClick={handleUploadPhoto} disabled={loadingPhoto}>
+              <button className="btn btn-primary btn-sm gap-2" onClick={handleUploadPhoto} disabled={loadingPhoto}>
                 {loadingPhoto ? <span className="loading loading-spinner loading-xs" /> : <Save size={14} />}
                 Enregistrer la photo
               </button>
             )}
-
             {!photoFile && (
               <p className="text-xs text-base-content/40">Cliquez sur l'icône pour changer votre photo</p>
+            )}
+            {preview && (
+              <button className="btn btn-ghost btn-sm text-error" onClick={handleRemovePhoto}>
+                  <X size={14} /> Réinitialiser
+              </button>
             )}
           </div>
         </div>
 
-        {/* Informations */}
+        {/* ── Informations ── */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/10 rounded-lg"><Mail size={14} /></div>
-            <h3 className="font-extrabold text-sm">Informations personnelles</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-accent/25 blur-xl pointer-events-none" />
+              <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Mail size={14} /></div>
+              <h3 className="font-extrabold text-sm relative z-10">Informations personnelles</h3>
           </div>
           <div className="card-body pt-5">
-            {successInfo && <div className="alert alert-success text-sm py-2 rounded-xl mb-3">{successInfo}</div>}
-            {errorInfo   && <div className="alert alert-error text-sm py-2 rounded-xl mb-3">{errorInfo}</div>}
-
+              {successInfo && <div className="alert alert-success text-sm py-2 rounded-2xl mb-3">{successInfo}</div>}
+              {errorInfo   && <div className="alert alert-error   text-sm py-2 rounded-2xl mb-3">{errorInfo}</div>}
             <form onSubmit={handleSaveInfo} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="form-control">
-                  <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nom</span></label>
-                  <input className="input input-bordered rounded-xl" value={form.nom}
-                    onChange={e => setForm({ ...form, nom: e.target.value })} />
+                  <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nom</span>
+                  </label>
+                  <input
+                    className="input input-bordered"
+                    value={form.nom}
+                    onChange={e => setForm({ ...form, nom: e.target.value })}
+                  />
                 </div>
                 <div className="form-control">
-                  <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Prénom</span></label>
-                  <input className="input input-bordered rounded-xl" value={form.prenom}
-                    onChange={e => setForm({ ...form, prenom: e.target.value })} />
+                  <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Prénom</span>
+                  </label>
+                  <input
+                    className="input input-bordered"
+                    value={form.prenom}
+                    onChange={e => setForm({ ...form, prenom: e.target.value })}
+                  />
                 </div>
               </div>
               <div className="form-control">
-                <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Email</span></label>
-                <input type="email" className="input input-bordered rounded-xl" value={form.email}
-                  onChange={e => setForm({ ...form, email: e.target.value })} />
+                <label className="label py-1">
+                  <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Email</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                />
               </div>
               <div className="form-control">
-                <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Rôle</span></label>
-                <div className="input input-bordered rounded-xl bg-base-200 flex items-center gap-2">
-                  <Shield size={14} className="text-base-content/40" />
-                  <span className="capitalize text-base-content/60">{user?.role}</span>
-                  <span className="ml-auto badge badge-neutral badge-xs">Non modifiable</span>
+                <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Login</span>
+                </label>
+                <input className="input input-bordered" value={form.login} onChange={e => setForm({ ...form, login: e.target.value })} />
+              </div>
+              <div className="form-control">
+                <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Rôle</span>
+                </label>
+                <div className="input input-bordered bg-base-200 flex items-center gap-2">
+                    <Shield size={14} className="text-primary" />
+                    <span className="capitalize text-base-content/70 font-medium">{user?.role}</span>
+                    <span className="ml-auto badge badge-secondary badge-xs">Non modifiable</span>
                 </div>
               </div>
               <div className="flex justify-end pt-1">
-                <button type="submit" className="btn btn-neutral btn-sm gap-2 rounded-xl" disabled={loadingInfo}>
-                  {loadingInfo ? <span className="loading loading-spinner loading-xs" /> : <Save size={14} />}
-                  Enregistrer
+                <button type="submit" className="btn btn-primary btn-sm gap-2" disabled={loadingInfo}>
+                    {loadingInfo ? <span className="loading loading-spinner loading-xs" /> : <Save size={14} />}
+                    Enregistrer
                 </button>
               </div>
             </form>
@@ -218,25 +276,33 @@ export default function MonProfil() {
 
         {/* Mot de passe */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-          <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-            <div className="p-1.5 bg-white/10 rounded-lg"><Lock size={14} /></div>
-            <h3 className="font-extrabold text-sm">Changer le mot de passe</h3>
+          <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 relative overflow-hidden">
+            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-info/30 blur-xl pointer-events-none" />
+            <div className="p-1.5 bg-white/25 rounded-2xl relative z-10"><Lock size={14} /></div>
+            <h3 className="font-extrabold text-sm relative z-10">Changer le mot de passe</h3>
           </div>
           <div className="card-body pt-5">
-            {successPwd && <div className="alert alert-success text-sm py-2 rounded-xl mb-3">{successPwd}</div>}
-            {errorPwd   && <div className="alert alert-error text-sm py-2 rounded-xl mb-3">{errorPwd}</div>}
+            {successPwd && <div className="alert alert-success text-sm py-2 rounded-2xl mb-3">{successPwd}</div>}
+            {errorPwd   && <div className="alert alert-error   text-sm py-2 rounded-2xl mb-3">{errorPwd}</div>}
 
             <form onSubmit={handleSavePwd} className="space-y-4">
               {/* Ancien MDP */}
               <div className="form-control">
-                <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Ancien mot de passe</span></label>
+                <label className="label py-1">
+                  <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Ancien mot de passe</span>
+                </label>
                 <div className="relative">
-                  <input type={showPwd.ancien ? 'text' : 'password'}
-                    className="input input-bordered w-full rounded-xl pr-10"
+                  <input
+                    type={showPwd.ancien ? 'text' : 'password'}
+                    className="input input-bordered w-full pr-10"
                     value={passwords.ancien}
-                    onChange={e => setPasswords({ ...passwords, ancien: e.target.value })} />
-                  <button type="button" onClick={() => setShowPwd({ ...showPwd, ancien: !showPwd.ancien })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content">
+                    onChange={e => setPasswords({ ...passwords, ancien: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd({ ...showPwd, ancien: !showPwd.ancien })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
+                  >
                     {showPwd.ancien ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
@@ -244,53 +310,65 @@ export default function MonProfil() {
 
               {/* Nouveau MDP */}
               <div className="form-control">
-                <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nouveau mot de passe</span></label>
+                <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nouveau mot de passe</span>
+                </label>
                 <div className="relative">
-                  <input type={showPwd.nouveau ? 'text' : 'password'}
-                    className="input input-bordered w-full rounded-xl pr-10"
-                    value={passwords.nouveau}
-                    onChange={e => setPasswords({ ...passwords, nouveau: e.target.value })} />
+                  <input
+                      type={showPwd.nouveau ? 'text' : 'password'}
+                      className="input input-bordered w-full pr-10"
+                      value={passwords.nouveau}
+                      onChange={e => setPasswords({ ...passwords, nouveau: e.target.value })}
+                  />
                   <button type="button" onClick={() => setShowPwd({ ...showPwd, nouveau: !showPwd.nouveau })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content">
-                    {showPwd.nouveau ? <EyeOff size={16} /> : <Eye size={16} />}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors">
+                      {showPwd.nouveau ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
                 {passwords.nouveau && (
                   <div className="mt-2 space-y-1">
-                    <div className="flex gap-1">
-                      {[1,2,3,4].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : 'bg-base-200'}`} />
-                      ))}
-                    </div>
-                    <p className={`text-xs font-semibold ${strengthColors[strength].replace('bg-', 'text-')}`}>
-                      {strengthLabels[strength]}
-                    </p>
+                      <div className="flex gap-1">
+                          {[1,2,3,4].map(i => (
+                              <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : 'bg-base-200'}`} />
+                          ))}
+                      </div>
+                      <p className={`text-xs font-bold ${strengthColors[strength].replace('bg-', 'text-')}`}>
+                          {strengthLabels[strength]}
+                      </p>
                   </div>
                 )}
               </div>
 
               {/* Confirmation */}
               <div className="form-control">
-                <label className="label py-1"><span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Confirmer le mot de passe</span></label>
+                <label className="label py-1">
+                    <span className="label-text text-xs font-semibold text-base-content/60 uppercase tracking-wider">Confirmer le mot de passe</span>
+                </label>
                 <div className="relative">
-                  <input type={showPwd.confirmation ? 'text' : 'password'}
-                    className={`input input-bordered w-full rounded-xl pr-10 ${passwords.confirmation && passwords.confirmation !== passwords.nouveau ? 'input-error' : passwords.confirmation && passwords.confirmation === passwords.nouveau ? 'input-success' : ''}`}
-                    value={passwords.confirmation}
-                    onChange={e => setPasswords({ ...passwords, confirmation: e.target.value })} />
-                  <button type="button" onClick={() => setShowPwd({ ...showPwd, confirmation: !showPwd.confirmation })}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content">
-                    {showPwd.confirmation ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                    <input
+                        type={showPwd.confirmation ? 'text' : 'password'}
+                        className={`input input-bordered w-full pr-10 ${
+                            passwords.confirmation && passwords.confirmation !== passwords.nouveau ? 'input-error'
+                            : passwords.confirmation && passwords.confirmation === passwords.nouveau ? 'input-success'
+                            : ''
+                        }`}
+                        value={passwords.confirmation}
+                        onChange={e => setPasswords({ ...passwords, confirmation: e.target.value })}
+                    />
+                    <button type="button" onClick={() => setShowPwd({ ...showPwd, confirmation: !showPwd.confirmation })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors">
+                        {showPwd.confirmation ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                 </div>
                 {passwords.confirmation && passwords.confirmation !== passwords.nouveau && (
-                  <p className="text-xs text-error mt-1">Les mots de passe ne correspondent pas</p>
+                    <p className="text-xs text-error mt-1">Les mots de passe ne correspondent pas</p>
                 )}
               </div>
 
               <div className="flex justify-end pt-1">
-                <button type="submit" className="btn btn-neutral btn-sm gap-2 rounded-xl" disabled={loadingPwd}>
-                  {loadingPwd ? <span className="loading loading-spinner loading-xs" /> : <Lock size={14} />}
-                  Modifier le mot de passe
+                <button type="submit" className="btn btn-primary btn-sm gap-2" disabled={loadingPwd}>
+                    {loadingPwd ? <span className="loading loading-spinner loading-xs" /> : <Lock size={14} />}
+                    Modifier le mot de passe
                 </button>
               </div>
             </form>

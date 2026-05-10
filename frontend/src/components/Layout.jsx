@@ -92,7 +92,7 @@ export default function Layout({ children }) {
   const ProfilDropdown = ({ direction = 'dropdown-end', avatarSize = 'w-7 h-7' }) => (
     <div className={`dropdown ${direction}`}>
       <div tabIndex={0} className="btn btn-ghost btn-sm gap-2 px-2 cursor-pointer">
-        <div className={`${avatarSize} rounded-full overflow-hidden bg-neutral text-neutral-content flex items-center justify-center shrink-0`}>
+        <div className={`${avatarSize} rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center shrink-0`}>
           {user?.photo
             ? <img src={`http://localhost:8000/storage/${user.photo}`} alt="avatar" className="w-full h-full object-cover" />
             : <User size={14} />
@@ -104,8 +104,8 @@ export default function Layout({ children }) {
         </div>
       </div>
       <ul tabIndex={0} className="dropdown-content bg-base-100 rounded-2xl shadow-lg w-56 p-0 z-50 border border-base-200 overflow-hidden mt-2">
-        <div className="flex items-center gap-3 p-4 bg-base-200/50 border-b border-base-200">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral text-neutral-content flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 p-4 bg-primary/10 border-b border-base-200">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center shrink-0">
             {user?.photo
               ? <img src={`http://localhost:8000/storage/${user.photo}`} alt="avatar" className="w-full h-full object-cover" />
               : <User size={16} />
@@ -113,14 +113,14 @@ export default function Layout({ children }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-base-content truncate">{user?.prenom} {user?.nom}</p>
-            <span className="badge badge-neutral badge-xs capitalize">{user?.role}</span>
+            <span className="badge badge-primary badge-xs capitalize">{user?.role}</span>
           </div>
         </div>
         <div className="p-2">
-          <button onClick={() => navigate('/profil')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-base-200 transition">
+          <button onClick={() => navigate('/profil')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-primary/10 hover:text-primary transition">
             <User size={14} /> Mon profil
           </button>
-          <button onClick={() => navigate('/parametres')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-base-200 transition">
+          <button onClick={() => navigate('/parametres')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-primary/10 hover:text-primary transition">
             <Settings size={14} /> Paramètres
           </button>
           <div className="divider my-1" />
@@ -135,8 +135,8 @@ export default function Layout({ children }) {
   /* ── Dropdown profil sidebar (bottom) ── */
   const ProfilSidebar = ({ isCollapsed }) => (
     <div className="dropdown dropdown-top w-full">
-      <div tabIndex={0} className={`flex items-center cursor-pointer p-2 rounded-xl hover:bg-base-200 transition w-full ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className="w-8 h-8 rounded-full overflow-hidden bg-neutral text-neutral-content flex items-center justify-center shrink-0">
+      <div tabIndex={0} className={`flex items-center cursor-pointer p-2 rounded-2xl hover:bg-primary/10 transition w-full ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center shrink-0">
           {user?.photo
             ? <img src={`http://localhost:8000/storage/${user.photo}`} alt="avatar" className="w-full h-full object-cover" />
             : <User size={14} />
@@ -153,8 +153,8 @@ export default function Layout({ children }) {
         )}
       </div>
       <ul tabIndex={0} className="dropdown-content bg-base-100 rounded-2xl shadow-lg w-56 mb-2 p-0 z-50 border border-base-200 overflow-hidden">
-        <div className="flex items-center gap-3 p-4 bg-base-200/50 border-b border-base-200">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral text-neutral-content flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 p-4 bg-primary/10 border-b border-base-200">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-primary text-primary-content flex items-center justify-center shrink-0">
             {user?.photo
               ? <img src={`http://localhost:8000/storage/${user.photo}`} alt="avatar" className="w-full h-full object-cover" />
               : <User size={16} />
@@ -162,14 +162,14 @@ export default function Layout({ children }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-base-content truncate">{user?.prenom} {user?.nom}</p>
-            <span className="badge badge-neutral badge-xs capitalize">{user?.role}</span>
+            <span className="badge badge-primary badge-xs capitalize">{user?.role}</span>
           </div>
         </div>
         <div className="p-2">
-          <button onClick={() => navigate('/profil')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-base-200 transition">
+          <button onClick={() => navigate('/profil')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-primary/10 hover:text-primary transition">
             <User size={14} /> Mon profil
           </button>
-          <button onClick={() => navigate('/parametres')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-base-200 transition">
+          <button onClick={() => navigate('/parametres')} className="flex items-center gap-3 w-full px-3 py-2 text-sm rounded-xl hover:bg-primary/10 hover:text-primary transition">
             <Settings size={14} /> Paramètres
           </button>
           <div className="divider my-1" />
@@ -187,9 +187,9 @@ export default function Layout({ children }) {
       {/* Logo */}
       <div className={`flex items-center border-b border-base-200 h-16 shrink-0 ${isCollapsed ? 'justify-center px-3' : 'justify-between px-4'}`}>
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 bg-neutral rounded-xl flex items-center justify-center text-neutral-content text-lg shadow shrink-0">
+          <div className="w-9 h-9 bg-primary rounded-2xl flex items-center justify-center text-primary-content text-lg shadow shrink-0">
             {appConfig.company.logo
-              ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-xl" />
+              ? <img src={appConfig.company.logo} alt={appConfig.company.name} className="w-full h-full object-contain rounded-2xl" />
               : <span>⛽</span>
             }
           </div>
@@ -207,7 +207,7 @@ export default function Layout({ children }) {
               setCollapsed(newVal)
               localStorage.setItem('sidebar_collapsed', newVal)
             }}
-            className="absolute top-13 -right-3 btn btn-ghost btn-circle btn-xs text-base-content/40 hover:text-base-content z-50 bg-base-100 shadow-md border border-base-200"
+            className="absolute top-13 -right-3 btn btn-ghost btn-circle btn-xs text-base-content/40 hover:text-primary z-50 bg-base-100 shadow-md border border-base-200"
           >
             {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
@@ -234,16 +234,18 @@ export default function Layout({ children }) {
                         onClick={() => onNavigate(item.path)}
                         title={isCollapsed ? item.label : undefined}
                         className={`
-                          flex items-center w-full rounded-xl text-sm font-medium transition-all duration-150
+                          flex items-center w-full rounded-2xl text-sm font-medium transition-all duration-150
                           ${isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5'}
-                          ${isActive ? 'bg-neutral text-neutral-content shadow-sm' : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'}
+                          ${isActive
+                            ? 'bg-primary text-primary-content shadow-md'
+                            : 'text-base-content/70 hover:bg-primary/10 hover:text-primary'}
                         `}
                       >
-                        <span className={isActive ? 'text-neutral-content' : 'text-base-content/50'}>{item.icon}</span>
+                        <span className={isActive ? 'text-primary-content' : 'text-base-content/50'}>{item.icon}</span>
                         {!isCollapsed && (
                           <>
                             <span className="flex-1 text-left">{item.label}</span>
-                            {isActive && <ChevronRight size={14} className="opacity-60" />}
+                            {isActive && <ChevronRight size={14} className="opacity-70" />}
                           </>
                         )}
                       </button>
@@ -280,7 +282,7 @@ export default function Layout({ children }) {
 
       {/* Sidebar Mobile */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 bg-neutral/50 z-40 lg:hidden backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
       )}
       <aside className={`
         fixed top-0 left-0 h-full w-64 bg-base-100 z-50 shadow-2xl
@@ -313,13 +315,13 @@ export default function Layout({ children }) {
               <button tabIndex={0} className="btn btn-ghost btn-circle btn-sm relative">
                 <Bell size={18} />
                 {notifsNonLues.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-secondary-content text-xs rounded-full flex items-center justify-center font-bold leading-none shadow-sm">
                     {notifsNonLues.length > 9 ? '9+' : notifsNonLues.length}
                   </span>
                 )}
               </button>
-              <ul tabIndex={0} className="dropdown-content z-50 bg-base-100 rounded-xl shadow-lg border border-base-200 w-80 p-0 mt-2">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-base-200">
+              <ul tabIndex={0} className="dropdown-content z-50 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-80 p-0 mt-2 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border-b border-base-200">
                   <p className="font-bold text-sm">Notifications</p>
                   {notifsNonLues.length > 0 && (
                     <button onClick={marquerToutLu} className="text-xs text-primary font-semibold hover:underline">Tout marquer lu</button>
@@ -334,13 +336,13 @@ export default function Layout({ children }) {
                       const estLue = luues.includes(n.id)
                       return (
                         <div key={n.id} onClick={() => marquerLue(n.id)}
-                          className={`flex items-start gap-3 px-4 py-3 border-b border-base-200/50 hover:bg-base-200/40 transition-colors cursor-pointer ${estLue ? 'opacity-50' : ''}`}>
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                            n.niveau === 'error' ? 'bg-error/10 text-error' : n.niveau === 'warning' ? 'bg-warning/10 text-warning' :
-                            n.niveau === 'success' ? 'bg-success/10 text-success' : 'bg-info/10 text-info'
+                          className={`flex items-start gap-3 px-4 py-3 border-b border-base-200/50 hover:bg-primary/5 transition-colors cursor-pointer ${estLue ? 'opacity-50' : ''}`}>
+                          <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            n.niveau === 'error' ? 'bg-error/15 text-error' : n.niveau === 'warning' ? 'bg-warning/15 text-warning' :
+                            n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
                           }`}>
                             {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
-                             n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
+                            n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
@@ -364,6 +366,7 @@ export default function Layout({ children }) {
                 )}
               </ul>
             </div>
+            
 
             {/* Profil dans header — visible seulement si sidebar collapsed (desktop) ou mobile */}
             <div className={collapsed ? 'block' : 'lg:hidden block'}>

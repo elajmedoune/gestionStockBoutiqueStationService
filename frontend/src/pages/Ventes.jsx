@@ -47,25 +47,25 @@ function ModalDetail({ vente, onClose }) {
     <div className="modal modal-open">
       <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden">
 
-        {/* Header */}
-        <div className="bg-neutral text-neutral-content px-5 py-4 flex items-center justify-between">
+        {/* 🧁 Header cupcake */}
+        <div className="bg-primary text-primary-content px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-xl">
+            <div className="p-2 bg-white/25 rounded-2xl">
               <Receipt size={18} />
             </div>
             <div>
               <h3 className="font-extrabold text-base">Vente #{vente.idVente}</h3>
-              <p className="text-xs opacity-50">Détail de la transaction</p>
+              <p className="text-xs opacity-70">Détail de la transaction</p>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm btn-circle text-neutral-content" onClick={onClose}>
+          <button className="btn btn-ghost btn-sm btn-circle text-primary-content" onClick={onClose}>
             <X size={16} />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
           {/* Infos */}
-          <div className="flex flex-wrap items-center gap-2 p-3 bg-base-200/50 rounded-xl">
+          <div className="flex flex-wrap items-center gap-2 p-3 bg-base-200/50 rounded-2xl">
             <div className="flex items-center gap-1 text-sm text-base-content/60">
               <Calendar size={13} />
               {vente.dateVente ? new Date(vente.dateVente).toLocaleString('fr-FR') : '—'}
@@ -80,7 +80,7 @@ function ModalDetail({ vente, onClose }) {
           </div>
 
           {/* Lignes */}
-          <div className="overflow-x-auto rounded-xl border border-base-200">
+          <div className="overflow-x-auto rounded-2xl border border-base-200">
             <table className="table table-sm w-full">
               <thead>
                 <tr className="bg-base-200/50">
@@ -100,7 +100,7 @@ function ModalDetail({ vente, onClose }) {
                       <td className="font-semibold">{l.produit?.reference ?? `#${l.idProduit}`}</td>
                       <td className="text-center"><span className="badge badge-ghost badge-sm">{l.quantite}</span></td>
                       <td className="text-right text-base-content/60">{fmt(l.produit?.prixUnitaire)} F</td>
-                      <td className="text-right font-bold text-neutral">{fmt(l.totalPartielle)} F</td>
+                      <td className="text-right font-bold text-primary">{fmt(l.totalPartielle)} F</td>
                     </tr>
                   ))
                 }
@@ -109,7 +109,7 @@ function ModalDetail({ vente, onClose }) {
           </div>
 
           {/* Totaux */}
-          <div className="bg-base-200/50 rounded-xl p-4 space-y-2 text-sm">
+          <div className="bg-base-200/50 rounded-2xl p-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-base-content/60">Sous-total HT</span>
               <span className="font-semibold">{fmt(vente.totalHorsTaxe)} F</span>
@@ -126,7 +126,7 @@ function ModalDetail({ vente, onClose }) {
           </div>
 
           <div className="flex justify-end">
-            <button className="btn btn-neutral btn-sm gap-2" onClick={() => exportTicketCaisse(vente)}>
+            <button className="btn btn-primary btn-sm gap-2" onClick={() => exportTicketCaisse(vente)}>
               <Printer size={14} /> Ticket de caisse
             </button>
           </div>
@@ -234,15 +234,15 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
     <div className="modal modal-open">
       <div className="modal-box max-w-6xl w-full h-[90vh] p-0 overflow-hidden flex flex-col rounded-2xl">
 
-        {/* Header */}
-        <div className="bg-neutral text-neutral-content flex items-center justify-between px-5 py-3 shrink-0">
+        {/* 🧁 Header cupcake */}
+        <div className="bg-primary text-primary-content flex items-center justify-between px-5 py-3 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-xl">
+            <div className="p-2 bg-white/25 rounded-2xl">
               <ShoppingCart size={18} />
             </div>
             <div>
               <h3 className="font-extrabold text-base leading-tight">Nouvelle vente</h3>
-              <p className="text-xs opacity-50">
+              <p className="text-xs opacity-70">
                 {user?.role === 'gerant' ? 'Gérant' :
                  user?.role === 'gestionnaire_stock' ? 'Gestionnaire' : 'Caissier'} : {user?.prenom} {user?.nom}
               </p>
@@ -251,15 +251,15 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
           <div className="flex gap-1.5">
             {Object.entries(MODE_LABELS).map(([key, { label }]) => (
               <button key={key} onClick={() => setModePaiement(key)}
-                className={`btn btn-xs rounded-xl font-bold ${modePaiement === key
-                  ? 'bg-white text-neutral border-0'
-                  : 'bg-white/10 text-neutral-content border-0 hover:bg-white/20'
+                className={`btn btn-xs font-bold ${modePaiement === key
+                  ? 'bg-base-100 text-primary border-0 hover:bg-base-100'
+                  : 'bg-white/20 text-primary-content border-0 hover:bg-white/30'
                 }`}>
                 {label}
               </button>
             ))}
           </div>
-          <button className="btn btn-ghost btn-sm btn-circle text-neutral-content" onClick={onClose}>
+          <button className="btn btn-ghost btn-sm btn-circle text-primary-content" onClick={onClose}>
             <X size={16} />
           </button>
         </div>
@@ -271,11 +271,11 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
           <div className="flex flex-col flex-1 overflow-hidden border-r border-base-200">
 
             {/* Recherche */}
-            <div className="px-4 py-3 border-b border-base-200 bg-base-50 shrink-0">
+            <div className="px-4 py-3 border-b border-base-200 bg-base-200/30 shrink-0">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
                 <input ref={searchRef} type="text"
-                  className="input input-bordered input-sm w-full pl-9 rounded-xl bg-base-100"
+                  className="input input-bordered input-sm w-full pl-9 bg-base-100"
                   placeholder="Rechercher par nom, référence ou scanner le code barre…"
                   value={search}
                   onChange={e => { setSearch(e.target.value); setError('') }}
@@ -291,21 +291,21 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
             </div>
 
             {/* Catégories */}
-            <div className="flex gap-2 px-4 py-2 border-b border-base-200 overflow-x-auto shrink-0 bg-base-50">
+            <div className="flex gap-2 px-4 py-2 border-b border-base-200 overflow-x-auto shrink-0 bg-base-200/30">
               <button onClick={() => setCategorieActive('tous')}
-                className={`btn btn-xs shrink-0 rounded-xl ${categorieActive === 'tous' ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+                className={`btn btn-xs shrink-0 ${categorieActive === 'tous' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
                 Tous
               </button>
               {Object.entries(categories).map(([id, libelle]) => (
                 <button key={id} onClick={() => setCategorieActive(id)}
-                  className={`btn btn-xs shrink-0 rounded-xl ${categorieActive === String(id) ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+                  className={`btn btn-xs shrink-0 ${categorieActive === String(id) ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
                   {libelle}
                 </button>
               ))}
             </div>
 
             {/* Grille produits */}
-            <div className="flex-1 overflow-y-auto p-4 bg-base-50">
+            <div className="flex-1 overflow-y-auto p-4 bg-base-200/20">
               {produitsFiltres.length === 0
                 ? <div className="flex flex-col items-center justify-center h-40 text-base-content/30">
                     <Package size={32} className="mb-2 opacity-30" />
@@ -321,14 +321,14 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                           className={`
                             relative flex flex-col items-center text-center p-3 rounded-2xl border-2 transition-all duration-150 bg-base-100
                             ${dispo === 0 ? 'opacity-40 cursor-not-allowed border-base-200'
-                              : isFlash ? 'border-neutral bg-neutral/10 scale-95'
-                              : enPanier ? 'border-neutral bg-neutral/5 shadow-md'
-                              : 'border-base-200 hover:border-neutral/40 hover:shadow-md hover:scale-[1.02]'
+                              : isFlash ? 'border-primary bg-primary/15 scale-95'
+                              : enPanier ? 'border-primary bg-primary/10 shadow-md'
+                              : 'border-base-200 hover:border-primary/40 hover:shadow-md hover:scale-[1.02]'
                             }
                           `}>
                           {enPanier && (
-                            <div className="absolute -top-2 -right-2 w-5 h-5 bg-neutral rounded-full flex items-center justify-center shadow">
-                              <span className="text-neutral-content text-xs font-bold">{enPanier.quantite}</span>
+                            <div className="absolute -top-2 -right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow">
+                              <span className="text-primary-content text-xs font-bold">{enPanier.quantite}</span>
                             </div>
                           )}
                           <div className="w-full h-32 rounded-xl overflow-hidden mb-2 shadow-sm bg-base-200">
@@ -340,7 +340,7 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                             }
                           </div>
                           <p className="text-xs font-bold leading-tight line-clamp-2 mb-1">{p.nomProduit ?? p.reference}</p>
-                          <p className="text-sm font-extrabold text-neutral">{fmt(p.prixUnitaire)} F</p>
+                          <p className="text-sm font-extrabold text-primary">{fmt(p.prixUnitaire)} F</p>
                           <span className={`mt-1 text-xs badge badge-sm ${dispo === 0 ? 'badge-error' : dispo <= 5 ? 'badge-warning' : 'badge-ghost'}`}>
                             {dispo === 0 ? 'Rupture' : `Stock: ${dispo}`}
                           </span>
@@ -356,9 +356,9 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
           <div className="w-72 flex flex-col shrink-0 bg-base-100">
             <div className="px-4 py-3 border-b border-base-200 shrink-0 bg-base-100">
               <h4 className="font-extrabold text-sm flex items-center gap-2">
-                <ShoppingCart size={14} className="text-neutral" />
+                <ShoppingCart size={14} className="text-primary" />
                 Panier
-                {lignes.length > 0 && <span className="badge badge-neutral badge-sm">{lignes.length}</span>}
+                {lignes.length > 0 && <span className="badge badge-primary badge-sm">{lignes.length}</span>}
               </h4>
             </div>
 
@@ -370,8 +370,8 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                   </div>
                 : lignes.map(l => (
                   <div key={l.produit.idProduit}
-                    className="flex items-center gap-2 p-2 bg-base-200/50 rounded-xl border border-base-200 hover:bg-base-200 transition">
-                    <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-base-200 bg-base-200">
+                    className="flex items-center gap-2 p-2 bg-base-200/50 rounded-2xl border border-base-200 hover:bg-base-200 transition">
+                    <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 border border-base-200 bg-base-200">
                       {l.produit.photo
                         ? <img src={`http://127.0.0.1:8000/storage/${l.produit.photo}`} alt="" className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center">
@@ -393,7 +393,7 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                         <span className="text-xs">＋</span>
                       </button>
                     </div>
-                    <p className="text-xs font-extrabold text-neutral shrink-0">
+                    <p className="text-xs font-extrabold text-primary shrink-0">
                       {fmt(parseFloat(l.produit.prixUnitaire) * l.quantite)} F
                     </p>
                   </div>
@@ -403,7 +403,7 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
 
             <div className="px-4 py-4 border-t border-base-200 shrink-0 bg-base-100 space-y-3">
               {error && (
-                <div className="alert alert-error py-1.5 text-xs rounded-xl">
+                <div className="alert alert-error py-1.5 text-xs rounded-2xl">
                   <AlertTriangle size={12} /> {error}
                 </div>
               )}
@@ -423,8 +423,8 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="btn btn-ghost btn-sm flex-1 rounded-xl" onClick={onClose} disabled={loading}>Annuler</button>
-                <button className="btn btn-neutral btn-sm flex-1 gap-1 rounded-xl" onClick={handleSubmit} disabled={loading || lignes.length === 0}>
+                <button className="btn btn-ghost btn-sm flex-1" onClick={onClose} disabled={loading}>Annuler</button>
+                <button className="btn btn-primary btn-sm flex-1 gap-1" onClick={handleSubmit} disabled={loading || lignes.length === 0}>
                   {loading ? <span className="loading loading-spinner loading-xs" /> : <Check size={14} />}
                   Valider
                 </button>
@@ -531,7 +531,7 @@ export default function Ventes() {
   if (lV || lP) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-neutral" />
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     </Layout>
   )
@@ -543,7 +543,7 @@ export default function Ventes() {
         {/* Toast */}
         {toast && (
           <div className="toast toast-top toast-end z-[100]">
-            <div className={`alert ${toast.type === 'success' ? 'alert-success' : 'alert-error'} text-sm py-2 rounded-xl`}>
+            <div className={`alert ${toast.type === 'success' ? 'alert-success' : 'alert-error'} text-sm py-2 rounded-2xl`}>
               {toast.type === 'success' ? <Check size={14} /> : <AlertTriangle size={14} />}
               {toast.msg}
             </div>
@@ -554,8 +554,8 @@ export default function Ventes() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-extrabold text-base-content flex items-center gap-2">
-              <div className="p-2 bg-neutral/10 rounded-xl">
-                <ShoppingCart size={18} className="text-neutral" />
+              <div className="p-2 bg-primary/15 rounded-2xl">
+                <ShoppingCart size={18} className="text-primary" />
               </div>
               Ventes
             </h1>
@@ -563,12 +563,12 @@ export default function Ventes() {
           </div>
           <div className="flex gap-2">
             <div className="relative">
-              <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5 rounded-xl"
+              <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5"
                 onClick={() => setExportOpen(!exportOpen)}>
                 <Download size={14} /> Exporter
               </button>
               {exportOpen && (
-                <div className="absolute right-0 mt-1 bg-base-100 rounded-xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
                   <ExportPDF data={exportData} columns={PDF_COLS} filename="ventes" label="PDF" />
                   <ExportExcel data={ventesFiltrees.map(v => ({
                     ID: `#${v.idVente}`,
@@ -583,7 +583,7 @@ export default function Ventes() {
                 </div>
               )}
             </div>
-            <button className="btn btn-sm btn-neutral gap-1.5 rounded-xl" onClick={() => setModalNew(true)}>
+            <button className="btn btn-sm btn-primary gap-1.5" onClick={() => setModalNew(true)}>
               <Plus size={14} /> Nouvelle vente
             </button>
           </div>
@@ -599,7 +599,7 @@ export default function Ventes() {
           ].map((kpi, i) => (
             <div key={i} className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-0.5 transition-transform duration-200">
               <div className="card-body p-4 gap-1">
-                <div className={`p-2 rounded-xl bg-${kpi.color}/10 text-${kpi.color} w-fit mb-1`}>{kpi.icon}</div>
+                <div className={`p-2 rounded-2xl bg-${kpi.color}/15 text-${kpi.color} w-fit mb-1`}>{kpi.icon}</div>
                 <p className="text-xs font-bold uppercase tracking-widest text-base-content/40">{kpi.label}</p>
                 <p className={`text-2xl font-extrabold text-${kpi.color}`}>{kpi.value}</p>
                 <p className="text-xs text-base-content/40">{kpi.sub}</p>
@@ -615,22 +615,22 @@ export default function Ventes() {
               <div className="relative">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
                 <input type="text" placeholder="Rechercher…"
-                  className="input input-bordered input-sm pl-8 w-44 rounded-xl"
+                  className="input input-bordered input-sm pl-8 w-44"
                   value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} />
               </div>
-              <select className="select select-bordered select-sm w-36 rounded-xl"
+              <select className="select select-bordered select-sm w-36"
                 value={filterMode} onChange={e => { setFilterMode(e.target.value); setPage(1) }}>
                 <option value="">Tous les modes</option>
                 <option value="especes">Espèces</option>
                 <option value="carte">Carte</option>
                 <option value="mobile_money">Mobile Money</option>
               </select>
-              <input type="date" className="input input-bordered input-sm w-36 rounded-xl"
+              <input type="date" className="input input-bordered input-sm w-36"
                 value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPage(1) }} />
-              <input type="date" className="input input-bordered input-sm w-36 rounded-xl"
+              <input type="date" className="input input-bordered input-sm w-36"
                 value={dateFin} onChange={e => { setDateFin(e.target.value); setPage(1) }} />
               {(search || filterMode || dateDebut || dateFin) && (
-                <button className="btn btn-ghost btn-sm gap-1 text-error rounded-xl"
+                <button className="btn btn-ghost btn-sm gap-1 text-error"
                   onClick={() => { setSearch(''); setFilterMode(''); setDateDebut(''); setDateFin(''); setPage(1) }}>
                   <X size={13} /> Effacer
                 </button>
@@ -645,7 +645,7 @@ export default function Ventes() {
           <div className="overflow-x-auto">
             <table className="table table-sm w-full">
               <thead>
-                <tr className="bg-neutral text-neutral-content">
+                <tr className="bg-primary text-primary-content">
                   <th>#</th><th>Date</th><th>Caissier</th><th>Mode</th><th>Produits</th>
                   <th className="text-right">HT</th><th className="text-right">TVA</th>
                   <th className="text-right">TTC</th><th className="text-right">Actions</th>
@@ -659,7 +659,7 @@ export default function Ventes() {
                       const lignes = v.lignes ?? []
                       return (
                         <tr key={v.idVente} className={`hover ${v.statut === 'annulee' ? 'opacity-50' : ''}`}>
-                          <td className="font-bold text-neutral">#{v.idVente}</td>
+                          <td className="font-bold text-primary">#{v.idVente}</td>
                           <td className="text-base-content/70 text-xs">
                             {v.dateVente ? new Date(v.dateVente).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                           </td>
@@ -687,7 +687,7 @@ export default function Ventes() {
                                 ? <span className="badge badge-error badge-sm">Annulée</span>
                                 : <>
                                     <button className="btn btn-ghost btn-xs btn-circle tooltip" data-tip="Détail" onClick={() => handleDetail(v)}><Eye size={13} /></button>
-                                    <button className="btn btn-ghost btn-xs btn-circle tooltip text-neutral" data-tip="Ticket" onClick={() => handleTicket(v)}><Printer size={13} /></button>
+                                    <button className="btn btn-ghost btn-xs btn-circle tooltip text-primary" data-tip="Ticket" onClick={() => handleTicket(v)}><Printer size={13} /></button>
                                     <button className="btn btn-ghost btn-xs btn-circle text-warning tooltip" data-tip="Annuler" onClick={() => setConfirmDel(v.idVente)}><Ban size={13} /></button>
                                   </>
                               }
@@ -714,7 +714,7 @@ export default function Ventes() {
                   }, [])
                   .map((p, i) => p === '…'
                     ? <span key={`e${i}`} className="join-item btn btn-xs btn-ghost pointer-events-none">…</span>
-                    : <button key={p} className={`join-item btn btn-xs ${page === p ? 'btn-neutral' : 'btn-ghost'}`} onClick={() => setPage(p)}>{p}</button>
+                    : <button key={p} className={`join-item btn btn-xs ${page === p ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage(p)}>{p}</button>
                   )
                 }
                 <button className="join-item btn btn-xs btn-ghost" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}><ChevronRight size={13} /></button>
@@ -736,14 +736,14 @@ export default function Ventes() {
         <div className="modal modal-open">
           <div className="modal-box max-w-sm rounded-2xl p-0 overflow-hidden">
             <div className="bg-warning text-warning-content px-5 py-4 flex items-center gap-3">
-              <div className="p-2 bg-white/10 rounded-xl"><Ban size={18} /></div>
+              <div className="p-2 bg-white/25 rounded-2xl"><Ban size={18} /></div>
               <h3 className="font-extrabold text-base">Annuler la vente #{confirmDel} ?</h3>
             </div>
             <div className="p-5">
               <p className="text-sm text-base-content/60 mb-4">La vente sera marquée comme annulée. Cette action est irréversible.</p>
               <div className="flex justify-end gap-2">
-                <button className="btn btn-ghost btn-sm rounded-xl" onClick={() => setConfirmDel(null)}>Retour</button>
-                <button className="btn btn-warning btn-sm gap-1 rounded-xl" onClick={() => handleDelete(confirmDel)}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDel(null)}>Retour</button>
+                <button className="btn btn-warning btn-sm gap-1" onClick={() => handleDelete(confirmDel)}>
                   <Ban size={13} /> Confirmer
                 </button>
               </div>

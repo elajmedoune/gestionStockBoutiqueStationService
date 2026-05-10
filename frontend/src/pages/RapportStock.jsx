@@ -27,15 +27,21 @@ const PERIODES = [
   { label: 'Tout', days: null },
 ]
 
+/* 🧁 Palette cupcake */
 const COLORS_PIE = [
-  'rgba(99,102,241,0.85)',
-  'rgba(34,197,94,0.85)',
-  'rgba(56,189,248,0.85)',
-  'rgba(251,191,36,0.85)',
-  'rgba(236,72,153,0.85)',
-  'rgba(248,114,114,0.85)',
-  'rgba(52,211,153,0.85)',
+  'rgba(101,195,200,0.85)', // primary teal
+  'rgba(239,159,188,0.85)', // secondary rose
+  'rgba(238,175,58,0.85)',  // accent ambre
+  'rgba(180,144,202,0.85)', // lavande
+  'rgba(116,206,183,0.85)', // menthe
+  'rgba(247,202,201,0.85)', // rose poudré
+  'rgba(155,206,235,0.85)', // ciel
 ]
+
+const CHART_TEAL  = 'rgba(101,195,200,0.85)'
+const CHART_ROSE  = 'rgba(239,159,188,0.85)'
+const CHART_SKY   = 'rgba(155,206,235,0.85)'
+const CHART_AMBRE = 'rgba(238,175,58,0.85)'
 
 const PDF_COLS = [
   { header: 'Produit',       dataKey: 'produit'   },
@@ -51,7 +57,7 @@ function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse 
     <div className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-1 transition-transform duration-200">
       <div className="card-body p-4 gap-2">
         <div className="flex items-center justify-between">
-          <div className={`p-2 rounded-xl ${badgeClass}`}><Icon size={16} /></div>
+          <div className={`p-2 rounded-2xl ${badgeClass}`}><Icon size={16} /></div>
           {pulse && <span className="badge badge-error badge-xs animate-pulse">!</span>}
         </div>
         <div>
@@ -66,26 +72,28 @@ function KpiCard({ label, value, sub, icon: Icon, colorClass, badgeClass, pulse 
 
 function HeroBanner({ stats, dateDebut, dateFin }) {
   const colors = [
-    { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30', icon: <Package size={14} className="text-primary" /> },
-    { bg: 'bg-info/15', text: 'text-info', border: 'border-info/30', icon: <Layers size={14} className="text-info" /> },
-    { bg: 'bg-error/15', text: 'text-error', border: 'border-error/30', icon: <TrendingDown size={14} className="text-error" /> },
-    { bg: 'bg-warning/15', text: 'text-warning', border: 'border-warning/30', icon: <ShieldAlert size={14} className="text-warning" /> },
+    { bg: 'bg-primary/15',   text: 'text-primary',   border: 'border-primary/30',   icon: <Package      size={14} className="text-primary" /> },
+    { bg: 'bg-info/15',      text: 'text-info',      border: 'border-info/30',      icon: <Layers       size={14} className="text-info" /> },
+    { bg: 'bg-error/15',     text: 'text-error',     border: 'border-error/30',     icon: <TrendingDown size={14} className="text-error" /> },
+    { bg: 'bg-warning/15',   text: 'text-warning',   border: 'border-warning/30',   icon: <ShieldAlert  size={14} className="text-warning" /> },
   ]
   return (
     <div className="card bg-base-100 text-base-content shadow-md border border-base-300 overflow-hidden">
       <div className="card-body p-0">
         <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-white/3 translate-y-1/2 pointer-events-none" />
+          {/* 🧁 bulles pastel cupcake */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-secondary/20 -translate-y-1/2 translate-x-1/4 pointer-events-none blur-2xl" />
+          <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-primary/30 translate-y-1/2 pointer-events-none blur-xl" />
+          <div className="absolute top-4 left-1/2 w-24 h-24 rounded-full bg-accent/20 pointer-events-none blur-xl" />
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-white/15 rounded-lg"><BarChart2 size={14} /></div>
-              <span className="text-xs font-bold opacity-60 uppercase tracking-widest">Gestion des stocks</span>
+              <div className="p-1.5 bg-white/20 rounded-2xl"><BarChart2 size={14} /></div>
+              <span className="text-xs font-bold opacity-70 uppercase tracking-widest">Gestion des stocks</span>
               <div className="w-px h-3 bg-white/20" />
-              <span className="badge badge-sm bg-white/20 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
+              <span className="badge badge-sm bg-secondary/30 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
             </div>
             <h1 className="text-3xl font-extrabold leading-tight mb-2">Rapport de Stock</h1>
-            <div className="flex items-center gap-1.5 text-xs opacity-50">
+            <div className="flex items-center gap-1.5 text-xs opacity-60">
               <CalendarDays size={11} />
               <span>{dateDebut}</span><span>→</span><span>{dateFin}</span>
             </div>
@@ -96,7 +104,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
             <div key={label} className={`rounded-2xl p-4 border-2 shadow-sm hover:-translate-y-1 transition-all duration-200 cursor-default ${colors[i].bg} ${colors[i].border}`}>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold uppercase tracking-widest text-base-content/40">{label}</p>
-                <div className={`p-1.5 rounded-lg border ${colors[i].bg} ${colors[i].border}`}>{colors[i].icon}</div>
+                <div className={`p-1.5 rounded-2xl border ${colors[i].bg} ${colors[i].border}`}>{colors[i].icon}</div>
               </div>
               <p className={`text-2xl font-extrabold ${ok === false ? 'text-error' : colors[i].text}`}>{value}</p>
             </div>
@@ -110,7 +118,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-base-100 border border-base-300 rounded-xl p-3 shadow-lg text-xs">
+    <div className="bg-base-100 border border-primary/40 rounded-2xl p-3 shadow-lg text-xs">
       <p className="font-bold text-base-content mb-2">{label}</p>
       {payload.map((p, i) => (
         <div key={i} className="flex items-center justify-between gap-4">
@@ -239,7 +247,7 @@ export default function RapportStock() {
   if (loading) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-neutral" />
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     </Layout>
   )
@@ -266,7 +274,7 @@ export default function RapportStock() {
               <div className="flex gap-1.5 flex-wrap">
                 {PERIODES.map(p => (
                   <button key={p.label} onClick={() => handlePeriode(p)}
-                    className={`btn btn-xs rounded-xl font-bold ${periodeActive === p.label ? 'btn-neutral' : 'btn-ghost border border-base-300'}`}>
+                    className={`btn btn-xs font-bold ${periodeActive === p.label ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
                     {p.label}
                   </button>
                 ))}
@@ -274,15 +282,15 @@ export default function RapportStock() {
               <div className="hidden sm:block w-px h-5 bg-base-300" />
               <div className="flex items-center gap-2">
                 <CalendarDays size={13} className="text-base-content/30" />
-                <input type="date" className="input input-xs input-bordered rounded-xl"
+                <input type="date" className="input input-xs input-bordered"
                   value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPeriodeActive('') }} />
                 <span className="text-base-content/30 text-xs">—</span>
-                <input type="date" className="input input-xs input-bordered rounded-xl"
+                <input type="date" className="input input-xs input-bordered"
                   value={dateFin} onChange={e => { setDateFin(e.target.value); setPeriodeActive('') }} />
               </div>
               <div className="ml-auto flex gap-2">
                 {periodeActive === '' && (
-                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold rounded-xl"
+                  <button className="btn btn-ghost btn-xs gap-1.5 text-error font-semibold"
                     onClick={() => {
                       setPeriodeActive('1M')
                       const d = new Date(today); d.setDate(d.getDate() - 30)
@@ -292,12 +300,12 @@ export default function RapportStock() {
                   </button>
                 )}
                 <div className="relative">
-                  <button className="btn btn-ghost btn-xs gap-1.5 font-semibold rounded-xl border border-base-300"
+                  <button className="btn btn-ghost btn-xs gap-1.5 font-semibold border border-base-300"
                     onClick={() => setExportOpen(!exportOpen)}>
                     <Download size={12} /> Exporter
                   </button>
                   {exportOpen && (
-                    <div className="absolute right-0 mt-1 bg-base-100 rounded-xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
                       <ExportPDF data={exportDataPDF} columns={PDF_COLS} filename="rapport-stock" label="PDF" />
                       <ExportExcel data={exportDataExcel} filename="rapport-stock" label="Excel" />
                       <ExportCSV data={exportDataPDF} filename="rapport-stock" label="CSV" />
@@ -311,12 +319,12 @@ export default function RapportStock() {
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KpiCard label="Total produits"    value={produits.length}           sub="références"          icon={Package}        colorClass="text-primary"   badgeClass="bg-primary/10 text-primary" />
-          <KpiCard label="Unités en stock"   value={fmt(totalUnites)}          sub="quantités restantes" icon={Layers}         colorClass="text-info"      badgeClass="bg-info/10 text-info" />
-          <KpiCard label="En rupture"        value={enRupture.length}          sub="stock à 0"           icon={TrendingDown}   colorClass={enRupture.length > 0 ? 'text-error' : 'text-success'}   badgeClass={enRupture.length > 0 ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}   pulse={enRupture.length > 0} />
-          <KpiCard label="Sous seuil"        value={sousSeuil.length}          sub="à réapprovisionner"  icon={ShieldAlert}    colorClass={sousSeuil.length > 0 ? 'text-warning' : 'text-success'} badgeClass={sousSeuil.length > 0 ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'} pulse={sousSeuil.length > 0} />
-          <KpiCard label="Taux consommation" value={`${tauxConsomm}%`}         sub="du stock initial"    icon={BarChart2}      colorClass="text-secondary" badgeClass="bg-secondary/10 text-secondary" />
-          <KpiCard label="Livraisons reçues" value={livraisonsFiltrees.length} sub="sur la période"      icon={ArrowDownCircle} colorClass="text-accent"   badgeClass="bg-accent/10 text-accent" />
+          <KpiCard label="Total produits"    value={produits.length}           sub="références"          icon={Package}        colorClass="text-primary"   badgeClass="bg-primary/15 text-primary" />
+          <KpiCard label="Unités en stock"   value={fmt(totalUnites)}          sub="quantités restantes" icon={Layers}         colorClass="text-info"      badgeClass="bg-info/15 text-info" />
+          <KpiCard label="En rupture"        value={enRupture.length}          sub="stock à 0"           icon={TrendingDown}   colorClass={enRupture.length > 0 ? 'text-error' : 'text-success'}   badgeClass={enRupture.length > 0 ? 'bg-error/15 text-error' : 'bg-success/15 text-success'}   pulse={enRupture.length > 0} />
+          <KpiCard label="Sous seuil"        value={sousSeuil.length}          sub="à réapprovisionner"  icon={ShieldAlert}    colorClass={sousSeuil.length > 0 ? 'text-warning' : 'text-success'} badgeClass={sousSeuil.length > 0 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'} pulse={sousSeuil.length > 0} />
+          <KpiCard label="Taux consommation" value={`${tauxConsomm}%`}         sub="du stock initial"    icon={BarChart2}      colorClass="text-secondary" badgeClass="bg-secondary/20 text-secondary" />
+          <KpiCard label="Livraisons reçues" value={livraisonsFiltrees.length} sub="sur la période"      icon={ArrowDownCircle} colorClass="text-accent"   badgeClass="bg-accent/15 text-accent" />
         </div>
 
         {/* Alertes */}
@@ -326,9 +334,9 @@ export default function RapportStock() {
               <div className="card bg-base-100 shadow-sm border border-error/30 overflow-hidden">
                 <div className="card-body p-0">
                   <div className="bg-error text-error-content px-5 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-white/10 rounded-lg"><AlertTriangle size={14} /></div>
+                    <div className="p-1.5 bg-white/25 rounded-2xl"><AlertTriangle size={14} /></div>
                     <h2 className="font-extrabold text-sm">Ruptures de stock</h2>
-                    <span className="badge badge-sm bg-white/20 border-0 text-error-content ml-auto">{enRupture.length}</span>
+                    <span className="badge badge-sm bg-white/25 border-0 text-error-content ml-auto">{enRupture.length}</span>
                   </div>
                   <div className="overflow-x-auto max-h-52 overflow-y-auto">
                     <table className="table table-xs w-full">
@@ -357,9 +365,9 @@ export default function RapportStock() {
               <div className="card bg-base-100 shadow-sm border border-warning/30 overflow-hidden">
                 <div className="card-body p-0">
                   <div className="bg-warning text-warning-content px-5 py-3 flex items-center gap-2">
-                    <div className="p-1.5 bg-white/10 rounded-lg"><ShieldAlert size={14} /></div>
+                    <div className="p-1.5 bg-white/25 rounded-2xl"><ShieldAlert size={14} /></div>
                     <h2 className="font-extrabold text-sm">Sous seuil de sécurité</h2>
-                    <span className="badge badge-sm bg-white/20 border-0 text-warning-content ml-auto">{sousSeuil.length}</span>
+                    <span className="badge badge-sm bg-white/25 border-0 text-warning-content ml-auto">{sousSeuil.length}</span>
                   </div>
                   <div className="overflow-x-auto max-h-52 overflow-y-auto">
                     <table className="table table-xs w-full">
@@ -398,11 +406,11 @@ export default function RapportStock() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="card bg-base-100 shadow-sm border border-base-200">
             <div className="card-body p-0">
-              <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><BarChart2 size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><BarChart2 size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Stock par catégorie</h2>
-                  <p className="text-xs opacity-50">{stockParCategorie.length} catégories</p>
+                  <p className="text-xs opacity-70">{stockParCategorie.length} catégories</p>
                 </div>
               </div>
               <div className="p-4">
@@ -415,7 +423,7 @@ export default function RapportStock() {
                           <XAxis dataKey="cat" tick={tick} tickLine={false} axisLine={false} />
                           <YAxis tick={tick} tickLine={false} axisLine={false} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="quantite" name="Unités" fill="rgba(99,102,241,0.75)" radius={[6,6,0,0]} />
+                          <Bar dataKey="quantite" name="Unités" fill={CHART_TEAL} radius={[8,8,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -426,11 +434,11 @@ export default function RapportStock() {
 
           <div className="card bg-base-100 shadow-sm border border-base-200">
             <div className="card-body p-0">
-              <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><Layers size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><Layers size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Répartition du stock</h2>
-                  <p className="text-xs opacity-50">Par catégorie</p>
+                  <p className="text-xs opacity-70">Par catégorie</p>
                 </div>
               </div>
               <div className="p-4">
@@ -465,11 +473,11 @@ export default function RapportStock() {
 
           <div className="card bg-base-100 shadow-sm border border-base-200">
             <div className="card-body p-0">
-              <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><ArrowDownCircle size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><ArrowDownCircle size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Entrées de stock</h2>
-                  <p className="text-xs opacity-50">{livraisonsFiltrees.length} livraison(s) sur la période</p>
+                  <p className="text-xs opacity-70">{livraisonsFiltrees.length} livraison(s) sur la période</p>
                 </div>
               </div>
               <div className="p-4">
@@ -482,7 +490,7 @@ export default function RapportStock() {
                           <XAxis dataKey="jour" tick={tick} tickLine={false} axisLine={false} />
                           <YAxis tick={tick} tickLine={false} axisLine={false} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="entrees" name="Unités reçues" fill="rgba(56,189,248,0.75)" radius={[6,6,0,0]} />
+                          <Bar dataKey="entrees" name="Unités reçues" fill={CHART_SKY} radius={[8,8,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -493,11 +501,11 @@ export default function RapportStock() {
 
           <div className="card bg-base-100 shadow-sm border border-base-200">
             <div className="card-body p-0">
-              <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><TrendingDown size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><TrendingDown size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Top produits consommés</h2>
-                  <p className="text-xs opacity-50">Depuis le début du stock</p>
+                  <p className="text-xs opacity-70">Depuis le début du stock</p>
                 </div>
               </div>
               <div className="p-4">
@@ -516,10 +524,10 @@ export default function RapportStock() {
                               </div>
                               <div className="w-full bg-base-200 rounded-full h-1.5">
                                 <div className="h-1.5 rounded-full transition-all duration-500"
-                                  style={{ width: `${ratio}%`, background: ratio >= 80 ? 'rgba(248,114,114,0.8)' : ratio >= 50 ? 'rgba(251,191,36,0.8)' : 'rgba(99,102,241,0.8)' }} />
+                                  style={{ width: `${ratio}%`, background: ratio >= 80 ? CHART_ROSE : ratio >= 50 ? CHART_AMBRE : CHART_TEAL }} />
                               </div>
                             </div>
-                            <span className={`text-xs font-extrabold shrink-0 w-10 text-right ${ratio >= 80 ? 'text-error' : ratio >= 50 ? 'text-warning' : 'text-primary'}`}>{ratio}%</span>
+                            <span className={`text-xs font-extrabold shrink-0 w-10 text-right ${ratio >= 80 ? 'text-secondary' : ratio >= 50 ? 'text-accent' : 'text-primary'}`}>{ratio}%</span>
                           </div>
                         )
                       })}
@@ -533,11 +541,11 @@ export default function RapportStock() {
         {/* Tableau état complet */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
           <div className="card-body p-0">
-            <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-              <div className="p-1.5 bg-white/10 rounded-lg"><FileText size={14} /></div>
+            <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+              <div className="p-1.5 bg-white/25 rounded-2xl"><FileText size={14} /></div>
               <div>
                 <h2 className="font-extrabold text-sm">État complet des stocks</h2>
-                <p className="text-xs opacity-50">{produits.length} produit(s) suivi(s)</p>
+                <p className="text-xs opacity-70">{produits.length} produit(s) suivi(s)</p>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -580,10 +588,10 @@ export default function RapportStock() {
                 </tbody>
                 {produits.length > 0 && (
                   <tfoot>
-                    <tr className="bg-neutral text-neutral-content text-xs font-black">
+                    <tr className="bg-primary text-primary-content text-xs font-black">
                       <td className="pl-5 py-3">TOTAL</td><td />
                       <td className="text-right">{fmt(totalInitial)}</td>
-                      <td className="text-right opacity-70">{fmt(totalInitial - totalUnites)}</td>
+                      <td className="text-right opacity-80">{fmt(totalInitial - totalUnites)}</td>
                       <td className="text-right text-success font-extrabold">{fmt(totalUnites)}</td>
                       <td />
                       <td className="text-center pr-5">
@@ -605,11 +613,11 @@ export default function RapportStock() {
         {livraisonsFiltrees.length > 0 && (
           <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
             <div className="card-body p-0">
-              <div className="bg-neutral text-neutral-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/10 rounded-lg"><ArrowDownCircle size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><ArrowDownCircle size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Historique des livraisons</h2>
-                  <p className="text-xs opacity-50">{livraisonsFiltrees.length} livraison(s) sur la période</p>
+                  <p className="text-xs opacity-70">{livraisonsFiltrees.length} livraison(s) sur la période</p>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -623,7 +631,7 @@ export default function RapportStock() {
                   <tbody className="text-xs">
                     {livraisonsFiltrees.slice(0, 20).map((l, i) => (
                       <tr key={i} className="hover">
-                        <td className="pl-5 font-bold text-neutral">#{l.idLivraison}</td>
+                        <td className="pl-5 font-bold text-primary">#{l.idLivraison}</td>
                         <td className="text-base-content/70">
                           {l.dateLivraison ? new Date(l.dateLivraison).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
                         </td>
