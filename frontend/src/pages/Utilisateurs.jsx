@@ -13,7 +13,7 @@ const Utilisateurs = () => {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     nom: "", prenom: "", login: "", email: "",
-    password: "", role: "caissier", actif: 1,
+    motDePasse: "", role: "caissier", actif: 1,
   });
 
   useEffect(() => {
@@ -35,9 +35,14 @@ const Utilisateurs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/register", form);
+      // Le backend attend motDePasse + motDePasse_confirmation (règle "confirmed")
+      const payload = {
+        ...form,
+        motDePasse_confirmation: form.motDePasse,
+      };
+      await api.post("/register", payload);
       setShowModal(false);
-      setForm({ nom: "", prenom: "", login: "", email: "", password: "", role: "caissier", actif: 1 });
+      setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", role: "caissier", actif: 1 });
       fetchUtilisateurs();
     } catch (err) {
       setError(err.response?.data?.message || "Erreur lors de la création");
@@ -223,7 +228,10 @@ const Utilisateurs = () => {
               <div className="form-control">
                 <label className="label"><span className="label-text">Mot de passe *</span></label>
                 <input type="password" className="input input-bordered" required minLength={8}
-                  value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                  autoComplete="new-password" name="motDePasse"
+                  value={form.motDePasse}
+                  onChange={(e) => setForm({ ...form, motDePasse: e.target.value })}
+                  onInput={(e) => setForm({ ...form, motDePasse: e.target.value })} />
               </div>
               <div className="form-control">
                 <label className="label"><span className="label-text">Rôle *</span></label>
