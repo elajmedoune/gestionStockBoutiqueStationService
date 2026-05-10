@@ -17,14 +17,36 @@ class ProduitController extends Controller
     public function store(StoreProduitRequest $request)
     {
         $validated = $request->validated();
+
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('photos', 'public');
             $validated['photo'] = $path;
         }
 
         // $validated = $request->validated();
-        $produit = Produit::create($validated);
-        return response()->json($produit, 201);
+       $produit = Produit::create([
+            'nomProduit'    => $validated['nomProduit'] ?? null,
+            'reference'     => $validated['reference'],
+            'codeBarre'     => $validated['codeBarre'] ?? null,
+            'photo'         => $validated['photo'] ?? null,
+            'prixUnitaire'  => (float) $validated['prixUnitaire'],
+            'seuilSecurite' => (int) $validated['seuilSecurite'],
+            'idCategorie'   => (int) $validated['idCategorie'],
+        ]);
+
+        // Création automatique du stock initial
+        if ($request->filled('quantiteInitiale') && $request->quantiteInitiale > 0) {
+            \App\Models\Stock::create([
+                'idProduit'        => $produit->idProduit,
+                'quantiteInitiale' => (int)  $request->quantiteInitiale,
+                'quantiteRestante' => (int)  $request->quantiteInitiale,
+                'dateEntree'       => now()->toDateString(),
+                'prixAchat'        => 0,
+                'prixEnGros'       => 0,
+            ]);
+        }
+    
+        return response()->json($produit->load(['categorie', 'stocks', 'fournisseurs']), 201);
     }
 
     public function show($id)
@@ -36,7 +58,24 @@ class ProduitController extends Controller
     public function update(StoreProduitRequest $request, $id)
     {
         $produit = Produit::findOrFail($id);
-        $produit->update($request->validated());
+
+        $validated = $request->validated();
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('photos', 'public');
+            $validated['photo'] = $path;
+        }
+
+        $produit->update([
+            'nomProduit'    => $validated['nomProduit'] ?? $produit->nomProduit,
+            'reference'     => $validated['reference'],
+            'codeBarre'     => $validated['codeBarre'] ?? null,
+            'photo'         => $validated['photo'] ?? $produit->photo,
+            'prixUnitaire'  => (float) $validated['prixUnitaire'],
+            'seuilSecurite' => (float) $validated['seuilSecurite'],
+            'idCategorie'   => (int) $validated['idCategorie'],
+        ]);
+
         return response()->json($produit, 200);
     }
 

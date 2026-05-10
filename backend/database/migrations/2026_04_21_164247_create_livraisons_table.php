@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('livraison', function (Blueprint $table) {
+        Schema::create('livraisons', function (Blueprint $table) {
             $table->id('idLivraison');
             $table->date('dateLivraison');
             $table->decimal('montantTotal', 10, 2)->default(0.00);
@@ -28,6 +28,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('livraison');
+        Schema::dropIfExists('livraisons');
     }
 };

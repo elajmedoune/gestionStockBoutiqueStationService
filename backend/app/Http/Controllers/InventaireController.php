@@ -9,131 +9,130 @@ use Illuminate\Support\Facades\DB;
 
 class InventaireController extends Controller
 {
-    //--------------------------------------------------------------------------
-    //GET /api/inventaires
-    //--------------------------------------------------------------------------
-    public function index(Request $request): JsonResponse{
-        $query = Inventaire::with(['utilisateur', 'produit']);
-        
-        //Filtres optionnels
-        if($request->filled('statut')){
-            $query->where('statut', $request-> statut); 
+    public function index(Request $request): JsonResponse
+    {
+        $query = Inventaire::with(['utilisateur', 'stock.produit']);
+
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->statut);
         }
 
-        if($request->filled('IdProduit')){
-            $query->where('IdProduit', $request-> IdProduit);
+        if ($request->filled('idStock')) {
+            $query->where('idStock', $request->idStock);
         }
 
-        if($request->filled('date_debut') && $request->falled('date_fin')){
-            $query->whereBetween('dateInventaire',[
+        if ($request->filled('date_debut') && $request->filled('date_fin')) {
+            $query->whereBetween('dateInventaire', [
                 $request->date_debut,
                 $request->date_fin,
             ]);
         }
+
         $inventaires = $query->orderBy('dateInventaire', 'desc')->paginate(15);
         return response()->json($inventaires);
-        
     }
-    //--------------------------------------------------------------------------
-    // POST /api/inventaires
-    //--------------------------------------------------------------------------
-     public function store(Request $request): JsonResponse{
+
+    public function store(Request $request): JsonResponse
+    {
         $validated = $request->validate([
-            'dateInventaire'              =>'required|date',
-            'quantiteReelle'             =>'required|integer|min:0',
-            'observations'                =>'required|string|max:300',
-            'idStock'                   =>'required|exists:Stock, idStock',
+            'dateInventaire' => 'required|date',
+            'quantiteReelle' => 'required|integer|min:0',
+            'observations'   => 'nullable|string|max:300',
+            'idStock'        => 'required|exists:stocks,idStock',
+        ], [
+            'dateInventaire.required' => 'La date est obligatoire.',
+            'quantiteReelle.required' => 'La quantité réelle est obligatoire.',
+            'quantiteReelle.min'      => 'La quantité ne peut pas être négative.',
+            'idStock.required'        => 'Le stock est obligatoire.',
+            'idStock.exists'          => 'Ce stock n\'existe pas.',
         ]);
 
-        //i = utilisateur connecte
-        $validated['idUtilisateur'] = $request->user()->i;
+        $validated['idUtilisateur'] = $request->user()->idUtilisateur;
 
-        //i MySQL (trg_inventaire_statut_insert) calculera automatiquement quantiteTheorique, ecart et statut.
-        $inventaire =  Inventaire::create($validated);
-
-        //Recharger pour recuperer les valeurs calculees par le trigger
+        // Le trigger trg_inventaire_statut_insert calculera automatiquement
+        // quantiteTheorique et statut
+        $inventaire = Inventaire::create($validated);
         $inventaire->refresh();
 
         return response()->json([
-            'message'    =>'Inventaire enregistre avec succes',
-            'inventaire'     =>$inventaire>load(['utilisateur', 'produit'])
+            'message'    => 'Inventaire enregistré avec succès',
+            'inventaire' => $inventaire->load(['utilisateur', 'stock.produit'])
         ], 201);
     }
 
-    //--------------------------------------------------------------------------
-    // GET /api/inventaires/{id}
-    //--------------------------------------------------------------------------
-    public function show(int $id): JsonResponse{
-        $inventaire = Inventaire::with(['utilisateur', 'produit'])->findOrFail($id);
+    public function show(int $id): JsonResponse
+    {
+        $inventaire = Inventaire::with(['utilisateur', 'stock.produit'])->findOrFail($id);
         return response()->json($inventaire);
     }
 
-    //--------------------------------------------------------------------------
-    // PUT /api/inventaires/{id}
-    //--------------------------------------------------------------------------
-    public function update(Requesst $request, int $id): JsonResponse{
-        $inventaire = Inventaire:: findOrFail($id);
-        $validated = $request->validate([
-            'quantiteReelle'             =>'sometimes|integer|min:0',
-            'observations'                =>'nullable|string|max:300',
-            'statut'                   =>'sometimes|in:en_cours, conforme, deficit, surplus',
-        ]);
-       
-        $inventaire->update($validated);
-        $inventaire-> refresh();
-
-           return response()->json([
-            'message'        =>'Inventaire mis a jour',
-            'inventaire'     =>$inventaire>load(['utilisateur', 'produit'])
-           ]);
-    }
-
-    //--------------------------------------------------------------------------
-    // DELETE /api/inventaires/{id}
-    //--------------------------------------------------------------------------
-     public function destroy(int $id): JsonResponse{
+    public function update(Request $request, int $id): JsonResponse
+    {
         $inventaire = Inventaire::findOrFail($id);
-        $inventaire->delete();
-        return response()->json(['message'  => 'Inventaire supprimée']);
+
+        $validated = $request->validate([
+            'quantiteReelle' => 'sometimes|integer|min:0',
+            'observations'   => 'nullable|string|max:300',
+            'statut'         => 'sometimes|in:en_cours,conforme,deficit,surplus',
+        ], [
+            'quantiteReelle.min' => 'La quantité ne peut pas être négative.',
+            'statut.in'          => 'Statut invalide.',
+        ]);
+
+        $inventaire->update($validated);
+        $inventaire->refresh();
+
+        return response()->json([
+            'message'    => 'Inventaire mis à jour',
+            'inventaire' => $inventaire->load(['utilisateur', 'stock.produit'])
+        ]);
     }
 
-    //--------------------------------------------------------------------------
-    //-GET /api/inventaires/rapport   --Resume des ecarts
-    //--------------------------------------------------------------------------
-    public function rapport(Request $request): JsonResponse{
+    public function destroy(int $id): JsonResponse
+    {
+        Inventaire::findOrFail($id)->delete();
+        return response()->json(['message' => 'Inventaire supprimé']);
+    }
+
+    public function rapport(Request $request): JsonResponse
+    {
         $request->validate([
-            'date_debut'       => 'required|date',
-            'date_fin'         => 'required|date|after_or_equal:date_debut',
+            'date_debut' => 'required|date',
+            'date_fin'   => 'required|date|after_or_equal:date_debut',
         ]);
-        $rapport = DB::table('Inventaire as i')
-            ->join('Produit as p', 'p.IdProduit', '=', 'i.IdProduit')
-            ->join('Categorie as c', 'u.IdCategorie', '=', 'p.IdCategorie')
-            ->join('i as u', 'u.i', '=', 'i.i')
+
+        $rapport = DB::table('inventaires as i')
+            ->join('stocks as s',      's.idStock',      '=', 'i.idStock')
+            ->join('produits as p',    'p.idProduit',    '=', 's.idProduit')
+            ->join('categories as c',  'c.idCategorie',  '=', 'p.idCategorie')
+            ->join('utilisateurs as u','u.idUtilisateur','=', 'i.idUtilisateur')
             ->whereBetween('i.dateInventaire', [$request->date_debut, $request->date_fin])
             ->select(
-                'i.IdInvenyaire',
-                'i.dateInvenyaire',
-                'p.designation',
+                'i.idInventaire',
+                'i.dateInventaire',
+                'p.nomProduit',
+                'p.reference',
                 'c.libelle as categorie',
-                DB:: raw("CONTACT(u.prenom, '', u.nom) as responsable"),
+                DB::raw("CONCAT(u.prenom, ' ', u.nom) as responsable"),
                 'i.quantiteTheorique',
                 'i.quantiteReelle',
-                'i.ecart',
+                DB::raw('(i.quantiteReelle - i.quantiteTheorique) as ecart'),
                 'i.statut',
                 'i.observations',
             )
             ->orderBy('i.dateInventaire', 'desc')
             ->get();
-        $stats =[
-             'total'               =>$rapport->count(),
-             'conformes'            =>$rapport->where('statut', 'conforme')->count(),
-             'deficits'           =>$rapport->where('statut', 'deficit')->count(),
-             'surplus'   =>$rapport->where('statut', 'surplus')->count(),
+
+        $stats = [
+            'total'     => $rapport->count(),
+            'conformes' => $rapport->where('statut', 'conforme')->count(),
+            'deficits'  => $rapport->where('statut', 'deficit')->count(),
+            'surplus'   => $rapport->where('statut', 'surplus')->count(),
         ];
+
         return response()->json([
-            'stats'   =>$stats,
-            'details' =>$rapport,
+            'stats'   => $stats,
+            'details' => $rapport,
         ]);
     }
 }
-

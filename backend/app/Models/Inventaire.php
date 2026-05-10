@@ -19,7 +19,7 @@ class Inventaire extends Model
         'observations',
         'statut',
         'idUtilisateur',
-        'idProduit',
+        'idStock',
     ];
     protected $casts =[
         'dateInventaire' =>'date',
@@ -35,8 +35,8 @@ class Inventaire extends Model
         return $this->belongsTo(Utilisateur::class, 'idUtilisateur', 'idUtilisateur');
     }
 
-    public function produit(){
-        return $this->belongsTo(Produit::class, 'idProduit', 'idProduit');
+    public function stock(){
+        return $this->belongsTo(Stock::class, 'idStock', 'idStock');
     }
 
     //-----------------------------------------------------------------------------------------------------
