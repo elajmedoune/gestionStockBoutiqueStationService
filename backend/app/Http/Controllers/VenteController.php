@@ -60,7 +60,12 @@ class VenteController extends Controller
                 $stock->save();
             }
             //Mettre a jour le montant total
-            $vente->montantTotal = $montantTotal;
+            $tva = round($montantTotal * 0.18, 2);
+            $vente->montantTotal      = $montantTotal;
+            $vente->totalHorsTaxe     = $montantTotal;
+            $vente->tva               = $tva;
+            $vente->totalTaxeComprise = $montantTotal + $tva;
+            $vente->statut            = 'active';
             $vente->save();
             
 

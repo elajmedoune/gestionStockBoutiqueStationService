@@ -80,7 +80,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
   return (
     <div className="card bg-base-100 text-base-content shadow-md border border-base-300 overflow-hidden">
       <div className="card-body p-0">
-        <div className="bg-neutral text-neutral-content px-6 py-5 relative overflow-hidden">
+        <div className="bg-primary text-primary-content px-6 py-5 relative overflow-hidden">
           {/* 🧁 bulles pastel cupcake */}
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-secondary/20 -translate-y-1/2 translate-x-1/4 pointer-events-none blur-2xl" />
           <div className="absolute bottom-0 left-20 w-32 h-32 rounded-full bg-primary/30 translate-y-1/2 pointer-events-none blur-xl" />
@@ -90,7 +90,7 @@ function HeroBanner({ stats, dateDebut, dateFin }) {
               <div className="p-1.5 bg-white/20 rounded-2xl"><BarChart2 size={14} /></div>
               <span className="text-xs font-bold opacity-70 uppercase tracking-widest">Gestion des stocks</span>
               <div className="w-px h-3 bg-white/20" />
-              <span className="badge badge-sm bg-secondary/30 border-0 text-neutral-content font-bold text-xs px-3">RAPPORT</span>
+              <span className="badge badge-sm bg-white text-primary font-bold text-xs px-3">RAPPORT</span>
             </div>
             <h1 className="text-3xl font-extrabold leading-tight mb-2">Rapport de Stock</h1>
             <div className="flex items-center gap-1.5 text-xs opacity-60">
