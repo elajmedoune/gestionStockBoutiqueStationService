@@ -27,14 +27,6 @@ CREATE TABLE `categories` (
   PRIMARY KEY (`idCategorie`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `categories` VALUES
-(1, 'Carburants',   'Essence, gasoil, gaz',              NOW(), NOW()),
-(2, 'Lubrifiants',  'Huiles moteur et transmission',      NOW(), NOW()),
-(3, 'Accessoires',  'Pièces et accessoires auto',         NOW(), NOW()),
-(4, 'Boissons',     'Eau, jus, sodas',                   NOW(), NOW()),
-(5, 'Alimentaire',  'Snacks, conserves, divers',          NOW(), NOW()),
-(6, 'Hygiène',      'Produits d\'entretien et hygiène',   NOW(), NOW());
-
 -- ============================================================
 -- TABLE : utilisateurs
 -- ============================================================
@@ -55,12 +47,6 @@ CREATE TABLE `utilisateurs` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `utilisateurs` (`nom`, `prenom`, `login`, `email`, `motDePasse`, `actif`, `role`) VALUES
-('Medoune',  'Elaj',  'admin',    'admin@station.sn',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 'gerant'),
-('Diallo',   'Awa',   'awa',      'awa@station.sn',      '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'gestionnaire_stock'),
-('Badiene',  'Fatou', 'badiene',  'badiene@station.sn',  '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier'),
-('Ndiaye',   'Omar',  'caissier2','omar@station.sn',     '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier');
-
 -- ============================================================
 -- TABLE : fournisseurs
 -- ============================================================
@@ -76,13 +62,6 @@ CREATE TABLE `fournisseurs` (
   `updated_at`     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idFournisseur`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT INTO `fournisseurs` (`nom`, `telephone`, `email`, `adresse`, `delaiLivraison`) VALUES
-('Total Sénégal',   '338201234', 'contact@total.sn',    'Dakar, Plateau',   2),
-('Shell Distribution','338205678','info@shell.sn',       'Dakar, Almadies',  3),
-('Auto Parts SN',   '771234567', 'vente@autoparts.sn',  'Dakar, Colobane',  5),
-('Auchan Sénégal',  '338209900', 'pro@auchan.sn',       'Dakar, Ouakam',    1),
-('Kirène SA',       '338341100', 'commande@kirene.sn',  'Thiès',            2);
 
 -- ============================================================
 -- TABLE : produits
@@ -103,27 +82,6 @@ CREATE TABLE `produits` (
   CONSTRAINT `fk_produit_categorie` FOREIGN KEY (`idCategorie`) REFERENCES `categories` (`idCategorie`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `produits` (`reference`, `codeBarre`, `prixUnitaire`, `seuilSecurite`, `idCategorie`) VALUES
-('SP95',           '6011000001',  750.00,   500.00, 1),
-('SP98',           '6011000002',  800.00,   300.00, 1),
-('GASOIL',         '6011000003',  680.00,   800.00, 1),
-('GPL',            '6011000004',  450.00,   200.00, 1),
-('HUILE-5W30-1L',  '6011000005', 4500.00,    20.00, 2),
-('HUILE-5W30-5L',  '6011000006',12500.00,    10.00, 2),
-('HUILE-15W40-1L', '6011000007', 3800.00,    20.00, 2),
-('LIQ-FREIN',      '6011000008', 2200.00,    15.00, 2),
-('FILTRE-HUILE',   '6011000009', 3500.00,    10.00, 3),
-('FILTRE-AIR',     '6011000010', 4200.00,    10.00, 3),
-('BALAI-ESSUIE',   '6011000011', 5500.00,     8.00, 3),
-('EAU-KIRENE-1L',  '6011000012',  400.00,    50.00, 4),
-('EAU-KIRENE-5L',  '6011000013',  900.00,    30.00, 4),
-('COCA-COLA-33CL', '6011000014',  600.00,    40.00, 4),
-('JUS-BOUYE',      '6011000015',  500.00,    30.00, 4),
-('BISCUITS-LU',    '6011000016',  350.00,    25.00, 5),
-('CHIPS-PRINGLES', '6011000017', 1200.00,    15.00, 5),
-('SAVON-LUX',      '6011000018',  450.00,    20.00, 6),
-('ESSUIE-MAIN',    '6011000019',  800.00,    15.00, 6);
-
 -- ============================================================
 -- TABLE : produit_fournisseur
 -- ============================================================
@@ -135,13 +93,6 @@ CREATE TABLE `produit_fournisseur` (
   CONSTRAINT `fk_pf_produit`      FOREIGN KEY (`idProduit`)     REFERENCES `produits`     (`idProduit`)     ON DELETE CASCADE,
   CONSTRAINT `fk_pf_fournisseur`  FOREIGN KEY (`idFournisseur`) REFERENCES `fournisseurs` (`idFournisseur`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT INTO `produit_fournisseur` VALUES
-(1,1),(2,1),(3,1),(4,1),
-(5,2),(6,2),(7,2),(8,2),
-(9,3),(10,3),(11,3),
-(12,5),(13,5),
-(14,4),(15,4),(16,4),(17,4),(18,4),(19,4);
 
 -- ============================================================
 -- TABLE : stocks
@@ -161,27 +112,6 @@ CREATE TABLE `stocks` (
   KEY `fk_stock_produit` (`idProduit`),
   CONSTRAINT `fk_stock_produit` FOREIGN KEY (`idProduit`) REFERENCES `produits` (`idProduit`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT INTO `stocks` (`quantiteInitiale`, `quantiteRestante`, `dateEntree`, `dateExpiration`, `prixEnGros`, `prixAchat`, `idProduit`) VALUES
-(5001, 4199, '2026-04-01', NULL,         620.00,   600.00,  1),
-(2000,  900, '2026-04-01', NULL,         670.00,   650.00,  2),
-(8000, 5998, '2026-04-01', NULL,         560.00,   540.00,  3),
-(1000,  850, '2026-04-01', NULL,         380.00,   360.00,  4),
-( 100,   76, '2026-03-15', '2028-03-15', 3800.00, 3600.00,  5),
-(  50,   47, '2026-03-15', '2028-03-15',10500.00,10000.00,  6),
-(  80,   45, '2026-03-15', '2028-03-15', 3200.00, 3000.00,  7),
-(  83,   11, '2026-03-15', '2028-03-15', 1800.00, 1700.00,  8),
-(  40,   32, '2026-02-10', NULL,         2800.00, 2500.00,  9),
-(  35,   26, '2026-02-10', NULL,         3500.00, 3200.00, 10),
-(  20,   15, '2026-02-10', NULL,         4500.00, 4200.00, 11),
-( 200,  165, '2026-04-10', '2026-10-10',  300.00,  280.00, 12),
-( 100,   80, '2026-04-10', '2026-10-10',  700.00,  650.00, 13),
-( 150,  120, '2026-04-05', '2026-09-05',  450.00,  420.00, 14),
-(  80,   59, '2026-04-05', '2026-08-05',  380.00,  350.00, 15),
-( 100,   75, '2026-03-20', '2026-09-20',  250.00,  230.00, 16),
-(  60,   45, '2026-03-20', '2026-08-20',  950.00,  900.00, 17),
-(  80,   61, '2026-03-01', '2027-03-01',  350.00,  320.00, 18),
-(  50,   38, '2026-03-01', '2027-03-01',  650.00,  600.00, 19);
 
 -- ============================================================
 -- TABLE : ventes
@@ -234,12 +164,6 @@ CREATE TABLE `commandes` (
   KEY `fk_commande_utilisateur` (`idUtilisateur`),
   CONSTRAINT `fk_commande_utilisateur` FOREIGN KEY (`idUtilisateur`) REFERENCES `utilisateurs` (`idUtilisateur`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT INTO `commandes` (`dateCommande`, `dateLivraisonPrevue`, `statut`, `montantTotal`, `idUtilisateur`) VALUES
-('2026-03-01', '2026-03-05', 'livree',    850000.00, 2),
-('2026-03-15', '2026-03-20', 'livree',    320000.00, 2),
-('2026-04-01', '2026-04-05', 'livree',    580000.00, 2),
-('2026-04-10', '2026-04-15', 'en_attente',150000.00, 2);
 
 -- ============================================================
 -- TABLE : lignecommande
@@ -304,14 +228,14 @@ CREATE TABLE `alertes` (
   `lue`           TINYINT(1)   NOT NULL DEFAULT 0,
   `niveauUrgence` ENUM('faible','moyen','critique') NOT NULL DEFAULT 'moyen',
   `idUtilisateur` INT(11)      NOT NULL,
-  `idProduit`     INT(11)      NOT NULL,
+  `idStock`       INT(11)      NOT NULL,
   `created_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idAlerte`),
   KEY `fk_alerte_utilisateur` (`idUtilisateur`),
-  KEY `fk_alerte_stock`     (`idstock`),
+  KEY `fk_alerte_stock` (`idStock`),
   CONSTRAINT `fk_alerte_utilisateur` FOREIGN KEY (`idUtilisateur`) REFERENCES `utilisateurs` (`idUtilisateur`),
-  CONSTRAINT `fk_alerte_stock`     FOREIGN KEY (`idstock`)     REFERENCES `produits`     (`idProduit`)
+  CONSTRAINT `fk_alerte_stock` FOREIGN KEY (`idStock`) REFERENCES `stocks` (`idStock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ============================================================
@@ -626,6 +550,91 @@ BEGIN
 END;;
 
 DELIMITER ;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ============================================================
+-- INSERTION
+-- ============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+INSERT INTO `categories` (`idCategorie`, `libelle`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'Carburants',  'Essence, gasoil, gaz',            NOW(), NOW()),
+(2, 'Lubrifiants', 'Huiles moteur et transmission',    NOW(), NOW()),
+(3, 'Accessoires', 'Pièces et accessoires auto',       NOW(), NOW()),
+(4, 'Boissons',    'Eau, jus, sodas',                 NOW(), NOW()),
+(5, 'Alimentaire', 'Snacks, conserves, divers',        NOW(), NOW()),
+(6, 'Hygiène',     'Produits d\'entretien et hygiène', NOW(), NOW());
+
+INSERT INTO `utilisateurs` (`nom`, `prenom`, `login`, `email`, `motDePasse`, `actif`, `role`) VALUES
+('Fall', 'Modou',  'modou',      'modou@station.sn',   '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 'gerant'),
+('Diallo',  'Awa',   'awa',        'awa@station.sn',     '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'gestionnaire_stock'),
+('Fall', 'Badiene', 'badiene',    'badiene@station.sn', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier'),
+('Ndiaye',  'Omar',  'magasinier', 'omar@station.sn',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'magasinier');
+
+INSERT INTO `fournisseurs` (`nom`, `telephone`, `email`, `adresse`, `delaiLivraison`) VALUES
+('Total Sénégal',    '338201234', 'contact@total.sn',   'Dakar, Plateau',  2),
+('Shell Distribution','338205678','info@shell.sn',       'Dakar, Almadies', 3),
+('Auto Parts SN',    '771234567', 'vente@autoparts.sn', 'Dakar, Colobane', 5),
+('Auchan Sénégal',   '338209900', 'pro@auchan.sn',      'Dakar, Ouakam',   1),
+('Kirène SA',        '338341100', 'commande@kirene.sn', 'Thiès',           2);
+
+INSERT INTO `produits` (`reference`, `codeBarre`, `prixUnitaire`, `seuilSecurite`, `idCategorie`) VALUES
+('SP95',          '6011000001',  750.00, 500.00, 1),
+('SP98',          '6011000002',  800.00, 300.00, 1),
+('GASOIL',        '6011000003',  680.00, 800.00, 1),
+('GPL',           '6011000004',  450.00, 200.00, 1),
+('HUILE-5W30-1L', '6011000005', 4500.00,  20.00, 2),
+('HUILE-5W30-5L', '6011000006',12500.00,  10.00, 2),
+('HUILE-15W40-1L','6011000007', 3800.00,  20.00, 2),
+('LIQ-FREIN',     '6011000008', 2200.00,  15.00, 2),
+('FILTRE-HUILE',  '6011000009', 3500.00,  10.00, 3),
+('FILTRE-AIR',    '6011000010', 4200.00,  10.00, 3),
+('BALAI-ESSUIE',  '6011000011', 5500.00,   8.00, 3),
+('EAU-KIRENE-1L', '6011000012',  400.00,  50.00, 4),
+('EAU-KIRENE-5L', '6011000013',  900.00,  30.00, 4),
+('COCA-COLA-33CL','6011000014',  600.00,  40.00, 4),
+('JUS-BOUYE',     '6011000015',  500.00,  30.00, 4),
+('BISCUITS-LU',   '6011000016',  350.00,  25.00, 5),
+('CHIPS-PRINGLES','6011000017', 1200.00,  15.00, 5),
+('SAVON-LUX',     '6011000018',  450.00,  20.00, 6),
+('ESSUIE-MAIN',   '6011000019',  800.00,  15.00, 6);
+
+INSERT INTO `produit_fournisseur` VALUES
+(1,1),(2,1),(3,1),(4,1),
+(5,2),(6,2),(7,2),(8,2),
+(9,3),(10,3),(11,3),
+(12,5),(13,5),
+(14,4),(15,4),(16,4),(17,4),(18,4),(19,4);
+
+INSERT INTO `stocks` (`quantiteInitiale`, `quantiteRestante`, `dateEntree`, `dateExpiration`, `prixEnGros`, `prixAchat`, `idProduit`) VALUES
+(5001, 4199, '2026-04-01', NULL,         620.00,   600.00,  1),
+(2000,  900, '2026-04-01', NULL,         670.00,   650.00,  2),
+(8000, 5998, '2026-04-01', NULL,         560.00,   540.00,  3),
+(1000,  850, '2026-04-01', NULL,         380.00,   360.00,  4),
+( 100,   76, '2026-03-15', '2028-03-15', 3800.00, 3600.00,  5),
+(  50,   47, '2026-03-15', '2028-03-15',10500.00,10000.00,  6),
+(  80,   45, '2026-03-15', '2028-03-15', 3200.00, 3000.00,  7),
+(  83,   11, '2026-03-15', '2028-03-15', 1800.00, 1700.00,  8),
+(  40,   32, '2026-02-10', NULL,         2800.00, 2500.00,  9),
+(  35,   26, '2026-02-10', NULL,         3500.00, 3200.00, 10),
+(  20,   15, '2026-02-10', NULL,         4500.00, 4200.00, 11),
+( 200,  165, '2026-04-10', '2026-10-10',  300.00,  280.00, 12),
+( 100,   80, '2026-04-10', '2026-10-10',  700.00,  650.00, 13),
+( 150,  120, '2026-04-05', '2026-09-05',  450.00,  420.00, 14),
+(  80,   59, '2026-04-05', '2026-08-05',  380.00,  350.00, 15),
+( 100,   75, '2026-03-20', '2026-09-20',  250.00,  230.00, 16),
+(  60,   45, '2026-03-20', '2026-08-20',  950.00,  900.00, 17),
+(  80,   61, '2026-03-01', '2027-03-01',  350.00,  320.00, 18),
+(  50,   38, '2026-03-01', '2027-03-01',  650.00,  600.00, 19);
+
+INSERT INTO `commandes` (`dateCommande`, `dateLivraisonPrevue`, `statut`, `montantTotal`, `idUtilisateur`) VALUES
+('2026-03-01', '2026-03-05', 'livree',     850000.00, 2),
+('2026-03-15', '2026-03-20', 'livree',     320000.00, 2),
+('2026-04-01', '2026-04-05', 'livree',     580000.00, 2),
+('2026-04-10', '2026-04-15', 'en_attente', 150000.00, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
 

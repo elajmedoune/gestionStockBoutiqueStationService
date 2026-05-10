@@ -176,7 +176,7 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                         className="file-input file-input-bordered file-input-sm flex-1" 
                         name='photo'
                         onChange={handle}
-                        accept="image/jpeg,image/png,image/jpg"   
+                        accept="image/jpeg,image/png,image/jpg,image/webp"   
                     />
                 </div>
             </div>

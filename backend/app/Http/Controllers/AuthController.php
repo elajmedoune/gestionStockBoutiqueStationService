@@ -73,9 +73,25 @@ class AuthController extends Controller
             'nom'        => 'required|string|max:50',
             'prenom'     => 'required|string|max:50',
             'login'      => 'required|string|max:50|unique:utilisateurs,login',
-            'email'      => 'required|string|max:100|unique:utilisateurs,email',
-            'motDePasse' => 'required|string|min:8|confirmed',
+            'email'      => ['required', 'max:100', 'unique:utilisateurs,email',
+                            'regex:/^[a-zA-Z0-9\-]+@[a-zA-Z.\-]+\.[a-zA-Z]{2,3}$/'],
+            'motDePasse' => ['required', 'string', 'min:8', 'confirmed',
+                            'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-]).{8,}$/'],
             'role'       => 'required|in:gerant,caissier,magasinier,gestionnaire_stock',
+        ], [
+            'nom.required'          => 'Le nom est obligatoire.',
+            'prenom.required'       => 'Le prénom est obligatoire.',
+            'login.required'        => 'Le login est obligatoire.',
+            'login.unique'          => 'Ce login est déjà utilisé.',
+            'email.required'        => 'L\'email est obligatoire.',
+            'email.unique'          => 'Cet email est déjà utilisé.',
+            'email.regex'           => 'Format email invalide. Exemple valide : prenom@domaine.sn',
+            'motDePasse.required'   => 'Le mot de passe est obligatoire.',
+            'motDePasse.min'        => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'motDePasse.confirmed'  => 'La confirmation du mot de passe ne correspond pas.',
+            'motDePasse.regex'      => 'Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial (! * _ -).',
+            'role.required'         => 'Le rôle est obligatoire.',
+            'role.in'               => 'Rôle invalide.',
         ]);
 
         $utilisateur = Utilisateur::create([
@@ -129,19 +145,54 @@ class AuthController extends Controller
         return response()->json(['photo' => $path]);
     }
 
+    public function removePhoto(Request $request)
+    {
+        $user = $request->user();
+        $user->photo = null;
+        $user->save();
+        return response()->json(['message' => 'Photo supprimée']);
+    }
+
     public function updateProfil(Request $request)
     {
         $user = $request->user();
-        $user->nom    = $request->nom;
-        $user->prenom = $request->prenom;
-        $user->email  = $request->email;
+
+        $request->validate([
+            'login' => 'sometimes|string|max:50|unique:utilisateurs,login,' . $user->idUtilisateur . ',idUtilisateur',
+            'nom'   => 'sometimes|string|max:50',
+            'prenom'=> 'sometimes|string|max:50',
+            'email' => ['sometimes', 'max:100', 
+                        'unique:utilisateurs,email,' . $user->idUtilisateur . ',idUtilisateur',
+                        'regex:/^[a-zA-Z0-9\-]+@[a-zA-Z.\-]+\.[a-zA-Z]{2,3}$/'],
+        ], [
+            'login.unique'  => 'Ce login est déjà utilisé.',
+            'login.max'     => 'Le login ne peut pas dépasser 50 caractères.',
+            'email.unique'  => 'Cet email est déjà utilisé.',
+            'email.regex'   => 'Format email invalide. Exemple valide : prenom@domaine.sn',
+        ]);
+        $user->nom    = $request->nom ?? $user->nom;
+        $user->prenom = $request->prenom ?? $user->prenom;
+        $user->email  = $request->email ?? $user->email;
+        $user->login  = $request->login ?? $user->login;
         $user->save();
+        
         return response()->json(['message' => 'Profil mis à jour']);
     }
 
     public function updatePassword(Request $request)
     {
         $user = $request->user();
+        
+        $request->validate([
+           'ancien_mot_de_passe'  => 'required|string',
+            'nouveau_mot_de_passe' => ['required', 'string', 'min:8',
+                                    'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-]).{8,}/'],
+        ], [
+            'ancien_mot_de_passe.required'  => 'L\'ancien mot de passe est obligatoire.',
+            'nouveau_mot_de_passe.required' => 'Le nouveau mot de passe est obligatoire.',
+            'nouveau_mot_de_passe.min'      => 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
+            'nouveau_mot_de_passe.regex'    => 'Le nouveau mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial (! * _ -).',
+        ]);
         if (!Hash::check($request->ancien_mot_de_passe, $user->motDePasse)) {
             return response()->json(['message' => 'Ancien mot de passe incorrect'], 401);
         }

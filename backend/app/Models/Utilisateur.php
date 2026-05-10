@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Laravel\Sanctum\HasApiTokens;
 
-class Utilisateur extends Authenticatable
+class Utilisateur extends Authenticatable implements CanResetPasswordContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
-    //Nom de la table personnalisé
+    // Nom de la table personnalisé
     protected $table      = 'utilisateurs';
     protected $primaryKey = 'idUtilisateur';
 
@@ -35,22 +37,32 @@ class Utilisateur extends Authenticatable
         'actif' => 'boolean',
     ];
 
-    //Laravel attend "password" pour l'auth -- on pointe vers motDePasse
+    // Laravel attend "password" pour l'auth — on pointe vers motDePasse
     public function getAuthPassword(): string
     {
         return $this->motDePasse;
     }
 
-    //-------------------------------------------------------------------
-    //Relations
-    //-------------------------------------------------------------------
-    public function inventaires(){
-       return $this->hasMany(Inventaire::class, 'idUtilisateur', 'idUtilisateur'); 
+    // Email utilisé pour envoyer le lien de reset (vient du trait CanResetPassword,
+    // mais on l'override pour être explicite)
+    public function getEmailForPasswordReset(): string
+    {
+        return $this->email;
     }
 
-    public function alertes(){
-       return $this->hasMany(Alerte::class, 'idUtilisateur', 'idUtilisateur'); 
+    //-------------------------------------------------------------------
+    // Relations
+    //-------------------------------------------------------------------
+    public function inventaires()
+    {
+        return $this->hasMany(Inventaire::class, 'idUtilisateur', 'idUtilisateur');
     }
+
+    public function alertes()
+    {
+        return $this->hasMany(Alerte::class, 'idUtilisateur', 'idUtilisateur');
+    }
+
     public function ventes()
     {
         return $this->hasMany(Vente::class, 'idUtilisateur', 'idUtilisateur');
@@ -61,22 +73,23 @@ class Utilisateur extends Authenticatable
         return $this->hasMany(Commande::class, 'idUtilisateur', 'idUtilisateur');
     }
 
-    //--------------------------------------------------------------------
-    //Helpers roles
-    //--------------------------------------------------------------------
-    public function isMangasinier(): bool{
+    public function isMangasinier(): bool
+    {
         return $this->role === 'magasinier';
     }
-    
-     public function isGestionnaireStock(): bool{
+
+    public function isGestionnaireStock(): bool
+    {
         return $this->role === 'gestionnaire_stock';
     }
 
-     public function isCaissier(): bool{
+    public function isCaissier(): bool
+    {
         return $this->role === 'caissier';
     }
 
-     public function isGerant(): bool{
+    public function isGerant(): bool
+    {
         return $this->role === 'gerant';
     }
 }

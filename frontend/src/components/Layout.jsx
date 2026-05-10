@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import appConfig from '../config/app'
-import AssistantChat from './AssistantChat'
 import { useCommandes, useLivraisons, useUtilisateurs, useProduits, useStocks, useNotifications } from '../hooks'
 import {
   Bell, User, LogOut, Settings,
@@ -72,9 +71,9 @@ export default function Layout({ children }) {
     {
       label: 'Stock',
       items: [
-        { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock', 'magasinier', 'caissier'] },
-        { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
         { label: 'Catégories',   icon: <Tag size={18} />,       path: '/categories',   roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
         { label: 'Fournisseurs', icon: <Users size={18} />,     path: '/fournisseurs', roles: ['gerant', 'gestionnaire_stock'] },
       ]
     },
@@ -342,7 +341,7 @@ export default function Layout({ children }) {
                             n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
                           }`}>
                             {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
-                             n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
+                            n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
@@ -366,6 +365,7 @@ export default function Layout({ children }) {
                 )}
               </ul>
             </div>
+            
 
             {/* Profil dans header — visible seulement si sidebar collapsed (desktop) ou mobile */}
             <div className={collapsed ? 'block' : 'lg:hidden block'}>
@@ -380,7 +380,7 @@ export default function Layout({ children }) {
         </main>
 
       </div>
-      <AssistantChat />
+      {/* <AssistantChat /> */}
     </div>
   )
 }
