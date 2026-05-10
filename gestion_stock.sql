@@ -1,14 +1,13 @@
 -- ============================================================
 -- BASE DE DONNÉES : gestion_stock
 -- Projet : Gestion Stock Boutique Station Service
--- Date   : 2026-04-22
+-- Date   : 2026-05-08 (corrigé)
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS gestion_stock
-
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
-  
+
 USE gestion_stock;
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -21,11 +20,19 @@ CREATE TABLE `categories` (
   `idCategorie`  INT(11)       NOT NULL AUTO_INCREMENT,
   `libelle`      VARCHAR(50)   NOT NULL,
   `description`  VARCHAR(500)  DEFAULT NULL,
-  `emoji`        VARCHAR(10)   ,
+  `emoji`        VARCHAR(10)   DEFAULT NULL,
   `created_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idCategorie`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `categories` VALUES
+(1, 'Carburants',   'Essence, gasoil, gaz',              NOW(), NOW()),
+(2, 'Lubrifiants',  'Huiles moteur et transmission',      NOW(), NOW()),
+(3, 'Accessoires',  'Pièces et accessoires auto',         NOW(), NOW()),
+(4, 'Boissons',     'Eau, jus, sodas',                   NOW(), NOW()),
+(5, 'Alimentaire',  'Snacks, conserves, divers',          NOW(), NOW()),
+(6, 'Hygiène',      'Produits d\'entretien et hygiène',   NOW(), NOW());
 
 -- ============================================================
 -- TABLE : utilisateurs
@@ -47,6 +54,12 @@ CREATE TABLE `utilisateurs` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `utilisateurs` (`nom`, `prenom`, `login`, `email`, `motDePasse`, `actif`, `role`) VALUES
+('Medoune',  'Elaj',  'admin',    'admin@station.sn',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 'gerant'),
+('Diallo',   'Awa',   'awa',      'awa@station.sn',      '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'gestionnaire_stock'),
+('Badiene',  'Fatou', 'badiene',  'badiene@station.sn',  '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier'),
+('Ndiaye',   'Omar',  'caissier2','omar@station.sn',     '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier');
+
 -- ============================================================
 -- TABLE : fournisseurs
 -- ============================================================
@@ -63,6 +76,13 @@ CREATE TABLE `fournisseurs` (
   PRIMARY KEY (`idFournisseur`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `fournisseurs` (`nom`, `telephone`, `email`, `adresse`, `delaiLivraison`) VALUES
+('Total Sénégal',      '338201234', 'contact@total.sn',    'Dakar, Plateau',   2),
+('Shell Distribution', '338205678', 'info@shell.sn',       'Dakar, Almadies',  3),
+('Auto Parts SN',      '771234567', 'vente@autoparts.sn',  'Dakar, Colobane',  5),
+('Auchan Sénégal',     '338209900', 'pro@auchan.sn',       'Dakar, Ouakam',    1),
+('Kirène SA',          '338341100', 'commande@kirene.sn',  'Thiès',            2);
+
 -- ============================================================
 -- TABLE : produits
 -- ============================================================
@@ -78,9 +98,32 @@ CREATE TABLE `produits` (
   `created_at`    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idProduit`),
+  UNIQUE KEY `reference` (`reference`),
+  UNIQUE KEY `codeBarre` (`codeBarre`),
   KEY `fk_produit_categorie` (`idCategorie`),
   CONSTRAINT `fk_produit_categorie` FOREIGN KEY (`idCategorie`) REFERENCES `categories` (`idCategorie`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `produits` (`nomProduit`, `reference`, `codeBarre`, `prixUnitaire`, `seuilSecurite`, `idCategorie`) VALUES
+('Essence Super 95',    'SP95',           '6011000001',  750.00,   500.00, 1),
+('Essence Super 98',    'SP98',           '6011000002',  800.00,   300.00, 1),
+('Gasoil',              'GASOIL',         '6011000003',  680.00,   800.00, 1),
+('GPL',                 'GPL',            '6011000004',  450.00,   200.00, 1),
+('Huile Moteur 5W30 1L','HUILE-5W30-1L',  '6011000005', 4500.00,    20.00, 2),
+('Huile Moteur 5W30 5L','HUILE-5W30-5L',  '6011000006',12500.00,    10.00, 2),
+('Huile Moteur 15W40 1L','HUILE-15W40-1L','6011000007', 3800.00,    20.00, 2),
+('Liquide de Frein',    'LIQ-FREIN',      '6011000008', 2200.00,    15.00, 2),
+('Filtre à Huile',      'FILTRE-HUILE',   '6011000009', 3500.00,    10.00, 3),
+('Filtre à Air',        'FILTRE-AIR',     '6011000010', 4200.00,    10.00, 3),
+('Balai Essuie-glace',  'BALAI-ESSUIE',   '6011000011', 5500.00,     8.00, 3),
+('Eau Kirène 1L',       'EAU-KIRENE-1L',  '6011000012',  400.00,    50.00, 4),
+('Eau Kirène 5L',       'EAU-KIRENE-5L',  '6011000013',  900.00,    30.00, 4),
+('Coca-Cola 33cl',      'COCA-COLA-33CL', '6011000014',  600.00,    40.00, 4),
+('Jus de Bouye',        'JUS-BOUYE',      '6011000015',  500.00,    30.00, 4),
+('Biscuits LU',         'BISCUITS-LU',    '6011000016',  350.00,    25.00, 5),
+('Chips Pringles',      'CHIPS-PRINGLES', '6011000017', 1200.00,    15.00, 5),
+('Savon Lux',           'SAVON-LUX',      '6011000018',  450.00,    20.00, 6),
+('Essuie-mains',        'ESSUIE-MAIN',    '6011000019',  800.00,    15.00, 6);
 
 -- ============================================================
 -- TABLE : produit_fournisseur
@@ -90,9 +133,16 @@ CREATE TABLE `produit_fournisseur` (
   `idFournisseur` INT(11) NOT NULL,
   PRIMARY KEY (`idProduit`, `idFournisseur`),
   KEY `fk_pf_fournisseur` (`idFournisseur`),
-  CONSTRAINT `fk_pf_produit`      FOREIGN KEY (`idProduit`)     REFERENCES `produits`     (`idProduit`)     ON DELETE CASCADE,
-  CONSTRAINT `fk_pf_fournisseur`  FOREIGN KEY (`idFournisseur`) REFERENCES `fournisseurs` (`idFournisseur`) ON DELETE CASCADE
+  CONSTRAINT `fk_pf_produit`     FOREIGN KEY (`idProduit`)     REFERENCES `produits`     (`idProduit`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pf_fournisseur` FOREIGN KEY (`idFournisseur`) REFERENCES `fournisseurs` (`idFournisseur`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `produit_fournisseur` VALUES
+(1,1),(2,1),(3,1),(4,1),
+(5,2),(6,2),(7,2),(8,2),
+(9,3),(10,3),(11,3),
+(12,5),(13,5),
+(14,4),(15,4),(16,4),(17,4),(18,4),(19,4);
 
 -- ============================================================
 -- TABLE : stocks
@@ -112,6 +162,27 @@ CREATE TABLE `stocks` (
   KEY `fk_stock_produit` (`idProduit`),
   CONSTRAINT `fk_stock_produit` FOREIGN KEY (`idProduit`) REFERENCES `produits` (`idProduit`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `stocks` (`quantiteInitiale`, `quantiteRestante`, `dateEntree`, `dateExpiration`, `prixEnGros`, `prixAchat`, `idProduit`) VALUES
+(5001, 4199, '2026-04-01', NULL,         620.00,   600.00,  1),
+(2000,  900, '2026-04-01', NULL,         670.00,   650.00,  2),
+(8000, 5998, '2026-04-01', NULL,         560.00,   540.00,  3),
+(1000,  850, '2026-04-01', NULL,         380.00,   360.00,  4),
+( 100,   76, '2026-03-15', '2028-03-15', 3800.00, 3600.00,  5),
+(  50,   47, '2026-03-15', '2028-03-15',10500.00,10000.00,  6),
+(  80,   45, '2026-03-15', '2028-03-15', 3200.00, 3000.00,  7),
+(  83,   11, '2026-03-15', '2028-03-15', 1800.00, 1700.00,  8),
+(  40,   32, '2026-02-10', NULL,         2800.00, 2500.00,  9),
+(  35,   26, '2026-02-10', NULL,         3500.00, 3200.00, 10),
+(  20,   15, '2026-02-10', NULL,         4500.00, 4200.00, 11),
+( 200,  165, '2026-04-10', '2026-10-10',  300.00,  280.00, 12),
+( 100,   80, '2026-04-10', '2026-10-10',  700.00,  650.00, 13),
+( 150,  120, '2026-04-05', '2026-09-05',  450.00,  420.00, 14),
+(  80,   59, '2026-04-05', '2026-08-05',  380.00,  350.00, 15),
+( 100,   75, '2026-03-20', '2026-09-20',  250.00,  230.00, 16),
+(  60,   45, '2026-03-20', '2026-08-20',  950.00,  900.00, 17),
+(  80,   61, '2026-03-01', '2027-03-01',  350.00,  320.00, 18),
+(  50,   38, '2026-03-01', '2027-03-01',  650.00,  600.00, 19);
 
 -- ============================================================
 -- TABLE : ventes
@@ -165,6 +236,12 @@ CREATE TABLE `commandes` (
   CONSTRAINT `fk_commande_utilisateur` FOREIGN KEY (`idUtilisateur`) REFERENCES `utilisateurs` (`idUtilisateur`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `commandes` (`dateCommande`, `dateLivraisonPrevue`, `statut`, `montantTotal`, `idUtilisateur`) VALUES
+('2026-03-01', '2026-03-05', 'livree',     850000.00, 2),
+('2026-03-15', '2026-03-20', 'livree',     320000.00, 2),
+('2026-04-01', '2026-04-05', 'livree',     580000.00, 2),
+('2026-04-10', '2026-04-15', 'en_attente', 150000.00, 2);
+
 -- ============================================================
 -- TABLE : lignecommande
 -- ============================================================
@@ -184,21 +261,22 @@ CREATE TABLE `lignecommande` (
 -- TABLE : livraisons
 -- ============================================================
 CREATE TABLE `livraisons` (
-  `idLivraison`  INT(11)       NOT NULL AUTO_INCREMENT,
-  `dateLivraison`DATE          NOT NULL,
-  `montantTotal` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `observations` VARCHAR(300)  DEFAULT NULL,
-  `statut`       VARCHAR(20)   NOT NULL DEFAULT 'en_cours',
-  `idCommande`   INT(11)       NOT NULL,
-  `created_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `idLivraison`   INT(11)       NOT NULL AUTO_INCREMENT,
+  `dateLivraison` DATE          NOT NULL,
+  `montantTotal`  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `observations`  VARCHAR(300)  DEFAULT NULL,
+  `statut`        VARCHAR(20)   NOT NULL DEFAULT 'en_cours',
+  `idCommande`    INT(11)       NOT NULL,
+  `created_at`    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idLivraison`),
-  UNIQUE KEY `idCommande` (`idCommande`),
+  UNIQUE KEY `uq_livraison_commande` (`idCommande`),
   CONSTRAINT `fk_livraison_commande` FOREIGN KEY (`idCommande`) REFERENCES `commandes` (`idCommande`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ============================================================
 -- TABLE : inventaires
+-- (FK vers stocks — une ligne d'inventaire porte sur un lot précis)
 -- ============================================================
 CREATE TABLE `inventaires` (
   `idInventaire`      INT(11)      NOT NULL AUTO_INCREMENT,
@@ -220,6 +298,7 @@ CREATE TABLE `inventaires` (
 
 -- ============================================================
 -- TABLE : alertes
+-- (FK vers stocks — une alerte porte sur un lot précis, pas juste un produit)
 -- ============================================================
 CREATE TABLE `alertes` (
   `idAlerte`      INT(11)      NOT NULL AUTO_INCREMENT,
@@ -233,9 +312,9 @@ CREATE TABLE `alertes` (
   `updated_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idAlerte`),
   KEY `fk_alerte_utilisateur` (`idUtilisateur`),
-  KEY `fk_alerte_stock` (`idStock`),
+  KEY `fk_alerte_stock`       (`idStock`),
   CONSTRAINT `fk_alerte_utilisateur` FOREIGN KEY (`idUtilisateur`) REFERENCES `utilisateurs` (`idUtilisateur`),
-  CONSTRAINT `fk_alerte_stock` FOREIGN KEY (`idStock`) REFERENCES `stocks` (`idStock`)
+  CONSTRAINT `fk_alerte_stock`       FOREIGN KEY (`idStock`)       REFERENCES `stocks`        (`idStock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ============================================================
@@ -264,32 +343,20 @@ CREATE TABLE `personal_access_tokens` (
 DELIMITER ;;
 
 -- Diminuer le stock + alerte si sous seuil
-CREATE TRIGGER trg_after_lignevente_insert
-AFTER INSERT ON lignevente
+CREATE TRIGGER trg_after_livraison_insert
+AFTER INSERT ON livraisons
 FOR EACH ROW
 BEGIN
     UPDATE stocks s
-    SET s.quantiteRestante = s.quantiteRestante - NEW.quantite
-    WHERE s.idProduit = NEW.idProduit;
+    JOIN lignecommande lc ON lc.idProduit = s.idProduit
+    SET s.quantiteRestante = s.quantiteRestante + lc.quantite,
+        s.dateEntree       = NEW.dateLivraison
+    WHERE lc.idCommande = NEW.idCommande;
 
-    INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
-    SELECT
-        'stock_faible',
-        CONCAT('Stock faible pour le produit réf : ', p.reference,
-               ' — Restant : ', s.quantiteRestante,
-               ' / Seuil : ', p.seuilSecurite),
-        CASE
-            WHEN s.quantiteRestante = 0                          THEN 'critique'
-            WHEN s.quantiteRestante <= p.seuilSecurite / 2       THEN 'critique'
-            ELSE 'moyen'
-        END,
-        v.idUtilisateur,
-        s.idStock
-    FROM produits p
-    JOIN stocks s ON s.idProduit = p.idProduit
-    JOIN ventes v ON v.idVente   = NEW.idVente
-    WHERE p.idProduit = NEW.idProduit
-      AND s.quantiteRestante <= p.seuilSecurite;
+    UPDATE commandes
+    SET statut      = 'livree',
+        idLivraison = NEW.idLivraison
+    WHERE idCommande = NEW.idCommande;
 END;;
 
 -- Recalculer les totaux HT/TVA/TTC de la vente
@@ -341,7 +408,7 @@ BEGIN
     END IF;
 END;;
 
--- Calcul automatique statut inventaire
+-- Calcul automatique statut inventaire (BEFORE INSERT)
 CREATE TRIGGER trg_inventaire_statut_insert
 BEFORE INSERT ON inventaires
 FOR EACH ROW
@@ -394,35 +461,69 @@ DELIMITER ;
 
 DELIMITER ;;
 
+-- Ajouter une ligne à une vente (avec vérification stock)
 CREATE PROCEDURE sp_ajouter_ligne_vente(
     IN p_idVente   INT,
     IN p_idProduit INT,
     IN p_quantite  INT
 )
 BEGIN
-    DECLARE v_stock INT;
-    DECLARE v_prix  DECIMAL(10,2);
-    DECLARE v_total DECIMAL(10,2);
-    DECLARE v_msg   VARCHAR(200);
+    DECLARE v_stock_total INT;
+    DECLARE v_prix        DECIMAL(10,2);
+    DECLARE v_total       DECIMAL(10,2);
+    DECLARE v_msg         VARCHAR(200);
+    DECLARE v_qte_restante INT;
+    DECLARE v_idStock     INT;
+    DECLARE done          INT DEFAULT FALSE;
 
-    SELECT s.quantiteRestante, p.prixUnitaire
-    INTO v_stock, v_prix
+    -- Vérifier le stock total toutes lots confondus
+    SELECT SUM(s.quantiteRestante), p.prixUnitaire
+    INTO v_stock_total, v_prix
     FROM produits p
     JOIN stocks s ON s.idProduit = p.idProduit
-    WHERE p.idProduit = p_idProduit
-    LIMIT 1;
+    WHERE p.idProduit = p_idProduit;
 
-    IF v_stock < p_quantite THEN
-        SET v_msg = CONCAT('Stock insuffisant. Disponible : ', v_stock, ' - Demande : ', p_quantite);
+    IF v_stock_total < p_quantite THEN
+        SET v_msg = CONCAT('Stock insuffisant. Disponible : ', v_stock_total, ' — Demandé : ', p_quantite);
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg;
     ELSE
+        -- Décrémenter lot par lot en FIFO jusqu'à épuisement de la quantité demandée
+        SET v_qte_restante = p_quantite;
+
+        WHILE v_qte_restante > 0 DO
+            -- Prendre le lot le plus ancien avec du stock
+            SELECT idStock, quantiteRestante
+            INTO v_idStock, v_stock_total
+            FROM stocks
+            WHERE idProduit = p_idProduit
+              AND quantiteRestante > 0
+            ORDER BY dateEntree ASC
+            LIMIT 1;
+
+            IF v_stock_total >= v_qte_restante THEN
+                -- Ce lot suffit pour couvrir le reste
+                UPDATE stocks
+                SET quantiteRestante = quantiteRestante - v_qte_restante
+                WHERE idStock = v_idStock;
+                SET v_qte_restante = 0;
+            ELSE
+                -- On vide ce lot et on continue sur le suivant
+                UPDATE stocks
+                SET quantiteRestante = 0
+                WHERE idStock = v_idStock;
+                SET v_qte_restante = v_qte_restante - v_stock_total;
+            END IF;
+        END WHILE;
+
         SET v_total = v_prix * p_quantite;
         INSERT INTO lignevente (idProduit, idVente, quantite, totalPartielle)
         VALUES (p_idProduit, p_idVente, p_quantite, v_total);
+
         SELECT 'Ligne ajoutée avec succès' AS message;
     END IF;
 END;;
 
+-- Créer une vente (retourne l'id)
 CREATE PROCEDURE sp_creer_vente(
     IN p_idUtilisateur INT,
     IN p_modePaiement  VARCHAR(20)
@@ -434,19 +535,21 @@ BEGIN
     SELECT LAST_INSERT_ID() AS idVente;
 END;;
 
+-- État du stock par produit
 CREATE PROCEDURE sp_etat_stock()
 BEGIN
     SELECT
         p.idProduit,
         p.reference,
+        p.nomProduit,
         c.libelle                                        AS categorie,
         s.quantiteRestante                               AS stock_actuel,
         p.seuilSecurite,
         s.dateExpiration,
         CASE
-            WHEN s.quantiteRestante = 0                        THEN 'RUPTURE'
-            WHEN s.quantiteRestante <= p.seuilSecurite         THEN 'CRITIQUE'
-            WHEN s.quantiteRestante <= p.seuilSecurite * 1.5   THEN 'FAIBLE'
+            WHEN s.quantiteRestante = 0                      THEN 'RUPTURE'
+            WHEN s.quantiteRestante <= p.seuilSecurite       THEN 'CRITIQUE'
+            WHEN s.quantiteRestante <= p.seuilSecurite * 1.5 THEN 'FAIBLE'
             ELSE 'OK'
         END                                              AS statut_stock,
         DATEDIFF(s.dateExpiration, CURDATE())            AS jours_avant_expiration
@@ -456,6 +559,7 @@ BEGIN
     ORDER BY s.quantiteRestante ASC;
 END;;
 
+-- Historique des mouvements d'un produit
 CREATE PROCEDURE sp_historique_produit(
     IN p_idProduit INT
 )
@@ -467,10 +571,10 @@ BEGIN
         f.nom                             AS source,
         NULL                              AS idVente
     FROM lignecommande lc
-    JOIN commandes c         ON c.idCommande    = lc.idCommande
-    JOIN livraisons l        ON l.idCommande    = c.idCommande
-    JOIN produit_fournisseur pf ON pf.idProduit = p_idProduit
-    JOIN fournisseurs f      ON f.idFournisseur = pf.idFournisseur
+    JOIN commandes c            ON c.idCommande    = lc.idCommande
+    JOIN livraisons l           ON l.idCommande    = c.idCommande
+    JOIN produit_fournisseur pf ON pf.idProduit    = p_idProduit
+    JOIN fournisseurs f         ON f.idFournisseur = pf.idFournisseur
     WHERE lc.idProduit = p_idProduit
 
     UNION ALL
@@ -489,6 +593,7 @@ BEGIN
     ORDER BY date_mouvement DESC;
 END;;
 
+-- Rapport des ventes par période
 CREATE PROCEDURE sp_rapport_ventes(
     IN p_dateDebut DATE,
     IN p_dateFin   DATE
@@ -509,6 +614,7 @@ BEGIN
     ORDER BY jour DESC;
 END;;
 
+-- Top produits les plus vendus
 CREATE PROCEDURE sp_top_produits(
     IN p_dateDebut DATE,
     IN p_dateFin   DATE,
@@ -518,6 +624,7 @@ BEGIN
     SELECT
         p.idProduit,
         p.reference,
+        p.nomProduit,
         c.libelle                      AS categorie,
         SUM(lv.quantite)               AS total_vendu,
         SUM(lv.totalPartielle)         AS chiffre_affaires,
@@ -528,11 +635,12 @@ BEGIN
     JOIN ventes v     ON v.idVente     = lv.idVente
     WHERE DATE(v.dateVente) BETWEEN p_dateDebut AND p_dateFin
       AND v.statut = 'active'
-    GROUP BY p.idProduit, p.reference, c.libelle
+    GROUP BY p.idProduit, p.reference, p.nomProduit, c.libelle
     ORDER BY total_vendu DESC
     LIMIT p_limite;
 END;;
 
+-- Valeur du stock par catégorie
 CREATE PROCEDURE sp_valeur_stock()
 BEGIN
     SELECT
@@ -552,92 +660,3 @@ END;;
 DELIMITER ;
 
 SET FOREIGN_KEY_CHECKS = 1;
-
-
--- ============================================================
--- INSERTION
--- ============================================================
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-INSERT INTO `categories` (`idCategorie`, `libelle`, `description`, `created_at`, `updated_at`) VALUES
-(1, 'Carburants',  'Essence, gasoil, gaz',            NOW(), NOW()),
-(2, 'Lubrifiants', 'Huiles moteur et transmission',    NOW(), NOW()),
-(3, 'Accessoires', 'Pièces et accessoires auto',       NOW(), NOW()),
-(4, 'Boissons',    'Eau, jus, sodas',                 NOW(), NOW()),
-(5, 'Alimentaire', 'Snacks, conserves, divers',        NOW(), NOW()),
-(6, 'Hygiène',     'Produits d\'entretien et hygiène', NOW(), NOW());
-
-INSERT INTO `utilisateurs` (`nom`, `prenom`, `login`, `email`, `motDePasse`, `actif`, `role`) VALUES
-('Fall', 'Modou',  'modou',      'modou@station.sn',   '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 'gerant'),
-('Diallo',  'Awa',   'awa',        'awa@station.sn',     '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'gestionnaire_stock'),
-('Fall', 'Badiene', 'badiene',    'badiene@station.sn', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'caissier'),
-('Ndiaye',  'Omar',  'magasinier', 'omar@station.sn',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usfutJ6hi', 1, 'magasinier');
-
-INSERT INTO `fournisseurs` (`nom`, `telephone`, `email`, `adresse`, `delaiLivraison`) VALUES
-('Total Sénégal',    '338201234', 'contact@total.sn',   'Dakar, Plateau',  2),
-('Shell Distribution','338205678','info@shell.sn',       'Dakar, Almadies', 3),
-('Auto Parts SN',    '771234567', 'vente@autoparts.sn', 'Dakar, Colobane', 5),
-('Auchan Sénégal',   '338209900', 'pro@auchan.sn',      'Dakar, Ouakam',   1),
-('Kirène SA',        '338341100', 'commande@kirene.sn', 'Thiès',           2);
-
-INSERT INTO `produits` (`reference`, `codeBarre`, `prixUnitaire`, `seuilSecurite`, `idCategorie`) VALUES
-('SP95',          '6011000001',  750.00, 500.00, 1),
-('SP98',          '6011000002',  800.00, 300.00, 1),
-('GASOIL',        '6011000003',  680.00, 800.00, 1),
-('GPL',           '6011000004',  450.00, 200.00, 1),
-('HUILE-5W30-1L', '6011000005', 4500.00,  20.00, 2),
-('HUILE-5W30-5L', '6011000006',12500.00,  10.00, 2),
-('HUILE-15W40-1L','6011000007', 3800.00,  20.00, 2),
-('LIQ-FREIN',     '6011000008', 2200.00,  15.00, 2),
-('FILTRE-HUILE',  '6011000009', 3500.00,  10.00, 3),
-('FILTRE-AIR',    '6011000010', 4200.00,  10.00, 3),
-('BALAI-ESSUIE',  '6011000011', 5500.00,   8.00, 3),
-('EAU-KIRENE-1L', '6011000012',  400.00,  50.00, 4),
-('EAU-KIRENE-5L', '6011000013',  900.00,  30.00, 4),
-('COCA-COLA-33CL','6011000014',  600.00,  40.00, 4),
-('JUS-BOUYE',     '6011000015',  500.00,  30.00, 4),
-('BISCUITS-LU',   '6011000016',  350.00,  25.00, 5),
-('CHIPS-PRINGLES','6011000017', 1200.00,  15.00, 5),
-('SAVON-LUX',     '6011000018',  450.00,  20.00, 6),
-('ESSUIE-MAIN',   '6011000019',  800.00,  15.00, 6);
-
-INSERT INTO `produit_fournisseur` VALUES
-(1,1),(2,1),(3,1),(4,1),
-(5,2),(6,2),(7,2),(8,2),
-(9,3),(10,3),(11,3),
-(12,5),(13,5),
-(14,4),(15,4),(16,4),(17,4),(18,4),(19,4);
-
-INSERT INTO `stocks` (`quantiteInitiale`, `quantiteRestante`, `dateEntree`, `dateExpiration`, `prixEnGros`, `prixAchat`, `idProduit`) VALUES
-(5001, 4199, '2026-04-01', NULL,         620.00,   600.00,  1),
-(2000,  900, '2026-04-01', NULL,         670.00,   650.00,  2),
-(8000, 5998, '2026-04-01', NULL,         560.00,   540.00,  3),
-(1000,  850, '2026-04-01', NULL,         380.00,   360.00,  4),
-( 100,   76, '2026-03-15', '2028-03-15', 3800.00, 3600.00,  5),
-(  50,   47, '2026-03-15', '2028-03-15',10500.00,10000.00,  6),
-(  80,   45, '2026-03-15', '2028-03-15', 3200.00, 3000.00,  7),
-(  83,   11, '2026-03-15', '2028-03-15', 1800.00, 1700.00,  8),
-(  40,   32, '2026-02-10', NULL,         2800.00, 2500.00,  9),
-(  35,   26, '2026-02-10', NULL,         3500.00, 3200.00, 10),
-(  20,   15, '2026-02-10', NULL,         4500.00, 4200.00, 11),
-( 200,  165, '2026-04-10', '2026-10-10',  300.00,  280.00, 12),
-( 100,   80, '2026-04-10', '2026-10-10',  700.00,  650.00, 13),
-( 150,  120, '2026-04-05', '2026-09-05',  450.00,  420.00, 14),
-(  80,   59, '2026-04-05', '2026-08-05',  380.00,  350.00, 15),
-( 100,   75, '2026-03-20', '2026-09-20',  250.00,  230.00, 16),
-(  60,   45, '2026-03-20', '2026-08-20',  950.00,  900.00, 17),
-(  80,   61, '2026-03-01', '2027-03-01',  350.00,  320.00, 18),
-(  50,   38, '2026-03-01', '2027-03-01',  650.00,  600.00, 19);
-
-INSERT INTO `commandes` (`dateCommande`, `dateLivraisonPrevue`, `statut`, `montantTotal`, `idUtilisateur`) VALUES
-('2026-03-01', '2026-03-05', 'livree',     850000.00, 2),
-('2026-03-15', '2026-03-20', 'livree',     320000.00, 2),
-('2026-04-01', '2026-04-05', 'livree',     580000.00, 2),
-('2026-04-10', '2026-04-15', 'en_attente', 150000.00, 2);
-
-SET FOREIGN_KEY_CHECKS = 1;
-
--- ============================================================
--- FIN DU SCRIPT
--- ============================================================
