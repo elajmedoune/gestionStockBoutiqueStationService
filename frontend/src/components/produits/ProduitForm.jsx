@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 
 const INITIAL = { 
+    nomProduit: '',
     reference: '',
     codeBarre: '',
     prixUnitaire: '',
@@ -18,6 +19,7 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
     useEffect(() => {
         if(initial) {
             setForm({
+                nomProduit: initial.nomProduit || '',
                 reference: initial.reference || '',
                 codeBarre: initial.codeBarre || '',
                 prixUnitaire: initial.prixUnitaire || '',
@@ -61,6 +63,21 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
             className="space-y-4"
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 {/* nom produit */}
+                <div className="form-control sm:col-span-2">
+                    <label className="label">
+                        <span className="label-text font-medium">Nom du produit *</span>
+                    </label>
+                    <input type="text" 
+                        className="input input-bordered w-full"
+                        name='nomProduit'
+                        value={form.nomProduit}
+                        onChange={handle}
+                        required
+                        maxLength={100}
+                        placeholder= "Ex: Eau kirene"
+                    />
+                </div>
                 {/* reference */}
                 <div className="form-control">
                     <label className="label">
@@ -159,7 +176,7 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                         className="file-input file-input-bordered file-input-sm flex-1" 
                         name='photo'
                         onChange={handle}
-                        accept="image/jpeg,image/png,image/jpg"   
+                        accept="image/jpeg,image/png,image/jpg,image/webp"   
                     />
                 </div>
             </div>

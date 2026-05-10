@@ -342,7 +342,7 @@ export default function Layout({ children }) {
                             n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
                           }`}>
                             {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
-                             n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
+                            n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
@@ -366,6 +366,7 @@ export default function Layout({ children }) {
                 )}
               </ul>
             </div>
+            
 
             {/* Profil dans header — visible seulement si sidebar collapsed (desktop) ou mobile */}
             <div className={collapsed ? 'block' : 'lg:hidden block'}>
