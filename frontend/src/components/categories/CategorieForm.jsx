@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-const EMOJIS = ['📦', '🍔', '🥤', '🧴', '⛽', '🔧', '🍫', '🚗', '💊', '🧹', '📰', '🎮']
+const EMOJIS = ['📦', '🍔',' 🍭', '🥤',, '🍧', '🧴', '🔧', '🍫', '🚗', '🧹', '📰', '🎮']
 const INITIAL = { libelle: '', description: '', emoji: '📦'}
 
 function CategorieForm({ initial = null, onSubmit, onCancel, loading = false }) {

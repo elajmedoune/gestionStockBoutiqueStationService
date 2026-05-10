@@ -2,7 +2,7 @@
 
 import ProduitForm from "./ProduitForm"
 
-function ProduitModal({isOpen, mode, produit, categories, onSubmit, onClose, loading}) {
+function ProduitModal({isOpen, mode, produit, categories, onSubmit, onClose, loading, onCategorieAdded}) {
     if(!isOpen) return null
 
     return(
@@ -16,11 +16,13 @@ function ProduitModal({isOpen, mode, produit, categories, onSubmit, onClose, loa
                 <h3 className="font-bold text-lg mb-4">
                     {mode === 'create' ? "➕ Nouveau produit" : "✏️ Modifier le produit"}
                 </h3>
-                <ProduitForm initial={ mode === 'edit' ? produit : null }
+                <ProduitForm  key={produit?.idProduit ?? 'new'}
+                    initial={ mode === 'edit' ? produit : null }
                     categories={categories}
                     onSubmit={onSubmit}
                     onCancel={onClose}
                     loading = {loading}
+                    onCategorieAdded={onCategorieAdded}
                 />
             </div>
 

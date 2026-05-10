@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 function ProduitCard({ produit, onEdit, onDelete}) {
     const photoUrl = produit.photo ? `${API_URL}/storage/${produit.photo}` : null
-    const stockTotal = produit.stocks?.reduce((acc, s) => acc + (s.quantiteInitiale || 0), 0) ?? 0
+    const stockTotal = produit.stocks?.reduce((acc, s) => acc + (s.quantiteRestante || 0), 0) ?? 0
     const isCritical =  produit.seuilSecurite && stockTotal <= produit.seuilSecurite
     
     return(
@@ -19,6 +19,7 @@ function ProduitCard({ produit, onEdit, onDelete}) {
             <div className="card-body p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
+                        <p className="font-semibold truncate">{produit.nomProduit}</p>
                         <p className="font-semibold truncate">{produit.reference}</p>
                         <p className="text-xs text-base-content/50">{produit.categorie?.libelle ?? '-'}</p>
                     </div>
@@ -27,9 +28,9 @@ function ProduitCard({ produit, onEdit, onDelete}) {
 
                 <div className="flex items-center justify-between text-sm">
                     <span className="font-bold text-primary">
-                        {Number(produit.prixUnitaire).toLocaleString('fr-FR')} FCFA
+                        {Math.round(Number(produit.prixUnitaire)).toLocaleString('fr-FR')} FCFA
                     </span>
-                    <span className="text-base-content/60">Stock : {stockTotal} </span>
+                    <span className="text-base-content/60">Stock : {stockTotal} Seuil: {produit.seuilSecurite}</span>
                 </div>
 
                 <div className="flex justify-end gap-1 pt-1 border-t border-base-200">

@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('produits', function (Blueprint $table) {
             $table->id('idProduit');
+            $table->string('nomProduit', 100)->nullable();
             $table->string('reference')->unique();
             $table->string('codeBarre')->unique()->nullable();
             $table->string('photo')->nullable();
             $table->decimal('prixUnitaire', 10, 2)->default(0.00);
-            $table->decimal('seuilSecurite')->default(0);
+            $table->integer('seuilSecurite')->default(0);
             $table->foreignId('idCategorie')
                   ->constrained('categories', 'idCategorie')
                   ->onDelete('restrict');
