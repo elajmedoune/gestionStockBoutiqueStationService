@@ -22,9 +22,15 @@ class CommandeController extends Controller
             'dateCommande'        => 'required|date',
             'dateLivraisonPrevue' => 'nullable|date',
             'montantTotal'        => 'required|numeric|min:0',
-            'idUtilisateur' => 'required|integer|exists:utilisateurs,idUtilisateur',
+            // 'idUtilisateur' => 'required|integer|exists:utilisateurs,idUtilisateur',
         ]);
-        $commande = Commande::create($request->all());
+        $commande = Commande::create([
+            'dateCommande'  =>$request->dateCommande,
+            'dateLivraisonPrevue'  =>$request->dateLivraisonPrevue,
+            'montantTotal'  =>$request->montantTotal,
+            'idUtilisateur' =>$request->user()->idUtilisateur,
+            'statut'        =>'en_attente',
+        ]);
         return new CommandeResource($commande->load(['utilisateur']));
     }
 

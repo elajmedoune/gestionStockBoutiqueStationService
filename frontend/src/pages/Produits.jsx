@@ -67,14 +67,10 @@ function Produits() {
         try {
             setSaving(true)
             if(modal.mode === 'create') {
-                await api.post('/produits', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                })
+                await api.post('/produits', formData)
                 showToast('Produit créé !')
             } else {
-                await api.post(`/produits/${modal.prod.idProduit}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data'},
-                })
+                await api.post(`/produits/${modal.prod.idProduit}`, formData)
                 showToast('Produit modifiée !')
             }
             setModal({ open: false, mode: 'create', prod:null })
