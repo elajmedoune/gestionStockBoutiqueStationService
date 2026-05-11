@@ -13,10 +13,12 @@ import {
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 const fmt   = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
-const today = new Date()
 
 const PERIODES = [
   { label: '7J',   days: 7   },
@@ -141,43 +143,51 @@ export default function RapportStock() {
 
   const [periodeActive, setPeriodeActive] = useState('1M')
   const [dateDebut, setDateDebut] = useState(() => {
-    const d = new Date(today); d.setDate(d.getDate() - 30); return toISO(d)
+    const d = new Date(); d.setDate(d.getDate() - 30); return toISO(d)
   })
-  const [dateFin, setDateFin]     = useState(toISO(today))
+  const [dateFin, setDateFin] = useState(() => toISO(new Date()))
   const [exportOpen, setExportOpen] = useState(false)
 
   const handlePeriode = (p) => {
     setPeriodeActive(p.label)
+    const now = new Date()
     if (p.days === null) {
       setDateDebut(toISO(new Date(2020, 0, 1)))
     } else {
-      const d = new Date(today); d.setDate(d.getDate() - p.days)
+      const d = new Date(now); d.setDate(d.getDate() - p.days)
       setDateDebut(toISO(d))
     }
-    setDateFin(toISO(today))
+    setDateFin(toISO(now))
   }
 
   const enRupture    = useMemo(() => stocks.filter(s => (parseInt(s.quantiteRestante) || 0) === 0), [stocks])
-  const sousSeuil    = useMemo(() => stocks.filter(s => {
-    const r = parseInt(s.quantiteRestante) || 0
-    const s2 = parseInt(s.seuilSecurite ?? s.seuilAlerte ?? 5)
-    return r > 0 && r <= s2
-  }), [stocks])
+const sousSeuil = useMemo(() => produits.filter(p => {
+    const total = stocks
+        .filter(s => s.idProduit === p.idProduit)
+        .reduce((sum, s) => sum + (parseInt(s.quantiteRestante) || 0), 0)
+    const seuil = parseInt(p?.seuilSecurite ?? 5)
+    return total > 0 && total <= seuil
+}), [stocks, produits])
   const enBonneSante = useMemo(() => stocks.filter(s => {
     const r = parseInt(s.quantiteRestante) || 0
-    const s2 = parseInt(s.seuilSecurite ?? s.seuilAlerte ?? 5)
+    const produit = produits.find(p => p.idProduit === s.idProduit)
+    const s2 = parseInt(produit?.seuilSecurite ?? 5)
     return r > s2
-  }), [stocks])
+}), [stocks, produits])
 
   const totalUnites  = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
   const totalInitial = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0), [stocks])
   const tauxConsomm  = totalInitial > 0 ? Math.round(((totalInitial - totalUnites) / totalInitial) * 100) : 0
 
-  const livraisonsFiltrees = useMemo(() => livraisons.filter(l => {
-    const d = (l.dateLivraison ?? l.createdAt ?? '').split('T')[0]
-    return d >= dateDebut && d <= dateFin
-  }), [livraisons, dateDebut, dateFin])
-
+  const livraisonsFiltrees = useMemo(() => {
+    console.log('livraisons:', livraisons)
+    console.log('dateDebut:', dateDebut, 'dateFin:', dateFin)
+    return livraisons.filter(l => {
+        const d = (l.dateLivraison ?? l.createdAt ?? '').split('T')[0]
+        console.log('date livraison:', d)
+        return d >= dateDebut && d <= dateFin
+    })
+  }, [livraisons, dateDebut, dateFin])
   const stockParCategorie = useMemo(() => {
     const map = {}
     produits.forEach(p => {
@@ -191,12 +201,16 @@ export default function RapportStock() {
   }, [produits, stocks])
 
   const topConsommes = useMemo(() => {
-    return stocks.map(s => {
-      const init     = parseInt(s.quantiteInitiale) || 0
-      const restante = parseInt(s.quantiteRestante) || 0
-      const produit  = produits.find(p => p.idProduit === s.idProduit)
-      return { nom: produit?.nomProduit ?? produit?.reference ?? `#${s.idProduit}`, consomme: init - restante, restante, init }
-    }).filter(x => x.consomme > 0).sort((a, b) => b.consomme - a.consomme).slice(0, 8)
+    const map = {}
+    stocks.forEach(s => {
+        const produit = produits.find(p => p.idProduit === s.idProduit)
+        const nom = produit?.nomProduit ?? produit?.reference ?? `#${s.idProduit}`
+        if (!map[s.idProduit]) map[s.idProduit] = { nom, consomme: 0, restante: 0, init: 0 }
+        map[s.idProduit].consomme  += (parseInt(s.quantiteInitiale) || 0) - (parseInt(s.quantiteRestante) || 0)
+        map[s.idProduit].restante  += parseInt(s.quantiteRestante) || 0
+        map[s.idProduit].init      += parseInt(s.quantiteInitiale) || 0
+    })
+    return Object.values(map).filter(x => x.consomme > 0).sort((a, b) => b.consomme - a.consomme).slice(0, 8)
   }, [stocks, produits])
 
   const mouvementsParJour = useMemo(() => {
@@ -246,8 +260,8 @@ export default function RapportStock() {
   const loading = lS || lP || lC || lL
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto space-y-5 p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )
@@ -268,7 +282,7 @@ export default function RapportStock() {
         />
 
         {/* Filtres */}
-        <div className="card bg-base-100 shadow-sm border border-base-200">
+        <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
           <div className="card-body p-4">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
               <div className="flex gap-1.5 flex-wrap">
@@ -305,7 +319,7 @@ export default function RapportStock() {
                     <Download size={12} /> Exporter
                   </button>
                   {exportOpen && (
-                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-[100]">
                       <ExportPDF data={exportDataPDF} columns={PDF_COLS} filename="rapport-stock" label="PDF" />
                       <ExportExcel data={exportDataExcel} filename="rapport-stock" label="Excel" />
                       <ExportCSV data={exportDataPDF} filename="rapport-stock" label="CSV" />
@@ -329,7 +343,7 @@ export default function RapportStock() {
 
         {/* Alertes */}
         {(enRupture.length > 0 || sousSeuil.length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`grid gap-4 ${enRupture.length > 0 && sousSeuil.length > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
             {enRupture.length > 0 && (
               <div className="card bg-base-100 shadow-sm border border-error/30 overflow-hidden">
                 <div className="card-body p-0">
@@ -375,24 +389,25 @@ export default function RapportStock() {
                         <th>Produit</th><th className="text-right">Restant</th><th className="text-right">Seuil</th><th className="text-center">Urgence</th>
                       </tr></thead>
                       <tbody>
-                        {sousSeuil.map((s, i) => {
-                          const p       = produits.find(pr => pr.idProduit === s.idProduit)
-                          const seuil   = parseInt(s.seuilSecurite ?? s.seuilAlerte ?? 5)
-                          const restant = parseInt(s.quantiteRestante) || 0
-                          const ratio   = Math.round((restant / seuil) * 100)
+                        {sousSeuil.map((p, i) => {
+                          const total = stocks
+                          .filter(s => s.idProduit === p.idProduit)
+                          .reduce((sum, s) => sum + (parseInt(s.quantiteRestante) || 0), 0)
+                          const seuil = parseInt(p?.seuilSecurite ?? 5)
+                          const ratio = Math.round((total / seuil) * 100)
                           return (
-                            <tr key={i} className="hover">
-                              <td className="font-bold">{p?.nomProduit ?? p?.reference ?? `#${s.idProduit}`}</td>
-                              <td className="text-right font-extrabold text-warning">{restant}</td>
-                              <td className="text-right text-base-content/50">{seuil}</td>
-                              <td className="text-center">
-                                <span className={`badge badge-xs font-bold ${ratio <= 30 ? 'badge-error' : 'badge-warning'}`}>
-                                  {ratio <= 30 ? 'Critique' : 'Attention'}
+                          <tr key={i} className="hover">
+                            <td className="font-bold">{p?.nomProduit ?? p?.reference}</td>
+                            <td className="text-right font-extrabold text-warning">{total}</td>
+                            <td className="text-right text-base-content/50">{seuil}</td>
+                            <td className="text-center">
+                              <span className={`badge badge-xs font-bold ${ratio <= 30 ? 'badge-error' : 'badge-warning'}`}>
+                                {ratio <= 30 ? 'Critique' : 'Attention'}
                                 </span>
-                              </td>
-                            </tr>
-                          )
-                        })}
+                                </td>
+                                </tr>
+                                )
+                                })}
                       </tbody>
                     </table>
                   </div>
@@ -404,9 +419,9 @@ export default function RapportStock() {
 
         {/* Graphiques */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="card bg-base-100 shadow-sm border border-base-200">
+          <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
                 <div className="p-1.5 bg-white/25 rounded-2xl"><BarChart2 size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Stock par catégorie</h2>
@@ -415,7 +430,7 @@ export default function RapportStock() {
               </div>
               <div className="p-4">
                 {stockParCategorie.length === 0
-                  ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune donnée</div>
+                  ? <EmptyState title="Aucune donnée" message="Aucun stock disponible" />
                   : <div className="h-56" style={{ minWidth: 0 }}>
                       <ResponsiveContainer width="100%" height={224}>
                         <BarChart data={stockParCategorie} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -431,49 +446,56 @@ export default function RapportStock() {
               </div>
             </div>
           </div>
-
-          <div className="card bg-base-100 shadow-sm border border-base-200">
+          <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
-                <div className="p-1.5 bg-white/25 rounded-2xl"><Layers size={14} /></div>
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
+                <div className="p-1.5 bg-white/25 rounded-2xl"><ShieldAlert size={14} /></div>
                 <div>
-                  <h2 className="font-extrabold text-sm">Répartition du stock</h2>
-                  <p className="text-xs opacity-70">Par catégorie</p>
+                  <h2 className="font-extrabold text-sm">État du stock</h2>
+                  <p className="text-xs opacity-70">Répartition par statut</p>
+                  </div>
+                  </div>
+                  <div className="p-4 flex items-center justify-center h-56" style={{ minWidth: 0 }}>
+                    <ResponsiveContainer width="60%" height={224}>
+                      <PieChart>
+                        <Pie
+                        data={[
+                          { name: 'OK',        value: enBonneSante.length },
+                          { name: 'Sous seuil', value: sousSeuil.length   },
+                          { name: 'Rupture',   value: enRupture.length    },
+                        ]}
+                      dataKey="value" nameKey="name"
+                      cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>
+                        <Cell fill="rgba(101,195,200,0.85)" />
+                        <Cell fill="rgba(238,175,58,0.85)" />
+                        <Cell fill="rgba(239,159,188,0.85)" />
+                      </Pie>
+                        <Tooltip formatter={(v, n) => [v, n]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-col gap-3 w-40">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(101,195,200,0.85)' }} />
+                        <span className="text-base-content/70">OK</span>
+                        <span className="ml-auto font-bold text-success">{enBonneSante.length}</span>
+                      </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(238,175,58,0.85)' }} />
+                      <span className="text-base-content/70">Sous seuil</span>
+                      <span className="ml-auto font-bold text-warning">{sousSeuil.length}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(239,159,188,0.85)' }} />
+                      <span className="text-base-content/70">Rupture</span>
+                      <span className="ml-auto font-bold text-error">{enRupture.length}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="p-4">
-                {stockParCategorie.length === 0
-                  ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune donnée</div>
-                  : <div className="flex items-center gap-4 h-56" style={{ minWidth: 0 }}>
-                      <ResponsiveContainer width="60%" height={224}>
-                        <PieChart>
-                          <Pie data={stockParCategorie} dataKey="quantite" nameKey="cat"
-                            cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>
-                            {stockParCategorie.map((_, i) => (
-                              <Cell key={i} fill={COLORS_PIE[i % COLORS_PIE.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(v, n) => [fmt(v), n]} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-col gap-1.5 overflow-y-auto max-h-52 w-40">
-                        {stockParCategorie.map((c, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs">
-                            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: COLORS_PIE[i % COLORS_PIE.length] }} />
-                            <span className="truncate text-base-content/70 font-medium">{c.cat}</span>
-                            <span className="ml-auto font-bold text-base-content shrink-0">{fmt(c.quantite)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                }
-              </div>
             </div>
-          </div>
-
-          <div className="card bg-base-100 shadow-sm border border-base-200">
+          <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
                 <div className="p-1.5 bg-white/25 rounded-2xl"><ArrowDownCircle size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Entrées de stock</h2>
@@ -499,9 +521,9 @@ export default function RapportStock() {
             </div>
           </div>
 
-          <div className="card bg-base-100 shadow-sm border border-base-200">
+          <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
                 <div className="p-1.5 bg-white/25 rounded-2xl"><TrendingDown size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Top produits consommés</h2>
@@ -541,7 +563,7 @@ export default function RapportStock() {
         {/* Tableau état complet */}
         <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
           <div className="card-body p-0">
-            <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+            <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
               <div className="p-1.5 bg-white/25 rounded-2xl"><FileText size={14} /></div>
               <div>
                 <h2 className="font-extrabold text-sm">État complet des stocks</h2>
@@ -566,7 +588,7 @@ export default function RapportStock() {
                         const initial  = stk.reduce((s, st) => s + (parseInt(st.quantiteInitiale) || 0), 0)
                         const restante = stk.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)
                         const consomme = initial - restante
-                        const seuil    = stk[0] ? parseInt(stk[0].seuilSecurite ?? stk[0].seuilAlerte ?? 5) : 5
+                        const seuil = parseInt(p?.seuilSecurite ?? 5)
                         const statut   = restante === 0 ? 'rupture' : restante <= seuil ? 'critique' : 'ok'
                         return (
                           <tr key={i} className={`hover ${statut === 'rupture' ? 'bg-error/5' : statut === 'critique' ? 'bg-warning/5' : ''}`}>
@@ -613,7 +635,7 @@ export default function RapportStock() {
         {livraisonsFiltrees.length > 0 && (
           <div className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2">
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">
                 <div className="p-1.5 bg-white/25 rounded-2xl"><ArrowDownCircle size={14} /></div>
                 <div>
                   <h2 className="font-extrabold text-sm">Historique des livraisons</h2>

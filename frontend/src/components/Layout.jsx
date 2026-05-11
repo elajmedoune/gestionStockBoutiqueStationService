@@ -376,8 +376,15 @@ export default function Layout({ children }) {
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
+  <div
+    key={location.pathname}
+    style={{
+      animation: 'fadeSlideIn 0.3s ease'
+    }}
+  >
+    {children}
+  </div>
+</main>
 
       </div>
       {/* <AssistantChat /> */}

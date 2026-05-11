@@ -14,6 +14,9 @@ import {
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 const fmt   = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
@@ -230,8 +233,8 @@ export default function Rapport() {
 
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )

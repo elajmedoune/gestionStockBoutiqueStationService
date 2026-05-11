@@ -14,6 +14,9 @@ import {
   PointElement, ArcElement, Tooltip, Legend, Filler,
 } from 'chart.js'
 import { Bar, Doughnut } from 'react-chartjs-2'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement, LineElement,
@@ -152,7 +155,11 @@ function HeroBanner({ user, stats, role }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 p-5">
+        <div className={`grid gap-3 p-5 ${
+          stats.length <= 3 ? 'grid-cols-3' :
+          stats.length === 4 ? 'grid-cols-2 sm:grid-cols-4' :
+          'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
+          }`}>
           {stats.map(({ label, value, ok }, i) => (
             <div key={label}
               className={`rounded-2xl p-3 border-2 text-center hover:-translate-y-0.5 transition-transform cursor-default ${statColors[i % statColors.length].bg} ${statColors[i % statColors.length].border}`}>
@@ -723,8 +730,8 @@ export default function Dashboard() {
 
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )
