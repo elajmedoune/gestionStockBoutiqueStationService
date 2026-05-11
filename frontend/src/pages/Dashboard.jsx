@@ -152,7 +152,11 @@ function HeroBanner({ user, stats, role }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 p-5">
+        <div className={`grid gap-3 p-5 ${
+          stats.length <= 3 ? 'grid-cols-3' :
+          stats.length === 4 ? 'grid-cols-2 sm:grid-cols-4' :
+          'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
+          }`}>
           {stats.map(({ label, value, ok }, i) => (
             <div key={label}
               className={`rounded-2xl p-3 border-2 text-center hover:-translate-y-0.5 transition-transform cursor-default ${statColors[i % statColors.length].bg} ${statColors[i % statColors.length].border}`}>
