@@ -343,12 +343,13 @@ CREATE TABLE `personal_access_tokens` (
 DELIMITER ;;
 
 -- Diminuer le stock + alerte si sous seuil
-CREATE TRIGGER trg_after_lignevente_insert
-AFTER INSERT ON lignevente
+CREATE TRIGGER trg_after_livraison_insert
+AFTER INSERT ON livraisons
 FOR EACH ROW
 BEGIN
     -- Décrémenter le stock du lot le plus ancien ayant encore du stock (FIFO)
     UPDATE stocks s
+<<<<<<< HEAD
     SET s.quantiteRestante = s.quantiteRestante - NEW.quantite
     WHERE s.idProduit = NEW.idProduit
       AND s.quantiteRestante > 0
@@ -374,6 +375,17 @@ BEGIN
     JOIN ventes v ON v.idVente   = NEW.idVente
     WHERE p.idProduit = NEW.idProduit
       AND s.quantiteRestante <= p.seuilSecurite;
+=======
+    JOIN lignecommande lc ON lc.idProduit = s.idProduit
+    SET s.quantiteRestante = s.quantiteRestante + lc.quantite,
+        s.dateEntree       = NEW.dateLivraison
+    WHERE lc.idCommande = NEW.idCommande;
+
+    UPDATE commandes
+    SET statut      = 'livree',
+        idLivraison = NEW.idLivraison
+    WHERE idCommande = NEW.idCommande;
+>>>>>>> origin/medoune
 END;;
 
 -- Recalculer les totaux HT/TVA/TTC de la vente
@@ -676,6 +688,7 @@ END;;
 
 DELIMITER ;
 
+<<<<<<< HEAD
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
@@ -1316,3 +1329,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- -- ============================================================
 -- -- FIN DU SCRIPT
 -- -- ============================================================
+=======
+SET FOREIGN_KEY_CHECKS = 1;
+>>>>>>> origin/medoune

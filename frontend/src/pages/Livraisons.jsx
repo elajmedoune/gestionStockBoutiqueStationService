@@ -15,7 +15,7 @@ const Livraisons = () => {
     idCommande: "",
     dateLivraison: "",
     statut: "en_attente",
-    observation: "",
+    observations: "",
   });
   const [commandes, setCommandes] = useState([]);
 
@@ -53,9 +53,10 @@ const Livraisons = () => {
       }
       setShowModal(false);
       setEditItem(null);
-      setForm({ idCommande: "", dateLivraison: "", statut: "en_attente", observation: "" });
+      setForm({ idCommande: "", dateLivraison: "", statut: "en_attente", observations: "" });
       fetchLivraisons();
     } catch (err) {
+      console.log("Erreur:", err.response?.data)
       setError("Erreur lors de la sauvegarde");
     }
   };
@@ -63,9 +64,9 @@ const Livraisons = () => {
   const handleEdit = (liv) => {
     setForm({
       idCommande: liv.idCommande,
-      dateLivraison: liv.dateLivraison?.split("T")[0] || "",
+      dateLivraison: liv.dateLivraison?.substring(0, 10) || "",
       statut: liv.statut,
-      observation: liv.observation || "",
+      observations: liv.observations || "",
     });
     setEditItem(liv);
     setShowModal(true);
@@ -124,7 +125,7 @@ const Livraisons = () => {
           onClick={() => {
             setShowModal(true);
             setEditItem(null);
-            setForm({ idCommande: "", dateLivraison: "", statut: "en_attente", observation: "" });
+            setForm({ idCommande: "", dateLivraison: "", statut: "en_attente", observations: "" });
           }}
         >
           + Nouvelle Livraison
@@ -186,7 +187,7 @@ const Livraisons = () => {
                 <th>Fournisseur</th>
                 <th>Date Livraison</th>
                 <th>Statut</th>
-                <th>Observation</th>
+                <th>Observations</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -214,7 +215,7 @@ const Livraisons = () => {
                       </span>
                     </td>
                     <td className="text-sm text-base-content/70 max-w-xs truncate">
-                      {liv.observation || "—"}
+                      {liv.observations || "—"}
                     </td>
                     <td>
                       <div className="flex gap-2">
@@ -265,10 +266,10 @@ const Livraisons = () => {
                 </select>
               </div>
               <div className="form-control">
-                <label className="label"><span className="label-text">Observation</span></label>
+                <label className="label"><span className="label-text">Observations</span></label>
                 <textarea className="textarea textarea-bordered" rows="3"
-                  value={form.observation}
-                  onChange={(e) => setForm({ ...form, observation: e.target.value })} />
+                  value={form.observations}
+                  onChange={(e) => setForm({ ...form, observations: e.target.value })} />
               </div>
               <div className="modal-action">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>Annuler</button>

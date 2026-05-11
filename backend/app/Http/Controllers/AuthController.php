@@ -75,8 +75,8 @@ class AuthController extends Controller
             'login'      => 'required|string|max:50|unique:utilisateurs,login',
             'email'      => ['required', 'max:100', 'unique:utilisateurs,email',
                             'regex:/^[a-zA-Z0-9\-]+@[a-zA-Z.\-]+\.[a-zA-Z]{2,3}$/'],
-            'motDePasse' => ['required', 'string', 'min:8', 'confirmed',
-                            'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-]).{8,}$/'],
+            'motDePasse' => ['required', 'string', 'min:8', 'confirmed'],
+                            // 'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-]).{8,}$/'],
             'role'       => 'required|in:gerant,caissier,magasinier,gestionnaire_stock',
         ], [
             'nom.required'          => 'Le nom est obligatoire.',
@@ -199,5 +199,28 @@ class AuthController extends Controller
         $user->motDePasse = Hash::make($request->nouveau_mot_de_passe);
         $user->save();
         return response()->json(['message' => 'Mot de passe modifié']);
+    }
+    public function update(Request $request, int $id): JsonResponse{
+        $utilisateur = Utilisateur::findOrFail($id);
+        $request->validate([
+            'nom'                                      =>'sometimes|string|max:50',
+            'prenom'                                   =>'sometimes|string|max:50',
+            'login'                                    =>['sometimes','string','max:50', \Illuminate\Validation\Rule::unique('utilisateurs','login')->ignore($id, 'idUtilisateur')],
+            'email'                                    =>['sometimes','string','max:100', \Illuminate\Validation\Rule::unique('utilisateurs','email')->ignore($id, 'idUtilisateur')],
+            'role'                                     =>'sometimes|in:gerant,caissier,magasinier,gestionnaire_stock',
+            'motDePasse'                               =>'sometimes|string|min:8|confirmed',
+            ]);
+            if ($request->has('motDePasse')&& $request->motDePasse) {
+                $utilisateur->motDePasse = hash::make($request->motDePasse);
+            }
+            $utilisateur->fill($request->except(['motDePasse', 'motDePasse_confirmation']));
+            $utilisateur->save();
+            return response()->json(['message' => 'Utilisateur modifié', 'utilisateur' =>$utilisateur]);
+    }
+    public function destroy(int $id): JsonResponse{
+        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur->tokens()->delete();
+        $utilisateur->delete();
+        return response()->json(['message' =>'Utilisateur supprimé']);
     }
 }
