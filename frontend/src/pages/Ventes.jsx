@@ -13,6 +13,9 @@ import { useVentes, useProduits, useStocks } from '../hooks'
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 const fmt = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
@@ -531,8 +534,8 @@ export default function Ventes() {
 
   if (lV || lP) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )
@@ -735,26 +738,13 @@ export default function Ventes() {
 
       {venteDetail && <ModalDetail vente={venteDetail} onClose={() => setVenteDetail(null)} />}
 
-      {confirmDel && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm rounded-2xl p-0 overflow-hidden">
-            <div className="bg-warning text-warning-content px-5 py-4 flex items-center gap-3">
-              <div className="p-2 bg-white/25 rounded-2xl"><Ban size={18} /></div>
-              <h3 className="font-extrabold text-base">Annuler la vente #{confirmDel} ?</h3>
-            </div>
-            <div className="p-5">
-              <p className="text-sm text-base-content/60 mb-4">La vente sera marquée comme annulée. Cette action est irréversible.</p>
-              <div className="flex justify-end gap-2">
-                <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDel(null)}>Retour</button>
-                <button className="btn btn-warning btn-sm gap-1" onClick={() => handleDelete(confirmDel)}>
-                  <Ban size={13} /> Confirmer
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop" onClick={() => setConfirmDel(null)} />
-        </div>
-      )}
+      <ConfirmDeleteModal
+      isOpen={!!confirmDel}
+      label={`la vente #${confirmDel}`}
+      onConfirm={() => handleDelete(confirmDel)}
+      onClose={() => setConfirmDel(null)}
+      loading={false}
+      />
     </Layout>
   )
 }

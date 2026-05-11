@@ -13,6 +13,9 @@ import {
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 const fmt   = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 const toISO = d => d.toISOString().split('T')[0]
@@ -257,8 +260,8 @@ const sousSeuil = useMemo(() => produits.filter(p => {
   const loading = lS || lP || lC || lL
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto space-y-5 p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )
@@ -427,7 +430,7 @@ const sousSeuil = useMemo(() => produits.filter(p => {
               </div>
               <div className="p-4">
                 {stockParCategorie.length === 0
-                  ? <div className="h-44 flex items-center justify-center text-base-content/30 text-sm">Aucune donnée</div>
+                  ? <EmptyState title="Aucune donnée" message="Aucun stock disponible" />
                   : <div className="h-56" style={{ minWidth: 0 }}>
                       <ResponsiveContainer width="100%" height={224}>
                         <BarChart data={stockParCategorie} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -459,38 +462,37 @@ const sousSeuil = useMemo(() => produits.filter(p => {
                         data={[
                           { name: 'OK',        value: enBonneSante.length },
                           { name: 'Sous seuil', value: sousSeuil.length   },
-              { name: 'Rupture',   value: enRupture.length    },
-            ]}
-            dataKey="value" nameKey="name"
-            cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>
-            <Cell fill="rgba(101,195,200,0.85)" />
-            <Cell fill="rgba(238,175,58,0.85)" />
-            <Cell fill="rgba(239,159,188,0.85)" />
-          </Pie>
-          <Tooltip formatter={(v, n) => [v, n]} />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="flex flex-col gap-3 w-40">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(101,195,200,0.85)' }} />
-          <span className="text-base-content/70">OK</span>
-          <span className="ml-auto font-bold text-success">{enBonneSante.length}</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(238,175,58,0.85)' }} />
-          <span className="text-base-content/70">Sous seuil</span>
-          <span className="ml-auto font-bold text-warning">{sousSeuil.length}</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(239,159,188,0.85)' }} />
-          <span className="text-base-content/70">Rupture</span>
-          <span className="ml-auto font-bold text-error">{enRupture.length}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+                          { name: 'Rupture',   value: enRupture.length    },
+                        ]}
+                      dataKey="value" nameKey="name"
+                      cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>
+                        <Cell fill="rgba(101,195,200,0.85)" />
+                        <Cell fill="rgba(238,175,58,0.85)" />
+                        <Cell fill="rgba(239,159,188,0.85)" />
+                      </Pie>
+                        <Tooltip formatter={(v, n) => [v, n]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-col gap-3 w-40">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(101,195,200,0.85)' }} />
+                        <span className="text-base-content/70">OK</span>
+                        <span className="ml-auto font-bold text-success">{enBonneSante.length}</span>
+                      </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(238,175,58,0.85)' }} />
+                      <span className="text-base-content/70">Sous seuil</span>
+                      <span className="ml-auto font-bold text-warning">{sousSeuil.length}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'rgba(239,159,188,0.85)' }} />
+                      <span className="text-base-content/70">Rupture</span>
+                      <span className="ml-auto font-bold text-error">{enRupture.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           <div className="card bg-base-100 shadow-sm border border-base-200 rounded-3xl">
             <div className="card-body p-0">
               <div className="bg-primary text-primary-content px-5 py-3 flex items-center gap-2 rounded-t-3xl">

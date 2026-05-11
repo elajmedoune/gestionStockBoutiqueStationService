@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense, useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 
@@ -9,6 +9,28 @@ const PageLoader = () => (
     <span className="loading loading-spinner loading-lg text-primary" />
   </div>
 )
+
+// Transition entre pages
+function PageTransition({ children }) {
+  const location = useLocation()
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    setShow(false)
+    const t = setTimeout(() => setShow(true), 50)
+    return () => clearTimeout(t)
+  }, [location.pathname])
+
+  return (
+<div style={{
+  transition: 'opacity 0.3s ease, transform 0.3s ease',
+  opacity: show ? 1 : 0,
+  transform: show ? 'translateY(0)' : 'translateY(8px)'
+}}>
+        {children}
+    </div>
+  )
+}
 
 // Lazy imports — chaque page se charge uniquement quand on y navigue
 const Login          = lazy(() => import('./pages/Login'))
@@ -52,43 +74,45 @@ function AppRoutes() {
 
   return (
     <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<Accueil />} />
+      <PageTransition>
+        <Routes>
+          <Route path="/" element={<Accueil />} />
 
-        <Route path="/login"           element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password"  element={<ResetPassword />} />
+          <Route path="/login"           element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password"  element={<ResetPassword />} />
 
-        {/* Pages avec Layout intégré */}
-        <Route path="/dashboard"    element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/ventes"       element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
-        <Route path="/rapport"      element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
-        <Route path="/profil"       element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
-        <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
+          {/* Pages avec Layout intégré */}
+          <Route path="/dashboard"     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/ventes"        element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
+          <Route path="/rapport"       element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
+          <Route path="/profil"        element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
+          <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
 
-        {/* Pages avec Layout ajouté ici */}
-        <Route path="/parametres"   element={<ProtectedRouteWithLayout><Parametres /></ProtectedRouteWithLayout>} />
-        <Route path="/utilisateurs" element={<ProtectedRouteWithLayout><Utilisateurs /></ProtectedRouteWithLayout>} />
-        <Route path="/produits"     element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
-        <Route path="/stock"        element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
-        <Route path="/categories"   element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
-        <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
-        <Route path="/commandes"    element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
-        <Route path="/livraisons"   element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
-        <Route path="/alertes"      element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />
-        <Route path="/inventaire"   element={<ProtectedRouteWithLayout><Inventaires /></ProtectedRouteWithLayout>} />
+          {/* Pages avec Layout ajouté ici */}
+          <Route path="/parametres"   element={<ProtectedRouteWithLayout><Parametres /></ProtectedRouteWithLayout>} />
+          <Route path="/utilisateurs" element={<ProtectedRouteWithLayout><Utilisateurs /></ProtectedRouteWithLayout>} />
+          <Route path="/produits"     element={<ProtectedRouteWithLayout><Produits /></ProtectedRouteWithLayout>} />
+          <Route path="/stock"        element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
+          <Route path="/categories"   element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
+          <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
+          <Route path="/commandes"    element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
+          <Route path="/livraisons"   element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
+          <Route path="/alertes"      element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />
+          <Route path="/inventaire"   element={<ProtectedRouteWithLayout><Inventaires /></ProtectedRouteWithLayout>} />
 
-        <Route path="/rapport-stock" element={
-          <ProtectedRoute>
-            {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)
-              ? <RapportStock />
-              : <Navigate to="/dashboard" />
-            }
-          </ProtectedRoute>
-        } />
+          <Route path="/rapport-stock" element={
+            <ProtectedRoute>
+              {user && ['gestionnaire_stock', 'magasinier', 'gerant'].includes(user.role)
+                ? <RapportStock />
+                : <Navigate to="/dashboard" />
+              }
+            </ProtectedRoute>
+          } />
 
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </PageTransition>
     </Suspense>
   )
 }

@@ -14,6 +14,9 @@ import {
   PointElement, ArcElement, Tooltip, Legend, Filler,
 } from 'chart.js'
 import { Bar, Doughnut } from 'react-chartjs-2'
+import EmptyState from '../components/layouts/EmptyState'
+import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
+import LoadingCard from '../components/layouts/LoadingCard'
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement, LineElement,
@@ -727,8 +730,8 @@ export default function Dashboard() {
 
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="max-w-6xl mx-auto p-6">
+        <LoadingCard count={8} />
       </div>
     </Layout>
   )
