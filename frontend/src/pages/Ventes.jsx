@@ -565,7 +565,7 @@ export default function Ventes() {
             </h1>
             <p className="text-xs text-base-content/40 mt-0.5 ml-1">Historique et saisie des ventes</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {user?.role !== 'caissier' && (
               <div className="relative">
                 <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5"
@@ -589,8 +589,8 @@ export default function Ventes() {
             )}
           </div>
         )}
-            <button className="btn btn-sm btn-primary gap-1.5" onClick={() => setModalNew(true)}>
-              <Plus size={14} /> Nouvelle vente
+            <button className="btn btn-primary gap-2" onClick={() => setModalNew(true)}>
+              <Plus size={16} /> Nouvelle vente
             </button>
           </div>
         </div>

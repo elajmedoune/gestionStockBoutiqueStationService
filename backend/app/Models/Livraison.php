@@ -14,6 +14,7 @@ class Livraison extends Model
         'montantTotal',
         'observations',
         'idCommande',
+        'statut',
     ];
 
     protected $casts = [
@@ -23,6 +24,6 @@ class Livraison extends Model
 
     public function commande()
     {
-        return $this->hasOne(Commande::class, 'idLivraison', 'idLivraison');
+        return $this->belongsTo(Commande::class, 'idCommande', 'idCommande');
     }
 }

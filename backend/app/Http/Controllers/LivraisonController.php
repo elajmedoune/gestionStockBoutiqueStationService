@@ -10,9 +10,12 @@ class LivraisonController extends Controller
 {
     public function index()
     {
-        $livraisons = Livraison::with(['commande.utilisateur'])
-                               ->orderBy('dateLivraison', 'desc')
-                               ->get();
+        $livraisons = Livraison::with([
+            'commande.utilisateur',
+            'commande.lignes.produit',
+            ])
+            ->orderBy('dateLivraison', 'desc')
+            ->get();
         return LivraisonResource::collection($livraisons);
     }
 
@@ -22,29 +25,48 @@ class LivraisonController extends Controller
             'dateLivraison' => 'required|date',
             'montantTotal'  => 'nullable|numeric|min:0',
             'observations'  => 'nullable|string|max:300',
-            'idCommande' => 'required|integer|exists:commandes,idCommande|unique:livraisons,idCommande',
+            'idCommande' => [
+            'required',
+            'integer',
+            'exists:commandes,idCommande',
+            \Illuminate\Validation\Rule::unique('livraisons', 'idCommande')
+            ->whereNotIn('statut', ['annulee']),
+            ],
+            'statut'        => 'nullable|string|in:en_attente,livree,annulee',
         ]);
         $livraison = Livraison::create($request->all());
-        return new LivraisonResource($livraison->load(['commande']));
+        return new LivraisonResource($livraison->load([
+            'commande.lignes.produit',
+        ]));
     }
 
     public function show($id)
     {
-        $livraison = Livraison::with(['commande.utilisateur'])->findOrFail($id);
+        $livraison = Livraison::with([
+            'commande.utilisateur',
+            'commande.lignes.produit',
+        ])->findOrFail($id);
         return new LivraisonResource($livraison);
     }
 
     public function update(Request $request, $id)
-    {
-        $livraison = Livraison::findOrFail($id);
-        $request->validate([
-            'dateLivraison' => 'sometimes|date',
-            'montantTotal'  => 'sometimes|numeric|min:0',
-            'observations'  => 'nullable|string|max:300',
-        ]);
-        $livraison->update($request->all());
-        return new LivraisonResource($livraison);
-    }
+{
+    $livraison = Livraison::findOrFail($id);
+    $request->validate([
+        'dateLivraison' => 'sometimes|date',
+        'montantTotal'  => 'sometimes|numeric|min:0',
+        'observations'  => 'nullable|string|max:300',
+        'statut'        => 'sometimes|string|in:en_attente,livree,annulee',
+        'idCommande'    => 'sometimes|integer|exists:commandes,idCommande',
+    ]);
+    $livraison->update($request->only([
+        'dateLivraison', 'montantTotal', 'observations', 'statut', 'idCommande'
+    ]));
+    return new LivraisonResource($livraison->load([
+        'commande.lignes.produit',
+        'commande.fournisseur',
+    ]));
+}
 
     public function destroy($id)
     {
