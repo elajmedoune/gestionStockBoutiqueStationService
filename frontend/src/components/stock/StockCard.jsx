@@ -20,7 +20,7 @@ function StockCard ({ stock, onEdit, onDelete }){
                 <div className="flex items-start justify-between gap-2">
                     <div>
                         <p className="font-semibold">
-                            {stock.produit?.reference ?? '-'}
+                            {stock.produit?.nomProduit ?? '-'}
                         </p>
                         <p className="text-xs text-base-content/50">
                             {stock.produit?.categorie?.libelle ?? ''}
@@ -32,9 +32,13 @@ function StockCard ({ stock, onEdit, onDelete }){
 
                 {/* Details */}
                 <div className="grid grid-cols-2 gap-1 text-sm">
-                    <span className="text-base-content/60">Quantité</span>
+                    <span className="text-base-content/60">Quantité initiale</span>
                     <span className="font-medium text-right">
                         {stock.quantiteInitiale}
+                    </span>
+                    <span className="text-base-content/60">Quantité restante</span>
+                    <span className="font-medium text-right">
+                        {stock.quantiteRestante}
                     </span>
 
                     <span className="text-base-content/60">Prix achat</span>

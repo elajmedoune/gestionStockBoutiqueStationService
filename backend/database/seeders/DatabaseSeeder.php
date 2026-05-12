@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         Utilisateur::create([
             'nom'        => 'DIALLO',
             'prenom'     => 'Mamadou',
-            'login'      => 'gerant',
+            'login'      => 'mamadou',
             'email'      => 'gerant@station.sn',
             'motDePasse' => Hash::make('password123'),
             'role'       => 'gerant',
