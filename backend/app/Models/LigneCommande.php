@@ -7,20 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class LigneCommande extends Model
 {
     protected $table      = 'lignecommande';
-    protected $primaryKey = ['idProduit', 'idCommande']; 
-    public $incrementing  = false;                        
-    public $timestamps    = false;                        
+    protected $primaryKey = 'idLigneCommande';
+    public $incrementing  = true;
+    public $timestamps    = true;
 
     protected $fillable = [
         'idCommande',
         'idProduit',
-        'quantiteCommande', 
-        'quantiteRecu',     
-        'montantLigne',    
+        'quantite',
+        'prixUnitaire',
+        'sousTotal',
     ];
 
     protected $casts = [
-        'montantLigne' => 'decimal:2',
+        'prixUnitaire' => 'decimal:2',
+        'sousTotal'    => 'decimal:2',
     ];
 
     public function commande()

@@ -337,12 +337,19 @@ export default function Layout({ children }) {
                         <div key={n.id} onClick={() => marquerLue(n.id)}
                           className={`flex items-start gap-3 px-4 py-3 border-b border-base-200/50 hover:bg-primary/5 transition-colors cursor-pointer ${estLue ? 'opacity-50' : ''}`}>
                           <div className={`w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 ${
-                            n.niveau === 'error' ? 'bg-error/15 text-error' : n.niveau === 'warning' ? 'bg-warning/15 text-warning' :
-                            n.niveau === 'success' ? 'bg-success/15 text-success' : 'bg-info/15 text-info'
-                          }`}>
-                            {n.niveau === 'error' ? <AlertTriangle size={14} /> : n.niveau === 'warning' ? <Bell size={14} /> :
-                            n.niveau === 'success' ? <Truck size={14} /> : <Package size={14} />}
-                          </div>
+  n.niveau === 'error'   ? 'bg-error/15 text-error'     :
+  n.niveau === 'warning' ? 'bg-warning/15 text-warning' :
+  n.niveau === 'success' ? 'bg-success/15 text-success' :
+  'bg-info/15 text-info'
+}`}>
+  {n.icone === 'rupture'    && <AlertTriangle size={14} />}
+  {n.icone === 'seuil'      && <AlertTriangle size={14} />}
+  {n.icone === 'retard'     && <Clock size={14} />}
+  {n.icone === 'commande'   && <Package size={14} />}
+  {n.icone === 'livraison'  && <Truck size={14} />}
+  {n.icone === 'utilisateur'&& <User size={14} />}
+  {!n.icone                 && <Bell size={14} />}
+</div>
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-bold ${estLue ? 'text-base-content/50' : 'text-base-content'}`}>{n.label}</p>
                             <p className="text-xs text-base-content/60 mt-0.5 truncate">{n.message}</p>
