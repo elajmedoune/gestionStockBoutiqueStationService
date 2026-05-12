@@ -7,6 +7,7 @@ function ProduitCard({ produit, onEdit, onDelete}) {
     const stockTotal = produit.stocks?.reduce((acc, s) => acc + (s.quantiteRestante || 0), 0) ?? 0
     const isCritical =  produit.seuilSecurite && stockTotal <= produit.seuilSecurite
     
+    console.log(produit.reference, produit.stocks, stockTotal)
     return(
         <div className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow border border-base-200">
             <figure className="h-36 bg-base-200 overflow-hidden rounded-t-2xl">

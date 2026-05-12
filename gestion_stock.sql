@@ -1,4 +1,4 @@
--- ============================================================
+- ============================================================
 -- BASE DE DONNÉES : gestion_stock
 -- Projet : Gestion Stock Boutique Station Service
 -- Date   : 2026-05-08 (corrigé)
@@ -343,49 +343,32 @@ CREATE TABLE `personal_access_tokens` (
 DELIMITER ;;
 
 -- Diminuer le stock + alerte si sous seuil
-CREATE TRIGGER trg_after_livraison_insert
-AFTER INSERT ON livraisons
+
+CREATE TRIGGER trg_after_lignevente_insert
+AFTER INSERT ON lignevente
 FOR EACH ROW
 BEGIN
-    -- Décrémenter le stock du lot le plus ancien ayant encore du stock (FIFO)
-    UPDATE stocks s
-    JOIN lignecommande lc ON lc.idProduit = s.idProduit
-    SET s.quantiteRestante = s.quantiteRestante + lc.quantite,
-        s.dateEntree       = NEW.dateLivraison
-    WHERE lc.idCommande = NEW.idCommande;
-
-    UPDATE commandes
-    SET statut      = 'livree',
-        idLivraison = NEW.idLivraison
-    WHERE idCommande = NEW.idCommande;
+    -- Alerte uniquement si stock restant <= seuil de sécurité
+    -- La décrémentation est gérée par sp_ajouter_ligne_vente (FIFO)
+    INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
+    SELECT
+        'stock_faible',
+        CONCAT('Stock faible — Réf : ', p.reference,
+               ' — Restant : ', s.quantiteRestante,
+               ' / Seuil : ', p.seuilSecurite),
+        CASE
+            WHEN s.quantiteRestante = 0                    THEN 'critique'
+            WHEN s.quantiteRestante <= p.seuilSecurite / 2 THEN 'critique'
+            ELSE 'moyen'
+        END,
+        v.idUtilisateur,
+        s.idStock
+    FROM produits p
+    JOIN stocks s ON s.idProduit = p.idProduit
+    JOIN ventes v ON v.idVente   = NEW.idVente
+    WHERE p.idProduit = NEW.idProduit
+      AND s.quantiteRestante <= p.seuilSecurite;
 END;;
-
-
-SET s.quantiteRestante = s.quantiteRestante - NEW.quantite
-    WHERE s.idProduit = NEW.idProduit
-      AND s.quantiteRestante > 0
-    ORDER BY s.dateEntree ASC
-    LIMIT 1;
-
-    -- -- Alerte si stock restant <= seuil de sécurité
-    -- INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
-    -- SELECT
-    --     'stock_faible',
-    --     CONCAT('Stock faible — Réf : ', p.reference,
-    --            ' — Restant : ', s.quantiteRestante,
-    --            ' / Seuil : ', p.seuilSecurite),
-    --     CASE
-    --         WHEN s.quantiteRestante = 0                    THEN 'critique'
-    --         WHEN s.quantiteRestante <= p.seuilSecurite / 2 THEN 'critique'
-    --         ELSE 'moyen'
-    --     END,
-    --     v.idUtilisateur,
-    --     s.idStock
-    -- FROM produits p
-    -- JOIN stocks s ON s.idProduit = p.idProduit
-    -- JOIN ventes v ON v.idVente   = NEW.idVente
-    -- WHERE p.idProduit = NEW.idProduit
-    --   AND s.quantiteRestante <= p.seuilSecurite;
 
 
 -- Recalculer les totaux HT/TVA/TTC de la vente
@@ -551,6 +534,35 @@ BEGIN
         SELECT 'Ligne ajoutée avec succès' AS message;
     END IF;
 END;;
+-- CREATE PROCEDURE sp_ajouter_ligne_vente(
+--     IN p_idVente   INT,
+--     IN p_idProduit INT,
+--     IN p_quantite  INT
+-- )
+-- BEGIN
+--     DECLARE v_stock INT;
+--     DECLARE v_prix  DECIMAL(10,2);
+--     DECLARE v_total DECIMAL(10,2);
+--     DECLARE v_msg   VARCHAR(200);
+
+--     SELECT s.quantiteRestante, p.prixUnitaire
+--     INTO v_stock, v_prix
+--     FROM produits p
+--     JOIN stocks s ON s.idProduit = p.idProduit
+--     WHERE p.idProduit = p_idProduit
+--     ORDER BY s.dateEntree ASC
+--     LIMIT 1;
+
+--     IF v_stock < p_quantite THEN
+--         SET v_msg = CONCAT('Stock insuffisant. Disponible : ', v_stock, ' — Demandé : ', p_quantite);
+--         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_msg;
+--     ELSE
+--         SET v_total = v_prix * p_quantite;
+--         INSERT INTO lignevente (idProduit, idVente, quantite, totalPartielle)
+--         VALUES (p_idProduit, p_idVente, p_quantite, v_total);
+--         SELECT 'Ligne ajoutée avec succès' AS message;
+--     END IF;
+-- END;;
 
 -- Créer une vente (retourne l'id)
 CREATE PROCEDURE sp_creer_vente(
@@ -689,3 +701,8 @@ END;;
 DELIMITER ;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- FIN DU SCRIPT
+-- ============================================================
+
