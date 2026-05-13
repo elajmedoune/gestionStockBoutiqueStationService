@@ -61,20 +61,20 @@ export default function Layout({ children }) {
       ]
     },
     {
-      label: 'Opérations',
-      items: [
-        { label: 'Ventes',     icon: <ShoppingCart size={18} />, path: '/ventes',     roles: ['gerant', 'caissier'] },
-        { label: 'Commandes',  icon: <Package size={18} />,      path: '/commandes',  roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-        { label: 'Livraisons', icon: <Truck size={18} />,        path: '/livraisons', roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-      ]
-    },
-    {
       label: 'Stock',
       items: [
         { label: 'Catégories',   icon: <Tag size={18} />,       path: '/categories',   roles: ['gerant', 'gestionnaire_stock'] },
         { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
         { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
         { label: 'Fournisseurs', icon: <Users size={18} />,     path: '/fournisseurs', roles: ['gerant', 'gestionnaire_stock'] },
+      ]
+    },
+    {
+      label: 'Opérations',
+      items: [
+        { label: 'Ventes',     icon: <ShoppingCart size={18} />, path: '/ventes',     roles: ['gerant', 'caissier'] },
+        { label: 'Commandes',  icon: <Package size={18} />,      path: '/commandes',  roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Livraisons', icon: <Truck size={18} />,        path: '/livraisons', roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
       ]
     },
     {

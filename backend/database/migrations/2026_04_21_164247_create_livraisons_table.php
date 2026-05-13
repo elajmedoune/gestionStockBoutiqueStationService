@@ -15,6 +15,8 @@ return new class extends Migration
             $table->enum('statut', ['en_attente', 'livree', 'annulee'])
                 ->default('en_attente');
             $table->string('observations', 300)->nullable();
+                $table->enum('ponctualite', ['a_temps', 'en_avance', 'en_retard'])
+                ->nullable();
             $table->unsignedBigInteger('idCommande')->unique();
             $table->timestamps();
 

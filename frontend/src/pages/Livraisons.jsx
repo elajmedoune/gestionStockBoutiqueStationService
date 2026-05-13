@@ -12,6 +12,7 @@ import ExportPDF from "../components/exports/ExportPDF"
 import ExportExcel from "../components/exports/ExportExcel"
 import ExportCSV from "../components/exports/ExportCSV"
 import { useAuth } from '../context/AuthContext'
+import { createPortal } from 'react-dom'
 
 const PDF_COLS = [
   { header: '#',             dataKey: 'idLivraison'   },
@@ -57,6 +58,7 @@ const canAnnuler     = isGerant || isGestionnaire
   const [form, setForm] = useState({
     idCommande:    "",
     dateLivraison: "",
+    dateLivraisonPrevue: "",
     statut:        "en_attente",
     observations:  "",
     montantTotal:  0,
@@ -101,7 +103,14 @@ const canAnnuler     = isGerant || isGestionnaire
   const handleCommandeChange = (idCommande) => {
     const cmd = commandes.find(c => String(c.idCommande) === String(idCommande))
     setCmdSelectionnee(cmd ?? null)
-    setForm(f => ({ ...f, idCommande, montantTotal: cmd?.montantTotal || 0 }))
+    setForm(f => ({ 
+        ...f, 
+        idCommande, 
+        montantTotal: cmd?.montantTotal || 0,
+        dateLivraisonPrevue: cmd?.dateLivraisonPrevue 
+            ? String(cmd.dateLivraisonPrevue).split('T')[0] 
+            : ''
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -385,150 +394,180 @@ const annulerLivraison = async (id) => {
       </div>
 
       {/* Modal création/édition */}
-      {showModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box max-w-lg rounded-2xl p-0 flex flex-col max-h-[90vh]">
+      {showModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setShowModal(false)} />
+            
+            <div className="relative bg-base-100 w-full max-w-lg rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+                style={{ maxHeight: '90vh' }}>
 
-            {/* Header fixe */}
-            <div className="bg-primary text-primary-content px-5 py-4 flex items-center justify-between flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/25 rounded-2xl"><Truck size={16} /></div>
-                <h3 className="font-extrabold">
-                  {editItem ? "Modifier la livraison" : "Nouvelle livraison"}
-                </h3>
-              </div>
-              <button className="btn btn-ghost btn-sm btn-circle text-primary-content"
-                onClick={() => setShowModal(false)}>✕</button>
-            </div>
-
-            {/* Formulaire scrollable */}
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-              <div className="p-5 space-y-4 overflow-y-auto flex-1">
-
-                {/* Commande */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium flex items-center gap-1">
-                      <ClipboardList size={13} className="text-primary" /> Commande *
-                    </span>
-                  </label>
-                  <select className="select select-bordered"
-                    value={form.idCommande}
-                    onChange={e => handleCommandeChange(e.target.value)}
-                    required disabled={!!editItem}>
-                    <option value="">-- Sélectionner une commande --</option>
-                    {commandes
-                      .filter(c => c.statut !== 'livree' || (editItem && c.idCommande === editItem.idCommande))
-                      .map(c => (
-                        <option key={c.idCommande} value={c.idCommande}>
-                          CMD #{c.idCommande} — {c.statut} — {fmt(c.montantTotal)} F
-                        </option>
-                      ))}
-                  </select>
+                {/* Header */}
+                <div className="bg-primary text-primary-content px-5 py-4 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/25 rounded-2xl"><Truck size={16} /></div>
+                        <h3 className="font-extrabold">
+                            {editItem ? "Modifier la livraison" : "Nouvelle livraison"}
+                        </h3>
+                    </div>
+                    <button className="btn btn-ghost btn-sm btn-circle text-primary-content"
+                        onClick={() => setShowModal(false)}>✕</button>
                 </div>
 
-                {/* Produits à recevoir */}
-                {cmdSelectionnee && (cmdSelectionnee.lignes ?? []).length > 0 && (
-                  <div className="bg-base-200/50 rounded-2xl p-3">
-                    <p className="text-xs font-bold mb-2 flex items-center gap-1">
-                      <Package size={12} className="text-primary" /> Produits à recevoir
-                    </p>
-                    <table className="table table-xs w-full">
-                      <thead>
-                        <tr className="bg-base-300/50">
-                          <th>Produit</th>
-                          <th className="text-right">Qté</th>
-                          <th className="text-right">Prix unit.</th>
-                          <th className="text-right">Sous-total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(cmdSelectionnee.lignes ?? []).map((l, i) => (
-                          <tr key={i}>
-                            <td className="font-semibold">
-                              {l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}
-                            </td>
-                            <td className="text-right">{l.quantite}</td>
-                            <td className="text-right text-base-content/60">{fmt(l.prixUnitaire)} F</td>
-                            <td className="text-right font-bold text-primary">{fmt(l.sousTotal)} F</td>
-                          </tr>
+                {/* Formulaire scrollable */}
+                <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(90vh - 70px)' }}>
+                  <div className="p-5 space-y-4 overflow-y-auto flex-1">
+
+                    {/* Commande */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium flex items-center gap-1">
+                          <ClipboardList size={13} className="text-primary" /> Commande *
+                        </span>
+                      </label>
+                      <select className="select select-bordered"
+                        value={form.idCommande}
+                        onChange={e => handleCommandeChange(e.target.value)}
+                        required disabled={!!editItem}>
+                        <option value="">-- Sélectionner une commande --</option>
+                        {commandes
+                          .filter(c => c.statut !== 'livree' || (editItem && c.idCommande === editItem.idCommande))
+                          .map(c => (
+                            <option key={c.idCommande} value={c.idCommande}>
+                              CMD #{c.idCommande} — {c.statut} — {fmt(c.montantTotal)} F
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    {/* Produits à recevoir */}
+                    {cmdSelectionnee && (cmdSelectionnee.lignes ?? []).length > 0 && (
+                      <div className="bg-base-200/50 rounded-2xl p-3">
+                        <p className="text-xs font-bold mb-2 flex items-center gap-1">
+                          <Package size={12} className="text-primary" /> Produits à recevoir
+                        </p>
+                        <table className="table table-xs w-full">
+                          <thead>
+                            <tr className="bg-base-300/50">
+                              <th>Produit</th>
+                              <th className="text-right">Qté</th>
+                              <th className="text-right">Prix unit.</th>
+                              <th className="text-right">Sous-total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(cmdSelectionnee.lignes ?? []).map((l, i) => (
+                              <tr key={i}>
+                                <td className="font-semibold">
+                                  {l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}
+                                </td>
+                                <td className="text-right">{l.quantite}</td>
+                                <td className="text-right text-base-content/60">{fmt(l.prixUnitaire)} F</td>
+                                <td className="text-right font-bold text-primary">{fmt(l.sousTotal)} F</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* Date prévue (lecture seule) + Date réelle */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-medium flex items-center gap-1">
+                                    <Calendar size={13} className="text-primary" /> Date prévue
+                                </span>
+                            </label>
+                            <input type="date" className="input input-bordered bg-base-200/50"
+                                value={form.dateLivraisonPrevue}
+                                readOnly />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-medium flex items-center gap-1">
+                                    <Calendar size={13} className="text-primary" /> Date réelle *
+                                </span>
+                            </label>
+                            <input type="date" className="input input-bordered"
+                                value={form.dateLivraison}
+                                onChange={e => setForm(f => ({ ...f, dateLivraison: e.target.value }))}
+                                required />
+                        </div>
+                    </div>
+
+                    {/* Ponctualité calculée */}
+                    {form.dateLivraison && form.dateLivraisonPrevue && (() => {
+                        const reel  = new Date(form.dateLivraison)
+                        const prevu = new Date(form.dateLivraisonPrevue)
+                        const diff  = Math.round((reel - prevu) / (1000 * 60 * 60 * 24))
+                        const config = diff < 0
+                            ? { label: `${Math.abs(diff)} jour(s) en avance`, cls: 'alert-success' }
+                            : diff === 0
+                            ? { label: 'Livré à temps ✓', cls: 'alert-success' }
+                            : { label: `${diff} jour(s) de retard`, cls: 'alert-warning' }
+                        return (
+                            <div className={`alert ${config.cls} py-2 text-sm`}>
+                                <span>{config.label}</span>
+                            </div>
+                        )
+                    })()}
+
+                    {/* Montant total */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium">Montant total (FCFA)</span>
+                      </label>
+                      <input type="number" min="0" step="0.01" className="input input-bordered"
+                        value={form.montantTotal}
+                        onChange={e => setForm(f => ({ ...f, montantTotal: e.target.value }))} />
+                    </div>
+
+                    {/* Statut */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium">Statut *</span>
+                      </label>
+                      <div className="flex gap-2 flex-wrap">
+                        {STATUTS.map(s => (
+                          <button key={s} type="button"
+                            onClick={() => setForm(f => ({ ...f, statut: s }))}
+                            className={`btn btn-sm gap-1 ${form.statut === s
+                              ? STATUT_CONFIG[s]?.btnClass
+                              : 'btn-ghost border border-base-300'}`}>
+                            {STATUT_CONFIG[s]?.icon}
+                            {STATUT_CONFIG[s]?.label}
+                          </button>
                         ))}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
+
+                    {/* Observations */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text font-medium">Observations</span>
+                      </label>
+                      <textarea className="textarea textarea-bordered rounded-2xl" rows={3}
+                        value={form.observations}
+                        onChange={e => setForm(f => ({ ...f, observations: e.target.value }))}
+                        placeholder="Notes sur la livraison..." />
+                    </div>
                   </div>
-                )}
 
-                {/* Date livraison */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium flex items-center gap-1">
-                      <Calendar size={13} className="text-primary" /> Date de livraison *
-                    </span>
-                  </label>
-                  <input type="date" className="input input-bordered"
-                    value={form.dateLivraison}
-                    onChange={e => setForm(f => ({ ...f, dateLivraison: e.target.value }))}
-                    required />
-                </div>
-
-                {/* Montant total */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Montant total (FCFA)</span>
-                  </label>
-                  <input type="number" min="0" step="0.01" className="input input-bordered"
-                    value={form.montantTotal}
-                    onChange={e => setForm(f => ({ ...f, montantTotal: e.target.value }))} />
-                </div>
-
-                {/* Statut */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Statut *</span>
-                  </label>
-                  <div className="flex gap-2 flex-wrap">
-                    {STATUTS.map(s => (
-                      <button key={s} type="button"
-                        onClick={() => setForm(f => ({ ...f, statut: s }))}
-                        className={`btn btn-sm gap-1 ${form.statut === s
-                          ? STATUT_CONFIG[s]?.btnClass
-                          : 'btn-ghost border border-base-300'}`}>
-                        {STATUT_CONFIG[s]?.icon}
-                        {STATUT_CONFIG[s]?.label}
+                  {/* Boutons fixés en bas */}
+                  <div className="flex justify-end gap-2 px-5 py-4 border-t border-base-200 shrink-0 bg-base-100">
+                      <button type="button" className="btn btn-ghost"
+                          onClick={() => setShowModal(false)} disabled={saving}>
+                          Annuler
                       </button>
-                    ))}
+                      <button type="submit" className="btn btn-primary" disabled={saving}>
+                          {saving && <span className="loading loading-spinner loading-xs" />}
+                          {editItem ? "Modifier" : "Enregistrer"}
+                      </button>
                   </div>
-                </div>
-
-                {/* Observations */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Observations</span>
-                  </label>
-                  <textarea className="textarea textarea-bordered rounded-2xl" rows={3}
-                    value={form.observations}
-                    onChange={e => setForm(f => ({ ...f, observations: e.target.value }))}
-                    placeholder="Notes sur la livraison..." />
-                </div>
-
-              </div>
-
-              {/* Boutons fixés en bas */}
-              <div className="flex justify-end gap-2 px-5 py-4 border-t border-base-200 flex-shrink-0 bg-base-100">
-                <button type="button" className="btn btn-ghost"
-                  onClick={() => setShowModal(false)} disabled={saving}>
-                  Annuler
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving && <span className="loading loading-spinner loading-xs" />}
-                  {editItem ? "Modifier" : "Enregistrer"}
-                </button>
-              </div>
-            </form>
-
-          </div>
-          <div className="modal-backdrop" onClick={() => setShowModal(false)} />
-        </dialog>
+                </form>
+            </div>
+        </div>,
+        document.body
       )}
 
       {/* Confirmation suppression */}

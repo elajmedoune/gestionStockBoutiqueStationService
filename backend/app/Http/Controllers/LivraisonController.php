@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Livraison;
+use App\Models\Commande;
 use App\Http\Resources\LivraisonResource;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,22 @@ class LivraisonController extends Controller
             ],
             'statut'        => 'nullable|string|in:en_attente,livree,annulee',
         ]);
-        $livraison = Livraison::create($request->all());
+
+        $commande = Commande::findOrFail($request->idCommande);
+        $dateLivraison = new \Carbon\Carbon($request->dateLivraison);
+        $datePrevue = $commande->dateLivraisonPrevue;
+        
+        $ponctualite = 'a_temps';
+        if ($datePrevue) {
+            if ($dateLivraison->lt($datePrevue)) $ponctualite = 'en_avance';
+            elseif ($dateLivraison->gt($datePrevue)) $ponctualite = 'en_retard';
+        }
+
+        $livraison = Livraison::create([
+            ...$request->only(['dateLivraison', 'montantTotal', 'observations', 'idCommande', 'statut']),
+            'ponctualite' => $ponctualite,
+        ]);
+
         return new LivraisonResource($livraison->load([
             'commande.lignes.produit',
         ]));
