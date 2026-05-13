@@ -26,7 +26,7 @@ const INITIAL = {
     lignes:              [],
 }
 
-function CommandeForm({ initial = null, onSubmit, onCancel, loading = false }) {
+function CommandeForm({ initial = null, onSubmit, onCancel, loading = false, error = null }) {
     const [form,        setForm]        = useState(INITIAL)
     const [produits,    setProduits]    = useState([])
     const [fournisseurs, setFournisseurs] = useState([])
@@ -62,7 +62,24 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false }) {
     }, [initial])
 
     const handle = (e) => {
-        setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+        const { name, value } = e.target
+        setForm(f => {
+            const updated = { ...f, [name]: value }
+            
+            // Calcul automatique de la date de livraison prévue
+            if (name === 'idFournisseur' || name === 'dateCommande') {
+                const fournisseur = fournisseurs.find(f => String(f.idFournisseur) === String(
+                    name === 'idFournisseur' ? value : f.idFournisseur
+                ))
+                const dateCmd = name === 'dateCommande' ? value : f.dateCommande
+                if (fournisseur && dateCmd) {
+                    const date = new Date(dateCmd)
+                    date.setDate(date.getDate() + fournisseur.delaiLivraison)
+                    updated.dateLivraisonPrevue = date.toISOString().split('T')[0]
+                }
+            }
+            return updated
+        })
     }
 
     const ajouterLigne = () => {
@@ -86,7 +103,11 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false }) {
                 const updated = { ...l, [field]: value }
                 if (field === 'idProduit') {
                     const produit = produits.find(p => String(p.idProduit) === String(value))
-                    updated.prixUnitaire = produit?.prixUnitaire ?? 0
+                    // Prendre le prixEnGros du dernier stock au lieu du prixUnitaire
+                    const dernierStock = produit?.stocks?.slice().sort((a, b) => 
+                        new Date(b.dateEntree) - new Date(a.dateEntree)
+                    )[0]
+                    updated.prixUnitaire = dernierStock?.prixEnGros ?? produit?.prixUnitaire ?? 0
                     updated.sousTotal    = updated.quantite * updated.prixUnitaire
                 }
                 if (field === 'quantite' || field === 'prixUnitaire') {
@@ -108,31 +129,11 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false }) {
 
     return (
         <form onSubmit={submit} className="space-y-5">
-
-            {/* Dates */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="form-control">
-                    <label className="label">
-                        <span className="label-text font-medium flex items-center gap-1">
-                            <Calendar size={13} className="text-primary" /> Date commande *
-                        </span>
-                    </label>
-                    <input className="input input-bordered"
-                        name="dateCommande" type="date"
-                        value={form.dateCommande} onChange={handle} required />
+            {error && (
+                <div className="alert alert-error text-sm py-2">
+                    <span>{error}</span>
                 </div>
-                <div className="form-control">
-                    <label className="label">
-                        <span className="label-text font-medium flex items-center gap-1">
-                            <CalendarCheck size={13} className="text-primary" /> Livraison prévue
-                        </span>
-                    </label>
-                    <input className="input input-bordered"
-                        name="dateLivraisonPrevue" type="date"
-                        value={form.dateLivraisonPrevue} onChange={handle} />
-                </div>
-            </div>
-
+            )}
             {/* Fournisseur */}
             <div className="form-control">
                 <label className="label">
@@ -152,6 +153,32 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false }) {
                         </option>
                     ))}
                 </select>
+            </div>
+            
+            {/* Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text font-medium flex items-center gap-1">
+                            <Calendar size={13} className="text-primary" /> Date commande *
+                        </span>
+                    </label>
+                    <input className="input input-bordered"
+                        name="dateCommande" type="date"
+                        value={form.dateCommande} onChange={handle} required />
+                </div>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text font-medium flex items-center gap-1">
+                            <CalendarCheck size={13} className="text-primary" /> Livraison prévue
+                        </span>
+                    </label>
+                    <input className="input input-bordered bg-base-200/50"
+                        name="dateLivraisonPrevue" type="date"
+                        value={form.dateLivraisonPrevue} onChange={handle}
+                        placeholder="Calculé automatiquement" 
+                    />
+                </div>
             </div>
 
             {/* Lignes de commande */}

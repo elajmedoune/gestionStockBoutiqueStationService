@@ -16,8 +16,13 @@ return new class extends Migration
             $table->decimal('montantTotal', 10, 2)->default(0);
             $table->unsignedBigInteger('idLivraison')->nullable();
             $table->unsignedBigInteger('idUtilisateur');
+            $table->unsignedBigInteger('idFournisseur')->nullable()->after('idLivraison');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->foreign('idFournisseur')
+                  ->references('idFournisseur')
+                  ->on('fournisseurs')
+                  ->onDelete('restrict');
         });
     }
 

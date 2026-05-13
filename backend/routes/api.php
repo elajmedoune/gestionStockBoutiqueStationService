@@ -12,7 +12,6 @@ use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\LivraisonController;
 use App\Http\Controllers\AssistantController;
-use App\Http\Controllers\PasswordResetController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
@@ -22,9 +21,6 @@ Route::get('/stats-publiques', function () {
         'caissiers' => \App\Models\Utilisateur::where('role', 'caissier')->count(),
     ]);
 });
-
-Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:3,1');
-Route::post('/reset-password',  [PasswordResetController::class, 'reset'])->middleware('throttle:5,1');
 
 Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
 
@@ -43,7 +39,6 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::post('/profil/photo',     [AuthController::class, 'uploadPhoto']);
     Route::put('/profil',            [AuthController::class, 'updateProfil']);
     Route::put('/profil/password',   [AuthController::class, 'updatePassword']);
-    Route::delete('/profil/photo',   [AuthController::class, 'removePhoto']);
 
     Route::middleware('role:gerant,gestionnaire_stock')->group(function() {
         Route::get('/inventaires/rapport',  [InventaireController::class, 'rapport']);
@@ -71,6 +66,7 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
 
     Route::apiResource('categories',   CategorieController::class);
     Route::apiResource('fournisseurs', FournisseurController::class);
+    Route::post('/fournisseurs/{id}/produits', [FournisseurController::class, 'syncProduits']);
     Route::apiResource('produits',     ProduitController::class);
     Route::apiResource('stocks',       StockController::class);
 
