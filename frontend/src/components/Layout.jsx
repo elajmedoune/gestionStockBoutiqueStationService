@@ -8,7 +8,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Truck,
   Menu, X, ChevronRight, ChevronLeft,
   BarChart2, Archive, AlertTriangle, Users, Tag,
-  TrendingUp, ClipboardList, ClipboardCheck
+  TrendingUp, ClipboardList, ClipboardCheck, Clock
 } from 'lucide-react'
 
 export default function Layout({ children }) {
