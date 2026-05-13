@@ -8,6 +8,7 @@ import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
 import { ShoppingBag, Plus, Search, Download } from "lucide-react"
 import { useAuth } from '../context/AuthContext'
+import { useFournisseurs } from '../hooks'
 
 const STATUTS = ['en_attente', 'confirmee', 'expediee', 'livree']
 const PDF_COLS = [
@@ -26,6 +27,7 @@ function Commandes() {
   const [saving,       setSaving]       = useState(false)
   const [exportOpen,   setExportOpen]   = useState(false)
   const { user } = useAuth()
+  const { data: fournisseurs } = useFournisseurs()
   const isGerant = user?.role === 'gerant'
   const isGestionnaire = user?.role === 'gestionnaire_stock'
   const canCreate = isGerant || isGestionnaire
@@ -253,6 +255,7 @@ const exportData = filtered.map((c) => ({
         isOpen={modal.open}
         mode={modal.mode}
         commande={modal.cmd}
+        fournisseurs={fournisseurs}
         onSubmit={handleSubmit}
         onClose={() => { setModal({ open: false, mode: 'create', cmd: null }); setErrorModal(null) }}
         loading={saving}

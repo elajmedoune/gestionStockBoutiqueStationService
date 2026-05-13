@@ -14,6 +14,7 @@ class LivraisonController extends Controller
         $livraisons = Livraison::with([
             'commande.utilisateur',
             'commande.lignes.produit',
+            'commande.fournisseur',
             ])
             ->orderBy('dateLivraison', 'desc')
             ->get();
@@ -35,6 +36,7 @@ class LivraisonController extends Controller
             ],
             'statut'        => 'nullable|string|in:en_attente,livree,annulee',
         ]);
+<<<<<<< HEAD
 
         $commande = Commande::findOrFail($request->idCommande);
         $dateLivraison = new \Carbon\Carbon($request->dateLivraison);
@@ -51,8 +53,21 @@ class LivraisonController extends Controller
             'ponctualite' => $ponctualite,
         ]);
 
+=======
+        $livraison = Livraison::create($request->only([
+            'dateLivraison', 'montantTotal', 'observations', 'idCommande', 'statut'
+            ]));
+            if ($request->datesExpiration) {
+            foreach ($request->datesExpiration as $idProduit => $dateExpiration) {
+            \App\Models\LigneCommande::where('idCommande', $request->idCommande)
+            ->where('idProduit', $idProduit)
+            ->update(['dateExpiration' => $dateExpiration ?: null]);
+            }
+        }
+>>>>>>> origin/medoune
         return new LivraisonResource($livraison->load([
             'commande.lignes.produit',
+            'commande.fournisseur', 
         ]));
     }
 
@@ -89,5 +104,18 @@ class LivraisonController extends Controller
         $livraison = Livraison::findOrFail($id);
         $livraison->delete();
         return response()->json(['message' => 'Livraison supprimée']);
+    }
+
+    public function saveDatesExpiration(Request $request, $id)
+    {
+    $livraison = Livraison::findOrFail($id);
+    if ($request->datesExpiration) {
+        foreach ($request->datesExpiration as $idProduit => $dateExpiration) {
+            \App\Models\LigneCommande::where('idCommande', $livraison->idCommande)
+                ->where('idProduit', $idProduit)
+                ->update(['dateExpiration' => $dateExpiration ?: null]);
+        }
+    }
+    return response()->json(['message' => 'Dates sauvegardées']);
     }
 }

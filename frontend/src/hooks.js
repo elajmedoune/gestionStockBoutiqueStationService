@@ -5,6 +5,10 @@ import api from './services/api'
 const cache = {}
 const subscribers = {}
 
+export const clearCache = () => {
+  Object.keys(cache).forEach(key => delete cache[key])
+}
+
 function useFetch(endpoint) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
@@ -75,34 +79,7 @@ export const useNotifications = (user, { commandes = [], livraisons = [], utilis
   const notifications = []
   const il7 = new Date(); il7.setDate(il7.getDate() - 7)
   const today = new Date(); today.setHours(0, 0, 0, 0)
-
-  // ── Alertes stock (tous les rôles sauf caissier) ──
-  if (role !== 'caissier') {
-    produits.forEach(p => {
-      const qte = stocks.filter(s => s.idProduit === p.idProduit).reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)
-      const seuil = parseInt(p.seuilSecurite ?? 5)
-      if (qte === 0) {
-        notifications.push({
-          id: `rupture-${p.idProduit}`,
-          label: 'Rupture de stock',
-          message: `${p.nomProduit ?? p.reference} est en rupture de stock`,
-          date: null,
-          niveau: 'error',
-          icone: 'rupture'
-        })
-      } else if (qte <= seuil) {
-        notifications.push({
-          id: `seuil-${p.idProduit}`,
-          label: 'Stock sous seuil',
-          message: `${p.nomProduit ?? p.reference} — ${qte} unités restantes (seuil: ${seuil})`,
-          date: null,
-          niveau: 'warning',
-          icone: 'seuil'
-        })
-      }
-    })
-  }
-
+  
   // ── Caissier ──
   if (role === 'caissier') {
     produits.filter(p => {

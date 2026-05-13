@@ -25,19 +25,13 @@ const INITIAL = {
     montantTotal:        0,
     lignes:              [],
 }
-
-function CommandeForm({ initial = null, onSubmit, onCancel, loading = false, error = null }) {
+function CommandeForm({ initial = null, onSubmit, onCancel, loading = false, fournisseurs = [], error = null }) {
     const [form,        setForm]        = useState(INITIAL)
     const [produits,    setProduits]    = useState([])
-    const [fournisseurs, setFournisseurs] = useState([])
 
     useEffect(() => {
         api.get('/produits').then(({ data }) => {
             setProduits(Array.isArray(data) ? data : data.data ?? [])
-        }).catch(() => {})
-
-        api.get('/fournisseurs').then(({ data }) => {
-            setFournisseurs(Array.isArray(data) ? data : data.data ?? [])
         }).catch(() => {})
     }, [])
 
@@ -256,39 +250,39 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false, err
             )}
 
             {/* Lignes existantes en mode édition */}
-{initial && (initial.lignes ?? []).length > 0 && (
-    <div className="space-y-3">
-        <h4 className="font-bold text-sm flex items-center gap-1">
-            <ShoppingBag size={14} className="text-primary" /> Produits commandés
-        </h4>
-        <div className="bg-base-200/50 rounded-2xl p-3">
-            <table className="table table-xs w-full">
-                <thead>
-                    <tr className="bg-base-300/50">
-                        <th>Produit</th>
-                        <th className="text-right">Qté</th>
-                        <th className="text-right">Prix unit.</th>
-                        <th className="text-right">Sous-total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {(initial.lignes ?? []).map((l, i) => (
-                        <tr key={i} className="hover">
-                            <td className="font-semibold">
-                                {l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}
-                            </td>
-                            <td className="text-right">
-                                <span className="badge badge-ghost badge-sm">{l.quantite}</span>
-                            </td>
-                            <td className="text-right text-base-content/60">{fmt(l.prixUnitaire)} F</td>
-                            <td className="text-right font-bold text-primary">{fmt(l.sousTotal)} F</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    </div>
-)}
+            {initial && (initial.lignes ?? []).length > 0 && (
+                <div className="space-y-3">
+                    <h4 className="font-bold text-sm flex items-center gap-1">
+                        <ShoppingBag size={14} className="text-primary" /> Produits commandés
+                        </h4>
+                        <div className="bg-base-200/50 rounded-2xl p-3">
+                        <table className="table table-xs w-full">
+                            <thead>
+                                <tr className="bg-base-300/50">
+                                    <th>Produit</th>
+                                    <th className="text-right">Qté</th>
+                                    <th className="text-right">Prix unit.</th>
+                                    <th className="text-right">Sous-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(initial.lignes ?? []).map((l, i) => (
+                                    <tr key={i} className="hover">
+                                        <td className="font-semibold">
+                                            {l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}
+                                            </td>
+                                            <td className="text-right">
+                                                <span className="badge badge-ghost badge-sm">{l.quantite}</span>
+                                            </td>
+                                            <td className="text-right text-base-content/60">{fmt(l.prixUnitaire)} F</td>
+                                            <td className="text-right font-bold text-primary">{fmt(l.sousTotal)} F</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* Montant total */}
             <div className="form-control">
@@ -302,28 +296,28 @@ function CommandeForm({ initial = null, onSubmit, onCancel, loading = false, err
             </div>
 
             {/* Statut en mode édition */}
-{initial && (
-    <div className="form-control">
-        <label className="label">
-            <span className="label-text font-medium">Statut</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-            {STATUTS.filter(s => s !== 'livree').map(s => (
-                <button key={s} type="button"
-                    onClick={() => setForm(f => ({ ...f, statut: s }))}
-                    className={`btn btn-sm gap-1 ${form.statut === s ? STATUT_CONFIG[s].color : 'btn-ghost border border-base-300'}`}>
-                    {STATUT_CONFIG[s].icon}
-                    {STATUT_CONFIG[s].label}
-                </button>
+            {initial && (
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text font-medium">Statut</span>
+                    </label>
+                <div className="flex flex-wrap gap-2">
+                    {STATUTS.filter(s => s !== 'livree').map(s => (
+                        <button key={s} type="button"
+                            onClick={() => setForm(f => ({ ...f, statut: s }))}
+                            className={`btn btn-sm gap-1 ${form.statut === s ? STATUT_CONFIG[s].color : 'btn-ghost border border-base-300'}`}>
+                                {STATUT_CONFIG[s].icon}
+                                {STATUT_CONFIG[s].label}
+                        </button>
             ))}
-        </div>
-        {initial.statut === 'livree' && (
-            <p className="text-xs text-success mt-2 flex items-center gap-1">
-                <PackageCheck size={12} /> Cette commande est livrée — statut non modifiable
-            </p>
+            </div>
+            {initial.statut === 'livree' && (
+                <p className="text-xs text-success mt-2 flex items-center gap-1">
+                    <PackageCheck size={12} /> Cette commande est livrée — statut non modifiable
+                </p>
+            )}
+            </div>
         )}
-    </div>
-)}
 
             {/* Boutons */}
             <div className="flex justify-end gap-2 pt-2">
