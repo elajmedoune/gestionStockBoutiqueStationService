@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
 import api from "../services/api";
-import { useAuth  } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const ROLES = ["gerant", "gestionnaire_stock", "caissier", "magasinier"];
 
@@ -11,18 +11,16 @@ const Utilisateurs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [errorModal, setErrorModal] = useState(null)
+  const [editUser, setEditUser] = useState(null);
+  const [errorModal, setErrorModal] = useState(null);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     nom: "", prenom: "", login: "", email: "",
     motDePasse: "", motDePasse_confirmation: "", role: "caissier",
   });
+  const [showPwd, setShowPwd] = useState(false);
 
-  const [showPwd, setShowPwd] = useState(false)
-
-  useEffect(() => {
-    fetchUtilisateurs();
-  }, []);
+  useEffect(() => { fetchUtilisateurs(); }, []);
 
   const fetchUtilisateurs = async () => {
     try {
@@ -37,26 +35,50 @@ const Utilisateurs = () => {
   };
 
   const fermerModal = () => {
-    setShowModal(false)
-    setErrorModal(null)
-    setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", motDePasse_confirmation: "", role: "caissier" })
-  }
+    setShowModal(false);
+    setEditUser(null);
+    setErrorModal(null);
+    setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", motDePasse_confirmation: "", role: "caissier" });
+  };
+
+  const ouvrirModification = (u) => {
+    setEditUser(u);
+    setForm({ nom: u.nom, prenom: u.prenom, login: u.login, email: u.email, motDePasse: "", motDePasse_confirmation: "", role: u.role });
+    setShowModal(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/register", form);
+      if (editUser) {
+        const data = { nom: form.nom, prenom: form.prenom, login: form.login, email: form.email, role: form.role };
+        if (form.motDePasse) {
+          data.motDePasse = form.motDePasse;
+          data.motDePasse_confirmation = form.motDePasse_confirmation;
+        }
+        await api.put(`/utilisateurs/${editUser.idUtilisateur}`, data);
+      } else {
+        await api.post("/register", form);
+      }
       fermerModal();
-      setForm({ nom: "", prenom: "", login: "", email: "", motDePasse: "", motDePasse_confirmation: "", role: "caissier"});
       fetchUtilisateurs();
     } catch (err) {
-      const errors = err.response?.data?.errors
+      const errors = err.response?.data?.errors;
       if (errors) {
-          const premier = Object.values(errors)[0][0]
-          setErrorModal(premier)
+        setErrorModal(Object.values(errors)[0][0]);
       } else {
-          setErrorModal(err.response?.data?.message ?? 'Erreur lors de la création.')
+        setErrorModal(err.response?.data?.message ?? 'Erreur lors de la sauvegarde.');
       }
+    }
+  };
+
+  const handleDelete = async (u) => {
+    if (!window.confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) return;
+    try {
+      await api.delete(`/utilisateurs/${u.idUtilisateur}`);
+      fetchUtilisateurs();
+    } catch {
+      setError("Erreur lors de la suppression");
     }
   };
 
@@ -70,65 +92,41 @@ const Utilisateurs = () => {
   };
 
   const getRoleBadge = (role) => {
-    const styles = {
-      gerant: "badge-error",
-      gestionnaire_stock: "badge-warning",
-      caissier: "badge-info",
-      magasinier: "badge-success",
-    };
+    const styles = { gerant: "badge-error", gestionnaire_stock: "badge-warning", caissier: "badge-info", magasinier: "badge-success" };
     return styles[role] || "badge-neutral";
   };
 
-  const filtered = utilisateurs.filter(
-    (u) =>
-      u.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      u.prenom?.toLowerCase().includes(search.toLowerCase()) ||
-      u.login?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase())
+  const filtered = utilisateurs.filter((u) =>
+    u.nom?.toLowerCase().includes(search.toLowerCase()) ||
+    u.prenom?.toLowerCase().includes(search.toLowerCase()) ||
+    u.login?.toLowerCase().includes(search.toLowerCase()) ||
+    u.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="p-6" data-theme="cupcake">
-      {/* Header */}
+    <div className="p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">👥 Gestion des Utilisateurs</h1>
-          <p className="text-sm text-base-content/60 mt-1">
-            Administration des comptes et des rôles
-          </p>
+          <p className="text-sm text-base-content/60 mt-1">Administration des comptes et des rôles</p>
         </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowModal(true)}
-        >
-          + Nouvel Utilisateur
-        </button>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Nouvel Utilisateur</button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {ROLES.map((role) => (
           <div key={role} className="stat bg-base-100 rounded-2xl shadow py-3">
             <div className="stat-title text-xs capitalize">{role}s</div>
-            <div className="stat-value text-xl text-primary">
-              {utilisateurs.filter((u) => u.role === role).length}
-            </div>
+            <div className="stat-value text-xl text-primary">{utilisateurs.filter((u) => u.role === role).length}</div>
           </div>
         ))}
       </div>
 
-      {/* Search */}
       <div className="mb-4">
-        <input
-          type="text"
-          placeholder="🔍 Rechercher un utilisateur..."
-          className="input input-bordered w-full max-w-md"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <input type="text" placeholder="🔍 Rechercher un utilisateur..." className="input input-bordered w-full max-w-md"
+          value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      {/* Error */}
       {error && (
         <div className="alert alert-error mb-4">
           <span>{error}</span>
@@ -136,31 +134,20 @@ const Utilisateurs = () => {
         </div>
       )}
 
-      {/* Table */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-        </div>
+        <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg text-primary"></span></div>
       ) : (
         <div className="overflow-x-auto bg-base-100 rounded-2xl shadow">
           <table className="table table-zebra">
             <thead>
               <tr>
-                <th>Utilisateur</th>
-                <th>Login</th>
-                <th>Email</th>
-                <th>Rôle</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th>Utilisateur</th><th>Login</th><th>Email</th>
+                <th>Rôle</th><th>Statut</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="text-center py-8 text-base-content/50">
-                    Aucun utilisateur trouvé
-                  </td>
-                </tr>
+                <tr><td colSpan="6" className="text-center py-8 text-base-content/50">Aucun utilisateur trouvé</td></tr>
               ) : (
                 filtered.map((u) => (
                   <tr key={u.idUtilisateur}>
@@ -168,36 +155,29 @@ const Utilisateurs = () => {
                       <div className="flex items-center gap-3">
                         <div className="avatar placeholder">
                           <div className="bg-primary text-primary-content rounded-full w-9">
-                            <span className="text-sm">
-                              {u.prenom?.[0]}{u.nom?.[0]}
-                            </span>
+                            <span className="text-sm">{u.prenom?.[0]}{u.nom?.[0]}</span>
                           </div>
                         </div>
-                        <div>
-                          <div className="font-bold">{u.prenom} {u.nom}</div>
-                        </div>
+                        <div className="font-bold">{u.prenom} {u.nom}</div>
                       </div>
                     </td>
                     <td className="font-mono text-sm">{u.login}</td>
                     <td className="text-sm">{u.email}</td>
-                    <td>
-                      <span className={`badge ${getRoleBadge(u.role)}`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${u.actif ? "badge-success" : "badge-ghost"}`}>
-                        {u.actif ? "Actif" : "Inactif"}
-                      </span>
-                    </td>
+                    <td><span className={`badge ${getRoleBadge(u.role)}`}>{u.role}</span></td>
+                    <td><span className={`badge ${u.actif ? "badge-success" : "badge-ghost"}`}>{u.actif ? "Actif" : "Inactif"}</span></td>
                     <td>
                       {u.idUtilisateur !== user?.idUtilisateur && (
-                        <button
-                          className={`btn btn-xs ${u.actif ? "btn-error" : "btn-success"}`}
-                          onClick={() => toggleActif(u.idUtilisateur)}
-                        >
-                          {u.actif ? "Désactiver" : "Activer"}
-                        </button>
+                        <div className="flex gap-1">
+                          <button className="btn btn-xs btn-warning" onClick={() => ouvrirModification(u)} title="Modifier">
+                            <Pencil size={12} />
+                          </button>
+                          <button className={`btn btn-xs ${u.actif ? "btn-error" : "btn-success"}`} onClick={() => toggleActif(u.idUtilisateur)}>
+                            {u.actif ? "Désactiver" : "Activer"}
+                          </button>
+                          <button className="btn btn-xs btn-error" onClick={() => handleDelete(u)} title="Supprimer">
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -208,15 +188,14 @@ const Utilisateurs = () => {
         </div>
       )}
 
-      {/* Modal création */}
       {showModal && (
         <dialog className="modal modal-open">
           <div className="modal-box max-w-lg">
-            <h3 className="font-bold text-lg mb-4">➕ Nouvel Utilisateur</h3>
+            <h3 className="font-bold text-lg mb-4">{editUser ? "✏️ Modifier Utilisateur" : "➕ Nouvel Utilisateur"}</h3>
             {errorModal && (
               <div className="alert alert-error text-sm py-2 mb-3">
-                  <span>{errorModal}</span>
-                  <button type="button" className="btn btn-xs btn-ghost ml-auto" onClick={() => setErrorModal(null)}>✕</button>
+                <span>{errorModal}</span>
+                <button type="button" className="btn btn-xs btn-ghost ml-auto" onClick={() => setErrorModal(null)}>✕</button>
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-3" noValidate>
@@ -243,29 +222,26 @@ const Utilisateurs = () => {
                   value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
               <div className="form-control">
-                <label className="label"><span className="label-text">Mot de passe *</span></label>
+                <label className="label">
+                  <span className="label-text">{editUser ? "Nouveau mot de passe (laisser vide pour ne pas changer)" : "Mot de passe *"}</span>
+                </label>
                 <div className="relative">
-                  <input type={showPwd ? 'text' : 'password'}
-                    className="input input-bordered" required minLength={8}
+                  <input type={showPwd ? 'text' : 'password'} className="input input-bordered w-full"
+                    required={!editUser} minLength={8}
                     value={form.motDePasse} onChange={(e) => setForm({ ...form, motDePasse: e.target.value })} />
-                  <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3 top-3 text-base-content/40">
+                  <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-3 text-base-content/40">
                     {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
-              <div className="form-control">
-                <label className="label"><span className="label-text">Confirmer mot de passe *</span></label>
-                <div className="relative">
-                  <input type={showPwd ? 'text' : 'password'}
-                    className="input input-bordered" required minLength={8}
-                    value={form.motDePasse_confirmation} onChange={(e) => setForm({ ...form, motDePasse_confirmation: e.target.value })}/>
-                  <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3 top-3 text-base-content/40">
-                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+              {(!editUser || form.motDePasse) && (
+                <div className="form-control">
+                  <label className="label"><span className="label-text">Confirmer mot de passe *</span></label>
+                  <input type={showPwd ? 'text' : 'password'} className="input input-bordered"
+                    required={!editUser || !!form.motDePasse} minLength={8}
+                    value={form.motDePasse_confirmation} onChange={(e) => setForm({ ...form, motDePasse_confirmation: e.target.value })} />
                 </div>
-              </div>
+              )}
               <div className="form-control">
                 <label className="label"><span className="label-text">Rôle *</span></label>
                 <select className="select select-bordered" value={form.role}
@@ -274,14 +250,12 @@ const Utilisateurs = () => {
                 </select>
               </div>
               <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => fermerModal()}>
-                  Annuler
-                </button>
-                <button type="submit" className="btn btn-primary">Créer</button>
+                <button type="button" className="btn btn-ghost" onClick={fermerModal}>Annuler</button>
+                <button type="submit" className="btn btn-primary">{editUser ? "Modifier" : "Créer"}</button>
               </div>
             </form>
           </div>
-          <div className="modal-backdrop" onClick={() => fermerModal()} />
+          <div className="modal-backdrop" onClick={fermerModal} />
         </dialog>
       )}
     </div>

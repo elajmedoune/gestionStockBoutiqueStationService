@@ -36,6 +36,8 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
         Route::get('/utilisateurs',                         [AuthController::class, 'index']); 
         Route::post('/register',                        [AuthController::class, 'register']);
         Route::patch('/utilisateurs/{id}/toggleActif',  [AuthController::class, 'toggleActif']);
+        Route::put('/utilisateurs/{id}',               [AuthController::class, 'update']);
+        Route::delete('/utilisateurs/{id}',              [AuthController::class, 'destroy']);
         Route::get('/utilisateurs',                     [AuthController::class, 'index']);
         Route::get('/utilisateurs/{id}',                [AuthController::class, 'show']);
     });
@@ -45,7 +47,7 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::put('/profil/password',   [AuthController::class, 'updatePassword']);
     Route::delete('/profil/photo',   [AuthController::class, 'removePhoto']);
 
-    Route::middleware('role:gerant,gestionnaire_stock')->group(function() {
+    Route::middleware('role:gerant,gestionnaire_stock,magasinier')->group(function() {
         Route::get('/inventaires/rapport',  [InventaireController::class, 'rapport']);
         Route::get('/inventaires',          [InventaireController::class, 'index']);
         Route::get('/inventaires/{id}',     [InventaireController::class, 'show']);

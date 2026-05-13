@@ -75,8 +75,14 @@ function Produits() {
             }
             setModal({ open: false, mode: 'create', prod:null })
             fetchAll()
-        } catch {
-            showToast('Une erreur est survenue', 'error')
+        } catch (err) {
+            const errors = err.response?.data?.errors
+            if (errors) {
+                const premier = Object.values(errors)[0][0]
+                showToast(premier, 'error')
+            } else {
+                showToast(err.response?.data?.message ?? 'Une erreur est survenue', 'error')
+            }
         } finally {
             setSaving(false)
         }
@@ -88,8 +94,11 @@ function Produits() {
             showToast('Produit supprimé')
             setDelModal({ open: false, prod: null })
             fetchAll()
-        } catch {
-            showToast('Impossible de supprimer ce produit', 'error')
+        } catch (err) {
+            showToast(
+                err.response?.data?.message ?? 'Impossible de supprimer ce produit',
+                'error'
+            )
         } finally {
             setSaving(false)
         }
@@ -191,6 +200,12 @@ function Produits() {
                 onSubmit={handleSubmit}
                 onClose={() => setModal({ open: false, mode: 'create', prod: null })}
                 loading={saving}
+                onCategorieAdded={(newCat) => {
+                    setCategories(prev => {
+                        if (prev.find(c => c.idCategorie === newCat.idCategorie)) return prev
+                        return [...prev, newCat]
+                    })
+                }}
             />
 
             <ConfirmDeleteModal 
