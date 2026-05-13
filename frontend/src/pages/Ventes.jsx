@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import Layout from '../components/Layout'
 import {
   Plus, Search, Download, Eye, Ban, Printer,
-  ShoppingCart, DollarSign, TrendingUp, CreditCard,
+  ShoppingCart, DollarSign, TrendingUp,
   X, ChevronLeft, ChevronRight, AlertTriangle, Check,
   Receipt, User, Calendar, Package, Trash2
 } from 'lucide-react'
@@ -100,7 +100,7 @@ function ModalDetail({ vente, onClose }) {
                     </td></tr>
                   : (vente.lignes ?? []).map(l => (
                     <tr key={l.idProduit} className="hover">
-                      <td className="font-semibold">{l.produit?.reference ?? `#${l.idProduit}`}</td>
+                      <td className="font-semibold">{l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}</td>
                       <td className="text-center"><span className="badge badge-ghost badge-sm">{l.quantite}</span></td>
                       <td className="text-right text-base-content/60">{fmt(l.produit?.prixUnitaire)} F</td>
                       <td className="text-right font-bold text-primary">{fmt(l.totalPartielle)} F</td>
@@ -493,9 +493,6 @@ export default function Ventes() {
     const debut = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
     return ventesActives.filter(v => v.dateVente >= debut).reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0)
   }, [ventesActives])
-  const panierMoyen   = useMemo(() =>
-    ventesActives.length ? ventesActives.reduce((s, v) => s + (parseFloat(v.totalTaxeComprise) || 0), 0) / ventesActives.length : 0
-  , [ventesActives])
 
   const handleDelete = async (id) => {
     try {
@@ -596,13 +593,12 @@ export default function Ventes() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'Ventes auj.',    value: ventesAuj.length,        sub: 'transactions',  icon: <ShoppingCart size={15} />, color: 'primary'   },
-            { label: "CA aujourd'hui", value: `${fmt(caAuj)} F`,       sub: 'total TTC',     icon: <DollarSign size={15} />,   color: 'secondary' },
-            { label: 'CA ce mois',     value: `${fmt(caMois)} F`,      sub: today.toLocaleDateString('fr-FR', { month: 'long' }), icon: <TrendingUp size={15} />, color: 'accent' },
-            { label: 'Panier moyen',   value: `${fmt(panierMoyen)} F`, sub: 'toutes ventes', icon: <CreditCard size={15} />,   color: 'success'   },
-          ].map((kpi, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+  {[
+    { label: 'Ventes auj.',    value: ventesAuj.length,   sub: 'transactions',  icon: <ShoppingCart size={15} />, color: 'primary'   },
+    { label: "CA aujourd'hui", value: `${fmt(caAuj)} F`,  sub: 'total TTC',     icon: <DollarSign size={15} />,   color: 'secondary' },
+    { label: 'CA ce mois',     value: `${fmt(caMois)} F`, sub: today.toLocaleDateString('fr-FR', { month: 'long' }), icon: <TrendingUp size={15} />, color: 'accent' },
+  ].map((kpi, i) => (
             <div key={i} className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-0.5 transition-transform duration-200">
               <div className="card-body p-4 gap-1">
                 <div className={`p-2 rounded-2xl bg-${kpi.color}/15 text-${kpi.color} w-fit mb-1`}>{kpi.icon}</div>

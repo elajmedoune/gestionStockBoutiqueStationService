@@ -44,6 +44,8 @@ export default function Livraisons() {
   const [delModal,         setDelModal]         = useState(null)
   const [detailId,         setDetailId]         = useState(null)
   const [cmdSelectionnee,  setCmdSelectionnee]  = useState(null)
+  const [datesExpiration, setDatesExpiration] = useState({})
+  const [validationModal, setValidationModal] = useState(null)
   const [exportOpen,       setExportOpen]       = useState(false)
   const { user } = useAuth()
 const isGerant       = user?.role === 'gerant'
@@ -102,16 +104,18 @@ const canAnnuler     = isGerant || isGestionnaire
     const cmd = commandes.find(c => String(c.idCommande) === String(idCommande))
     setCmdSelectionnee(cmd ?? null)
     setForm(f => ({ ...f, idCommande, montantTotal: cmd?.montantTotal || 0 }))
+    setDatesExpiration({})
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       setSaving(true)
+      const payload = { ...form, datesExpiration }
       if (editItem) {
-        await api.put(`/livraisons/${editItem.idLivraison}`, form)
+        await api.put(`/livraisons/${editItem.idLivraison}`, payload)
       } else {
-        await api.post("/livraisons", form)
+        await api.post("/livraisons", payload)
       }
       setShowModal(false)
       fetchLivraisons()
@@ -287,7 +291,7 @@ const annulerLivraison = async (id) => {
                   <tr className="hover">
                     <td className="font-bold text-primary">#{liv.idLivraison}</td>
                     <td className="font-semibold text-xs">CMD #{liv.idCommande}</td>
-                    <td className="text-xs">{liv.commande?.fournisseur?.nomFournisseur ?? "—"}</td>
+                    <td className="text-xs">{liv.commande?.fournisseur?.nom ?? "—"}</td>
                     <td className="text-xs">
                       {liv.dateLivraison
                         ? new Date(liv.dateLivraison).toLocaleDateString("fr-FR")
@@ -302,18 +306,18 @@ const annulerLivraison = async (id) => {
                     </td>
                     <td>
                       <div className="flex gap-1 justify-end">
-    <button className="btn btn-ghost btn-xs btn-circle tooltip"
-        data-tip="Voir lignes"
-        onClick={() => setDetailId(detailId === liv.idLivraison ? null : liv.idLivraison)}>
-        {detailId === liv.idLivraison ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-    </button>
-    {liv.statut === 'en_attente' && canValider && (
-        <button className="btn btn-ghost btn-xs btn-circle tooltip text-success"
-            data-tip="Valider"
-            onClick={() => validerLivraison(liv.idLivraison)}>
-            <CheckCircle size={13} />
-        </button>
-    )}
+                        <button className="btn btn-ghost btn-xs btn-circle tooltip"
+                        data-tip="Voir lignes"
+                        onClick={() => setDetailId(detailId === liv.idLivraison ? null : liv.idLivraison)}>
+                          {detailId === liv.idLivraison ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                          </button>
+                          {liv.statut === 'en_attente' && canValider && (
+                            <button className="btn btn-ghost btn-xs btn-circle tooltip text-success"
+                            data-tip="Valider"
+                            onClick={() => { setValidationModal(liv); setDatesExpiration({}) }}>
+                              <CheckCircle size={13} />
+                              </button>
+                            )}
     {liv.statut === 'en_attente' && canAnnuler && (
         <button className="btn btn-ghost btn-xs btn-circle tooltip text-error"
             data-tip="Annuler"
@@ -352,11 +356,11 @@ const annulerLivraison = async (id) => {
                           <table className="table table-xs w-full">
                             <thead>
                               <tr className="bg-base-300/50">
-                                <th>Produit</th>
-                                <th className="text-right">Qté commandée</th>
-                                <th className="text-right">Prix unitaire</th>
-                                <th className="text-right">Sous-total</th>
-                              </tr>
+    <th>Produit</th>
+    <th className="text-right">Qté</th>
+    <th className="text-right">Prix unit.</th>
+    <th className="text-right">Sous-total</th>
+</tr>
                             </thead>
                             <tbody>
                               {(liv.commande?.lignes ?? []).map((l, i) => (
@@ -530,6 +534,69 @@ const annulerLivraison = async (id) => {
           <div className="modal-backdrop" onClick={() => setShowModal(false)} />
         </dialog>
       )}
+
+      {validationModal && (
+    <dialog className="modal modal-open">
+        <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-success text-success-content px-5 py-4 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/25 rounded-2xl"><CheckCircle size={16} /></div>
+                    <h3 className="font-extrabold">Valider la livraison #{validationModal.idLivraison}</h3>
+                </div>
+                <button className="btn btn-ghost btn-sm btn-circle text-success-content"
+                    onClick={() => setValidationModal(null)}>✕</button>
+            </div>
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+                <p className="text-sm text-base-content/60">Saisissez les dates d'expiration pour chaque produit reçu.</p>
+                <table className="table table-xs w-full">
+                    <thead>
+                        <tr className="bg-base-200/50">
+                            <th>Produit</th>
+                            <th className="text-right">Qté</th>
+                            <th>Date expiration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(validationModal.commande?.lignes ?? []).map((l, i) => (
+                            <tr key={i} className="hover">
+                                <td className="font-semibold">
+                                    {l.produit?.nomProduit ?? l.produit?.reference ?? `#${l.idProduit}`}
+                                </td>
+                                <td className="text-right">
+                                    <span className="badge badge-ghost badge-sm">{l.quantite}</span>
+                                </td>
+                                <td>
+                                    <input type="date" className="input input-bordered input-xs w-full"
+                                        value={datesExpiration[l.idProduit] ?? ''}
+                                        onChange={e => setDatesExpiration(prev => ({
+                                            ...prev,
+                                            [l.idProduit]: e.target.value
+                                        }))} />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="flex justify-end gap-2 px-5 py-4 border-t border-base-200 shrink-0 bg-base-100">
+                <button className="btn btn-ghost" onClick={() => setValidationModal(null)}>Annuler</button>
+                <button className="btn btn-success gap-1" onClick={async () => {
+                    try {
+                        await api.post(`/livraisons/${validationModal.idLivraison}/dates-expiration`, {
+                            idCommande: validationModal.idCommande,
+                            datesExpiration
+                        })
+                        await validerLivraison(validationModal.idLivraison)
+                        setValidationModal(null)
+                    } catch { setError("Erreur lors de la validation") }
+                }}>
+                    <CheckCircle size={14} /> Confirmer la réception
+                </button>
+            </div>
+        </div>
+        <div className="modal-backdrop" onClick={() => setValidationModal(null)} />
+    </dialog>
+)}
 
       {/* Confirmation suppression */}
       <ConfirmDeleteModal

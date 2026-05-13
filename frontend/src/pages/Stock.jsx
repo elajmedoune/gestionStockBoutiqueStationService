@@ -38,12 +38,12 @@ function Stock() {
     const fetchAll = async () => {
         try {
             setLoading(true)
-            const [{ data: s }, { data: p }] = await Promise.all([
+            const [resS, resP] = await Promise.all([
                 api.get('/stocks'),
                 api.get('/produits'),
             ])
-            setStocks(s)
-            setProduits(p)
+            setStocks(Array.isArray(resS.data) ? resS.data : resS.data.data ?? [])
+            setProduits(Array.isArray(resP.data) ? resP.data : resP.data.data ?? [])
         } catch {
             showToast('Erreur lors du chargement', 'error')
         } finally {

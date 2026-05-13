@@ -2,7 +2,7 @@ import { ShoppingBag, Pencil, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import CommandeForm from "./CommandeForm"
 
-function CommandeModal({ isOpen, mode, commande, onSubmit, onClose, loading, error }) {
+function CommandeModal({ isOpen, mode, commande, fournisseurs, onSubmit, onClose, loading, error }) {
     if (!isOpen) return null
 
     return createPortal(
@@ -33,6 +33,7 @@ function CommandeModal({ isOpen, mode, commande, onSubmit, onClose, loading, err
                 <div className="overflow-y-auto p-5" style={{ maxHeight: 'calc(90vh - 70px)' }}>
                     <CommandeForm
                         initial={mode === 'edit' ? commande : null}
+                        fournisseurs={fournisseurs}
                         onSubmit={onSubmit}
                         onCancel={onClose}
                         loading={loading}

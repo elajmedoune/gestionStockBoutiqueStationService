@@ -77,4 +77,5 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
 
     Route::apiResource('commandes', CommandeController::class);
     Route::apiResource('livraisons', LivraisonController::class);
+    Route::post('/livraisons/{id}/dates-expiration', [LivraisonController::class, 'saveDatesExpiration']);
 });

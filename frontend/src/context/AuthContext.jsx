@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import { login as loginApi, logout as logoutApi } from '../services/api'
+import { clearCache } from '../hooks'
 
 const AuthContext = createContext(null)
 
@@ -21,6 +22,8 @@ export function AuthProvider({ children }) {
   const login = async (credentials) => {
     const response = await loginApi(credentials)
     const { token, utilisateur } = response.data
+    
+    clearCache()
 
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(utilisateur)) 
@@ -35,7 +38,8 @@ export function AuthProvider({ children }) {
     try {
       await logoutApi()
     } catch (e) {}
-
+    
+    clearCache() 
     
     localStorage.removeItem('token')
     localStorage.removeItem('user')
