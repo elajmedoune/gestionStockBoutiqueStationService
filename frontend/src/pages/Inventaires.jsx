@@ -9,17 +9,18 @@ const Inventaires = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
-    idProduit: "",
-    quantiteComptee: "",
-    observation: "",
+    idStock: "",
+    dateInventaire: new Date().toISOString().split('T')[0],
+    quantiteReelle: "",
+    observations: "",
   });
   const [editId, setEditId] = useState(null);
-  const [produits, setProduits] = useState([]);
+  const [stocks, setStocks] = useState([]);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchInventaires();
-    fetchProduits();
+    fetchStocks();
   }, []);
 
   const fetchInventaires = async () => {
@@ -34,10 +35,10 @@ const Inventaires = () => {
     }
   };
 
-  const fetchProduits = async () => {
+  const fetchStocks = async () => {
     try {
-      const res = await api.get("/produits");
-      setProduits(res.data.data || res.data);
+      const res = await api.get("/stocks");
+      setStocks(res.data.data || res.data);
     } catch {}
   };
 
@@ -50,7 +51,7 @@ const Inventaires = () => {
         await api.post("/inventaires", form);
       }
       setShowModal(false);
-      setForm({ idProduit: "", quantiteComptee: "", observation: "" });
+      setForm({ idtSock: "", dateInventaire: new Date().toISOString().split('T')[0], quantiteReelle: "", observations: "" });
       setEditId(null);
       fetchInventaires();
     } catch (err) {
@@ -60,9 +61,10 @@ const Inventaires = () => {
 
   const handleEdit = (inv) => {
     setForm({
-      idProduit: inv.idProduit,
-      quantiteComptee: inv.quantiteComptee,
-      observation: inv.observation || "",
+      idStock: "",
+      dateInventaire: new Date().toISOString().split('T')[0],
+      quantiteReelle: "",
+      observations: "",
     });
     setEditId(inv.idInventaire);
     setShowModal(true);
@@ -79,13 +81,13 @@ const Inventaires = () => {
   };
 
   const filtered = inventaires.filter((inv) => {
-    const produitNom = inv.produit?.nomProduit || "";
+    const produitNom = inv.stock?.produit?.nomProduit || "";
     return produitNom.toLowerCase().includes(search.toLowerCase());
   });
 
   const getEcart = (inv) => {
-    const stock = inv.produit?.stock?.quantite || 0;
-    return inv.quantiteComptee - stock;
+    const stockSysteme = inv.stock?.quantiteRestante ?? 0;
+    return inv.quantiteReelle - stockSysteme;
   };
 
   return (
@@ -100,13 +102,13 @@ const Inventaires = () => {
             Suivi et contrôle des stocks physiques
           </p>
         </div>
-        {["admin", "gestionnaire"].includes(user?.role) && (
+        {["gerant", "magasinier", "gestionnaire_stock"].includes(user?.role) && (
           <button
             className="btn btn-primary"
             onClick={() => {
               setShowModal(true);
               setEditId(null);
-              setForm({ idProduit: "", quantiteComptee: "", observation: "" });
+              setForm({ idStock: "", quantiteReelle: "", dateInventaire: "", observations: "" });
             }}
           >
             + Nouvel Inventaire
@@ -170,7 +172,7 @@ const Inventaires = () => {
                 <th>Écart</th>
                 <th>Observation</th>
                 <th>Date</th>
-                {["admin", "gestionnaire"].includes(user?.role) && <th>Actions</th>}
+                {["gerant", "magasinier", "gestionnaire_stockj"].includes(user?.role) && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -185,46 +187,29 @@ const Inventaires = () => {
                   const ecart = getEcart(inv);
                   return (
                     <tr key={inv.idInventaire}>
-                      <td className="font-mono text-sm">{i + 1}</td>
-                      <td className="font-medium">{inv.produit?.nomProduit || "—"}</td>
-                      <td>{inv.produit?.stock?.quantite ?? "—"}</td>
-                      <td className="font-semibold">{inv.quantiteComptee}</td>
+                      <td>{i + 1}</td>
+                      <td>{inv.stock?.produit?.nomProduit || "—"}</td>
+                      <td>{inv.stock?.quantiteRestante ?? "—"}</td>
+                      <td>{inv.quantiteReelle}</td>
                       <td>
-                        <span
-                          className={`badge ${
-                            ecart > 0
-                              ? "badge-success"
-                              : ecart < 0
-                              ? "badge-error"
-                              : "badge-neutral"
-                          }`}
-                        >
+                        <span className={`badge ${ecart > 0 ? "badge-success" : ecart < 0 ? "badge-error" : "badge-neutral"}`}>
                           {ecart > 0 ? "+" : ""}{ecart}
                         </span>
                       </td>
                       <td className="text-sm text-base-content/70 max-w-xs truncate">
-                        {inv.observation || "—"}
+                        {inv.observations || "—"}
                       </td>
                       <td className="text-sm">
-                        {inv.created_at
+                        {inv.dateInventaire
                           ? new Date(inv.created_at).toLocaleDateString("fr-FR")
                           : "—"}
                       </td>
-                      {["admin", "gestionnaire"].includes(user?.role) && (
+                      {["gerant", "magasinier", "gestionnaire_stock"].includes(user?.role) && (
                         <td>
                           <div className="flex gap-2">
                             <button
-                              className="btn btn-xs btn-warning"
-                              onClick={() => handleEdit(inv)}
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className="btn btn-xs btn-error"
-                              onClick={() => handleDelete(inv.idInventaire)}
-                            >
-                              🗑️
-                            </button>
+                              className="btn btn-xs btn-warning" onClick={() => handleEdit(inv)}> ✏️</button>
+                            <button className="btn btn-xs btn-error" onClick={() => handleDelete(inv.idInventaire)}>🗑️</button>
                           </div>
                         </td>
                       )}
@@ -247,44 +232,58 @@ const Inventaires = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Produit *</span>
+                  <span className="label-text">Stock / Produit *</span>
                 </label>
                 <select
                   className="select select-bordered"
-                  value={form.idProduit}
-                  onChange={(e) => setForm({ ...form, idProduit: e.target.value })}
+                  value={form.idStock}
+                  onChange={(e) => setForm({ ...form, idStock: e.target.value })}
                   required
                 >
-                  <option value="">-- Sélectionner un produit --</option>
-                  {produits.map((p) => (
-                    <option key={p.idProduit} value={p.idProduit}>
-                      {p.nomProduit}
+                  <option value="">-- Sélectionner un stock --</option>
+                  {stocks.map((s) => (
+                    <option key={s.idStock} value={s.idStock}>
+                      {s.produit?.nomProduit || `Stock #${s.idStock}`}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Quantité Comptée *</span>
+                  <span className="label-text">Date inventaire *</span>
                 </label>
                 <input
-                  type="number"
+                  type="date"
                   min="0"
                   className="input input-bordered"
-                  value={form.quantiteComptee}
-                  onChange={(e) => setForm({ ...form, quantiteComptee: e.target.value })}
+                  value={form.dateInventaire}
+                  onChange={(e) => setForm({ ...form, dateInventaire: e.target.value })}
                   required
                 />
               </div>
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Observation</span>
+                  <span className="label-text">Quantité Réelle *</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  className="input input-bordered"
+                  value={form.quantiteReelle}
+                  onChange={(e) => setForm({ ...form, quantiteReelle: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Observations *</span>
                 </label>
                 <textarea
                   className="textarea textarea-bordered"
                   rows="3"
-                  value={form.observation}
-                  onChange={(e) => setForm({ ...form, observation: e.target.value })}
+                  value={form.observations}
+                  onChange={(e) => setForm({ ...form, observations: e.target.value })}
                   placeholder="Remarques éventuelles..."
                 />
               </div>
