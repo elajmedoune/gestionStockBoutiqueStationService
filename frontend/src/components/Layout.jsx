@@ -64,16 +64,16 @@ export default function Layout({ children }) {
       label: 'Opérations',
       items: [
         { label: 'Ventes',     icon: <ShoppingCart size={18} />, path: '/ventes',     roles: ['gerant', 'caissier'] },
-        { label: 'Commandes',  icon: <Package size={18} />,      path: '/commandes',  roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-        { label: 'Livraisons', icon: <Truck size={18} />,        path: '/livraisons', roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Commandes',  icon: <Package size={18} />,      path: '/commandes',  roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Livraisons', icon: <Truck size={18} />,        path: '/livraisons', roles: ['gerant', 'gestionnaire_stock'] },
       ]
     },
     {
       label: 'Stock',
       items: [
         { label: 'Catégories',   icon: <Tag size={18} />,       path: '/categories',   roles: ['gerant', 'gestionnaire_stock'] },
-        { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-        { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock'] },
         { label: 'Fournisseurs', icon: <Users size={18} />,     path: '/fournisseurs', roles: ['gerant', 'gestionnaire_stock'] },
       ]
     },
@@ -81,7 +81,7 @@ export default function Layout({ children }) {
       label: 'Gestion',
       items: [
         { label: 'Inventaire',   icon: <ClipboardCheck size={18} />, path: '/inventaire',   roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-        { label: 'Alertes',      icon: <AlertTriangle size={18} />,  path: '/alertes',      roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Alertes',      icon: <AlertTriangle size={18} />,  path: '/alertes',      roles: ['gerant', 'gestionnaire_stock'] },
         { label: 'Utilisateurs', icon: <Users size={18} />,          path: '/utilisateurs', roles: ['gerant'] },
       ]
     },
