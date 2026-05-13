@@ -30,7 +30,16 @@ class StockController extends Controller
     public function update(StoreStockRequest $request, $id)
     {
         $stock = Stock::findOrFail($id);
-        $stock->update($request->validated());
+        $data = $request->validated();
+
+        // Quantité déjà consommée (vendue/utilisée)
+        $quantiteVendue = $stock->quantiteInitiale - $stock->quantiteRestante;
+        
+        // Recalculer la restante selon la nouvelle initiale
+        $data['quantiteRestante'] = max(0, $data['quantiteInitiale'] - $quantiteVendue);
+        
+        $stock->update($data);
+        
         return response()->json($stock, 200);
     }
 

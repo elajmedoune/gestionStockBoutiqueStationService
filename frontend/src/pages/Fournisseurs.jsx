@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import api from '../services/api'
 import FournisseurList from '../components/fournisseurs/FournisseurList'
 import FournisseurModal from '../components/fournisseurs/FournisseurModal'
+import FournisseurProduitsModal from '../components/fournisseurs/FournisseurProduitsModal'
 import ConfirmDeleteModal from '../components/layouts/ConfirmDeleteModal'
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
@@ -28,6 +29,9 @@ function Fournisseurs() {
     const [delModal, setDelModal] = useState({open: false, four: null})
     const [toast, setToast] = useState(null)
 
+    const [produitsModal, setProduitsModal] = useState({ open: false, four: null })
+    const [produits, setProduits] = useState([])
+
     const showToast = (msg, type = 'success') => {
         setToast({ msg, type })
         setTimeout(() => setToast(null), 3000)
@@ -37,9 +41,16 @@ function Fournisseurs() {
         try {
             setLoading(true)
             const { data } = await api.get('/fournisseurs')
+            api.get('/produits').then(({ data }) => setProduits(data))
             setFournisseurs(data)
-        } catch {
-            showToast('Erreur lors du chargement', 'error')
+        } catch (err) {
+            const errors = err.response?.data?.errors
+            if (errors) {
+                const premier = Object.values(errors)[0][0]
+                showToast(premier, 'error')
+            } else {
+                showToast(err.response?.data?.message ?? 'Une erreur est survenue', 'error')
+            }
         } finally {
             setLoading(false)
         }
@@ -74,8 +85,14 @@ function Fournisseurs() {
             }
             setModal({ open: false, mode: 'create', four:null })
             fetchFournisseurs()
-        } catch {
-            showToast('Une erreur est survenue', 'error')
+        } catch (err) {
+            const errors = err.response?.data?.errors
+            if (errors) {
+                const premier = Object.values(errors)[0][0]
+                showToast(premier, 'error')
+            } else {
+                showToast(err.response?.data?.message ?? 'Une erreur est survenue', 'error')
+            }
         } finally {
             setSaving(false)
         }
@@ -88,8 +105,14 @@ function Fournisseurs() {
             showToast('Fournisseur supprimé')
             setDelModal({ open: false, four: null })
             fetchFournisseurs()
-        } catch {
-            showToast('Impossible de supprimer ce fournisseur', 'error')
+        } catch (err) {
+            const errors = err.response?.data?.errors
+            if (errors) {
+                const premier = Object.values(errors)[0][0]
+                showToast(premier, 'error')
+            } else {
+                showToast(err.response?.data?.message ?? 'Une erreur est survenue', 'error')
+            }
         } finally {
             setSaving(false)
         }
@@ -166,6 +189,7 @@ function Fournisseurs() {
                 loading = {loading}
                 onEdit ={(f) => setModal({ open: true, mode: 'edit', four: f })}
                 onDelete = {(f) => setDelModal({ open: true, four: f })}
+                onManageProduits={(f) => setProduitsModal({ open: true, four: f })}
             />
 
             <FournisseurModal 
@@ -175,6 +199,14 @@ function Fournisseurs() {
                 onSubmit={handleSubmit}
                 onClose={() => setModal({ open: false, mode: 'create', four: null })}
                 loading={saving}
+            />
+
+            <FournisseurProduitsModal
+                isOpen={produitsModal.open}
+                fournisseur={produitsModal.four}
+                produits={produits}
+                onClose={() => setProduitsModal({ open: false, four: null })}
+                onSuccess={fetchFournisseurs}
             />
 
             <ConfirmDeleteModal 

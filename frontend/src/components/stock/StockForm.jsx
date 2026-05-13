@@ -58,7 +58,7 @@ function StockForm({ initial = null, produits = [], onSubmit, onCancel, loading 
                         <option value=""> -- Selectionner --</option>
                         {produits.map((p) => (
                             <option value={p.idProduit} key={p.idProduit}>
-                                {p.reference}
+                                {p.nomProduit}
                             </option>
                         ))}
                     </select>

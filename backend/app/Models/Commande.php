@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Fournisseur;
 
 class Commande extends Model
 {
@@ -16,6 +17,7 @@ class Commande extends Model
         'montantTotal',
         'idLivraison',
         'idUtilisateur',
+        'idFournisseur',
     ];
 
     protected $casts = [
@@ -23,6 +25,14 @@ class Commande extends Model
         'dateLivraisonPrevue' => 'date',
         'montantTotal'        => 'decimal:2',
     ];
+    public function fournisseur()
+{
+    return $this->belongsTo(
+        Fournisseur::class,
+        'idFournisseur',
+        'idFournisseur'
+    );
+}
 
     public function utilisateur()
     {
