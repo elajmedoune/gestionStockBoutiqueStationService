@@ -135,11 +135,10 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                         <label className="label">
                             <span className="label-text font-medium">Prix unitaire (FCFA) *</span>
                         </label>
-                        <input type="number" 
+                        <input type="text"
+                            inputMode='decimal'
                             className="input input-bordered w-full"
                             name='prixUnitaire'
-                            min="0"
-                            step="0.01"
                             value={form.prixUnitaire}
                             onChange={handle}
                             required
@@ -151,10 +150,10 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                         <label className="label">
                             <span className="label-text font-medium">Seuil securite*</span>
                         </label>
-                        <input type="number" 
+                        <input type="text"
+                            inputMode='numeric'
                             className="input input-bordered w-full"
                             name='seuilSecurite'
-                            min="0"
                             value={form.seuilSecurite}
                             onChange={handle}
                             required
@@ -168,10 +167,10 @@ function ProduitForm ({initial = null, categories=[], onSubmit, onCancel, loadin
                             <label className="label">
                                 <span className="label-text font-medium">Quantité initiale *</span>
                             </label>
-                            <input type="number" 
+                            <input type="text"
+                                inputMode="numeric"
                                 className="input input-bordered w-full"
                                 name='quantiteInitiale'
-                                min="0"
                                 value={form.quantiteInitiale}
                                 onChange={handle}
                                 required

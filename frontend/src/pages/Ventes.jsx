@@ -677,7 +677,7 @@ export default function Ventes() {
                               : <div className="flex flex-wrap gap-1">
                                   {lignes.slice(0, 3).map(l => (
                                     <span key={l.idProduit} className="badge badge-ghost badge-xs">
-                                      {l.produit?.reference ?? `#${l.idProduit}`} ×{l.quantite}
+                                      {l.produit?.nomProduit ?? `#${l.idProduit}`} ×{l.quantite}
                                     </span>
                                   ))}
                                   {lignes.length > 3 && <span className="badge badge-ghost badge-xs">+{lignes.length - 3}</span>}

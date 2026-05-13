@@ -4,7 +4,7 @@ import FournisseurCard from "./FournisseurCard"
 import LoadingCard from "../layouts/LoadingCard"
 import EmptyState from "../layouts/EmptyState"
 
-function FournisseurList({ fournisseurs, onEdit, onDelete, loading }) {
+function FournisseurList({ fournisseurs, onEdit, onDelete, loading, onManageProduits}) {
     if (loading) return <LoadingCard count={6} />
 
     if(!fournisseurs.length) return <EmptyState title="Aucun fournisseur trouvé" message="Créez votre premier fournisseur" /> 
@@ -16,6 +16,7 @@ function FournisseurList({ fournisseurs, onEdit, onDelete, loading }) {
                     fournisseur={f}
                     onEdit={onEdit}
                     onDelete={onDelete}
+                    onManageProduits={onManageProduits}
                 />
             ))}
         </div>

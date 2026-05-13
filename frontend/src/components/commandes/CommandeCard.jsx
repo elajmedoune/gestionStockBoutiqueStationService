@@ -13,7 +13,7 @@ const STATUTS = ['en_attente', 'confirmee', 'expediee', 'livree']
 
 const fmt = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))
 
-function CommandeCard({ commande, onEdit, onDelete, canDelete }) {
+function CommandeCard({ commande, onEdit, onDelete, canDelete, onStatutChange }) {
     const statut   = commande.statut || 'en_attente'
     const config   = STATUT_CONFIG[statut] ?? { label: statut, badge: 'badge-ghost', icon: null }
     const today    = new Date(); today.setHours(0, 0, 0, 0)
@@ -22,7 +22,10 @@ function CommandeCard({ commande, onEdit, onDelete, canDelete }) {
     const joursRetard = enRetard ? Math.floor((today - prevue) / (1000 * 60 * 60 * 24)) : 0
 
     return (
-        <div className={`card bg-base-100 shadow-sm border transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${enRetard ? 'border-error/40' : 'border-base-200'}`}>
+        <div className={`card bg-base-100 shadow-sm border transition-all duration-200 hover:-translate-y-1 hover:shadow-md 
+            ${enRetard ? 'border-error/40' : 'border-base-200'}
+            ${statut === 'livree' || statut === 'annulee' ? 'opacity-60' : ''}
+        `}>
             <div className="card-body p-4 space-y-3">
 
                 {/* Header */}
@@ -108,17 +111,36 @@ function CommandeCard({ commande, onEdit, onDelete, canDelete }) {
                     ))}
                 </div>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-1 pt-1 border-t border-base-200">
-                    <button className="btn btn-xs btn-ghost tooltip text-warning"
-                    data-tip="Modifier"
-                    onClick={() => onEdit(commande)}>
-                        <Pencil size={13} />
-                    </button>
+                {/* Actions statut — seulement si pas livree/annulee */}
+                {statut !== 'livree' && statut !== 'annulee' && (
+                    <div className="flex flex-wrap gap-1 pt-2 border-t border-base-200">
+                        {['en_attente', 'confirmee', 'expediee'].map(s => (
+                            s !== statut && (
+                                <button key={s} type="button"
+                                    className={`btn btn-xs gap-1 ${STATUT_CONFIG[s].badge.replace('badge-', 'btn-')} btn-outline`}
+                                    onClick={() => onStatutChange(commande.idCommande, s)}
+                                >
+                                    {STATUT_CONFIG[s].icon}
+                                    {STATUT_CONFIG[s].label}
+                                </button>
+                            )
+                        ))}
+                    </div>
+                )}
+
+                {/* Actions edit/delete */}
+                <div className={`flex justify-end gap-1 ${statut !== 'livree' && statut !== 'annulee' ? '' : 'pt-2 border-t border-base-200'}`}>
+                    {statut !== 'livree' && statut !== 'annulee' && (
+                        <button className="btn btn-xs btn-ghost tooltip text-warning"
+                            data-tip="Modifier"
+                            onClick={() => onEdit(commande)}>
+                            <Pencil size={13} />
+                        </button>
+                    )}
                     {canDelete && (
                         <button className="btn btn-xs btn-ghost tooltip text-error"
-                        data-tip="Supprimer"
-                        onClick={() => onDelete(commande)}>
+                            data-tip="Supprimer"
+                            onClick={() => onDelete(commande)}>
                             <Trash2 size={13} />
                         </button>
                     )}

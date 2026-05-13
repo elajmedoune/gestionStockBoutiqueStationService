@@ -34,6 +34,7 @@ function Commandes() {
   const [modal,    setModal]    = useState({ open: false, mode: 'create', cmd: null })
   const [delModal, setDelModal] = useState({ open: false, cmd: null })
   const [toast,    setToast]    = useState(null)
+  const [errorModal, setErrorModal] = useState(null)
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -81,8 +82,14 @@ function Commandes() {
       }
       setModal({ open: false, mode: 'create', cmd: null })
       fetchCommandes()
-    } catch {
-      showToast('Une erreur est survenue', 'error')
+    } catch (err) {
+      const errors = err.response?.data?.errors
+      if (errors) {
+          const premier = Object.values(errors)[0][0]
+          setErrorModal(premier)
+      } else {
+          showToast(err.response?.data?.message ?? 'Une erreur est survenue', 'error')
+      }
     } finally {
       setSaving(false)
     }
@@ -95,10 +102,19 @@ function Commandes() {
       showToast('Commande supprimée')
       setDelModal({ open: false, cmd: null })
       fetchCommandes()
-    } catch {
-      showToast('Impossible de supprimer cette commande', 'error')
+    } catch (err) {
+      showToast(err.response?.data?.message ?? 'Impossible de supprimer cette commande', 'error')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleStatutChange = async (id, statut) => {
+    try {
+        await api.put(`/commandes/${id}`, { statut })
+        fetchCommandes()
+    } catch (err) {
+        showToast(err.response?.data?.message ?? 'Erreur lors du changement de statut', 'error')
     }
   }
 
@@ -225,11 +241,12 @@ const exportData = filtered.map((c) => ({
 
       {/* Liste */}
       <CommandeList
-      commandes={filtered}
-      loading={loading}
-      onEdit={(c) => setModal({ open: true, mode: 'edit', cmd: c })}
-      onDelete={(c) => setDelModal({ open: true, cmd: c })}
-      canDelete={canDelete}
+        commandes={filtered}
+        loading={loading}
+        onEdit={(c) => setModal({ open: true, mode: 'edit', cmd: c })}
+        onDelete={(c) => setDelModal({ open: true, cmd: c })}
+        canDelete={canDelete}
+        onStatutChange={handleStatutChange}
       />
 
       <CommandeModal
@@ -237,8 +254,9 @@ const exportData = filtered.map((c) => ({
         mode={modal.mode}
         commande={modal.cmd}
         onSubmit={handleSubmit}
-        onClose={() => setModal({ open: false, mode: 'create', cmd: null })}
+        onClose={() => { setModal({ open: false, mode: 'create', cmd: null }); setErrorModal(null) }}
         loading={saving}
+        error={errorModal}
       />
 
       <ConfirmDeleteModal

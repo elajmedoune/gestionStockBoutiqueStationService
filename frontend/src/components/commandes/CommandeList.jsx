@@ -4,7 +4,7 @@ import CommandeCard from "./CommandeCard"
 import LoadingCard from "../layouts/LoadingCard"
 import EmptyState from "../layouts/EmptyState"
 
-function CommandeList({ commandes, onEdit, onDelete, loading, canDelete }) {
+function CommandeList({ commandes, onEdit, onDelete, loading, canDelete, onStatutChange }) {
     if (loading) return <LoadingCard count={8} />
 
     if (!commandes.length) return (
@@ -20,6 +20,7 @@ function CommandeList({ commandes, onEdit, onDelete, loading, canDelete }) {
                     onEdit={onEdit}
                     onDelete={onDelete}
                     canDelete={canDelete}
+                    onStatutChange={onStatutChange}
                 />
             ))}
         </div>

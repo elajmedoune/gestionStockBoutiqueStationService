@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Fournisseur;
 use App\Http\Requests\StoreFournisseurRequest;
+use Illuminate\Http\Request;
 
 class FournisseurController extends Controller
 {
@@ -41,5 +42,19 @@ class FournisseurController extends Controller
         $fournisseur = Fournisseur::findOrFail($id);
         $fournisseur->delete();
         return response()->json(['message' => 'Fournisseur supprime'], 200);
+    }
+
+    public function syncProduits(Request $request, $id)
+    {
+        $fournisseur = Fournisseur::findOrFail($id);
+        $request->validate([
+            'produits' => 'array',
+            'produits.*' => 'integer|exists:produits,idProduit',
+        ]);
+        $fournisseur->produits()->sync($request->produits ?? []);
+        return response()->json([
+            'message' => 'Produits mis à jour',
+            'fournisseur' => $fournisseur->load('produits')
+        ]);
     }
 }
