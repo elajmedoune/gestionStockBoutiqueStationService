@@ -420,9 +420,10 @@ function DashboardGerant({ ventes, produits, stocks, categories, user }) {
   const ca7j          = useMemo(() => ventesActives.filter(v => v.dateVente && new Date(v.dateVente) >= il7).reduce((s, v) => s + (parseFloat(v.totalTaxeComprise || v.montantTotal) || 0), 0), [ventesActives])
   const stockTotal    = useMemo(() => stocks.reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0), [stocks])
   const beneficeTotal = useMemo(() => ventesActives.reduce((s, v) => s + (v.lignes?.reduce((ls, l) => {
-    const pa = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
+    const stockProduit = stocks.find(st => st.idProduit === l.produit?.idProduit)
+    const pa = parseFloat(stockProduit?.prixAchat || 0)
     return ls + (parseFloat(l.produit?.prixUnitaire || 0) - pa) * parseInt(l.quantite || 0)
-  }, 0) || 0), 0), [ventesActives])
+  }, 0) || 0), 0), [ventesActives, stocks])
 
   const alertes = useMemo(() => produits.filter(p => {
     const qte = stocks.filter(s => s.idProduit === p.idProduit).reduce((s, st) => s + (parseInt(st.quantiteRestante) || 0), 0)

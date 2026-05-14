@@ -158,10 +158,6 @@ const Utilisateurs = () => {
         ))}
       </div>
 
-      <div className="mb-4">
-        <input type="text" placeholder="🔍 Rechercher un utilisateur..." className="input input-bordered w-full max-w-md"
-          value={search} onChange={(e) => setSearch(e.target.value)} />
-      </div>
       <div className="mb-4 flex gap-3">
         <input type="text" placeholder="🔍 Rechercher un utilisateur..."
             className="input input-bordered w-full max-w-md"

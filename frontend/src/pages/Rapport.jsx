@@ -166,7 +166,9 @@ export default function Rapport() {
   const totalHT    = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.totalHorsTaxe    || 0), 0), [ventesAffichees])
   const totalTVA   = useMemo(() => ventesAffichees.reduce((s, v) => s + parseFloat(v.tva              || 0), 0), [ventesAffichees])
   const benefice   = useMemo(() => ventesAffichees.reduce((s, v) => s + (v.lignes?.reduce((ls, l) => {
-    const pa = parseFloat(l.produit?.stocks?.[0]?.prixAchat || 0)
+    const stockProduit = (l.produit?.stocks ?? []).find(st => st.idProduit === l.produit?.idProduit)
+                      ?? l.produit?.stocks?.[0]
+    const pa = parseFloat(stockProduit?.prixAchat || 0)
     return ls + (parseFloat(l.produit?.prixUnitaire || 0) - pa) * parseInt(l.quantite || 0)
   }, 0) || 0), 0), [ventesAffichees])
   const panierMoyen = useMemo(() => ventesNormales.length ? caTotal / ventesNormales.length : 0, [caTotal, ventesNormales])
