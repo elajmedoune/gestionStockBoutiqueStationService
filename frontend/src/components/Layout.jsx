@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import appConfig from '../config/app'
-import { useCommandes, useLivraisons, useUtilisateurs, useProduits, useStocks, useNotifications } from '../hooks'
+import { useCommandes, useLivraisons, useUtilisateurs, useProduits, useStocks, useNotifications, useAlertes } from '../hooks'
 import {
   Bell, User, LogOut, Settings,
   LayoutDashboard, ShoppingCart, Package, Truck,
@@ -24,6 +24,8 @@ export default function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [mobileOpen, setMobileOpen] = useState(false)
   const notifications = useNotifications(user, { commandes, livraisons, utilisateurs, produits, stocks })
+  const { data: alertesData } = useAlertes()
+  const alertesNonLues = alertesData.filter(a => !a.lue).length
 
   const [luues, setLuues] = useState(() => JSON.parse(localStorage.getItem('notifs_lues') || '[]'))
   const [supprimees, setSupprimees] = useState(() => JSON.parse(localStorage.getItem('notifs_supprimees') || '[]'))
@@ -213,7 +215,7 @@ export default function Layout({ children }) {
         )}
       </div>
 
-     {/* Menu */}
+   {/* Menu */}
 <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-4">
   {menuGroups
     .map(group => ({ ...group, items: group.items.filter(item => item.roles.includes(user?.role)) }))
@@ -242,18 +244,18 @@ export default function Layout({ children }) {
                 >
                   <span className={`relative ${isActive ? 'text-primary-content' : 'text-base-content/50'}`}>
                     {item.icon}
-                    {item.path === '/alertes' && notifsNonLues.length > 0 && (
+                    {item.path === '/alertes' && alertesNonLues > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-error text-white text-xs rounded-full flex items-center justify-center font-bold leading-none animate-bounce shadow">
-                        {notifsNonLues.length > 9 ? '9+' : notifsNonLues.length}
+                        {alertesNonLues > 9 ? '9+' : alertesNonLues}
                       </span>
                     )}
                   </span>
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.label}</span>
-                      {item.path === '/alertes' && notifsNonLues.length > 0 && (
+                      {item.path === '/alertes' && alertesNonLues > 0 && (
                         <span className="badge badge-error badge-sm text-white font-bold animate-pulse">
-                          {notifsNonLues.length}
+                          {alertesNonLues}
                         </span>
                       )}
                       {isActive && item.path !== '/alertes' && <ChevronRight size={14} className="opacity-70" />}

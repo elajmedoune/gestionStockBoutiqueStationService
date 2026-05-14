@@ -204,3 +204,4 @@ export const useNotifications = (user, { commandes = [], livraisons = [], utilis
 
   return notifications
 }
+export const useAlertes = () => useFetch('/alertes')
