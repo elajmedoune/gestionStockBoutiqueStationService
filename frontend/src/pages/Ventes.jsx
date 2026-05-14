@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import Layout from '../components/Layout'
 import {
   Plus, Search, Download, Eye, Ban, Printer,
   ShoppingCart, DollarSign, TrendingUp,
@@ -535,16 +534,13 @@ export default function Ventes() {
   }))
 
   if (lV || lP) return (
-    <Layout>
-      <div className="max-w-6xl mx-auto p-6">
-        <LoadingCard count={8} />
-      </div>
-    </Layout>
+    <div className="max-w-6xl mx-auto p-6">
+      <LoadingCard count={8} />
+    </div>
   )
 
   return (
-    <Layout>
-      <div className="max-w-6xl mx-auto space-y-5">
+    <div className="max-w-6xl mx-auto space-y-5">
 
         {/* Toast */}
         {toast && (
@@ -571,26 +567,26 @@ export default function Ventes() {
             {user?.role !== 'caissier' && (
               <div className="relative">
                 <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5"
-                onClick={() => setExportOpen(!exportOpen)}>
+                  onClick={() => setExportOpen(!exportOpen)}>
                   <Download size={14} /> Exporter
-                  </button>
-                  {exportOpen && (
-                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
-                      <ExportPDF data={exportData} columns={PDF_COLS} filename="ventes" label="PDF" />
-                      <ExportExcel data={ventesFiltrees.map(v => ({
-                        ID: `#${v.idVente}`,
-                        Date: v.dateVente ? new Date(v.dateVente).toLocaleDateString('fr-FR') : '—',
-                        Caissier: v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—',
-                        Mode: MODE_LABELS[v.modePaiement]?.label ?? v.modePaiement,
-                        'HT (F)': v.totalHorsTaxe,
-                        'TVA (F)': v.tva,
-                        'TTC (F)': v.totalTaxeComprise,
-                      }))} filename="ventes" label="Excel" />
-                <ExportCSV data={exportData} filename="ventes" label="CSV" />
+                </button>
+                {exportOpen && (
+                  <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                    <ExportPDF data={exportData} columns={PDF_COLS} filename="ventes" label="PDF" />
+                    <ExportExcel data={ventesFiltrees.map(v => ({
+                      ID: `#${v.idVente}`,
+                      Date: v.dateVente ? new Date(v.dateVente).toLocaleDateString('fr-FR') : '—',
+                      Caissier: v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—',
+                      Mode: MODE_LABELS[v.modePaiement]?.label ?? v.modePaiement,
+                      'HT (F)': v.totalHorsTaxe,
+                      'TVA (F)': v.tva,
+                      'TTC (F)': v.totalTaxeComprise,
+                    }))} filename="ventes" label="Excel" />
+                    <ExportCSV data={exportData} filename="ventes" label="CSV" />
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
             <button className="btn btn-primary gap-2" onClick={() => setModalNew(true)}>
               <Plus size={16} /> Nouvelle vente
             </button>
@@ -738,7 +734,6 @@ export default function Ventes() {
             </div>
           )}
         </div>
-      </div>
 
       {modalNew && (
         <ModalNouvelleVente produits={produits}
@@ -755,6 +750,6 @@ export default function Ventes() {
       onClose={() => setConfirmDel(null)}
       loading={false}
       />
-    </Layout>
+    </div>
   )
 }
