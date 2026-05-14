@@ -23,24 +23,6 @@ const solidLine = (doc, y, x1 = 5, x2 = 75, thick = 0.2) => {
   doc.setLineWidth(0.2)
 }
 
-/* ── Charger logo ── */
-const loadLogoBase64 = (logoPath) => {
-  if (!logoPath) return Promise.resolve(null)
-  return new Promise(resolve => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
-      canvas.getContext('2d').drawImage(img, 0, 0)
-      resolve(canvas.toDataURL('image/png').split(',')[1])
-    }
-    img.onerror = () => resolve(null)
-    img.src = logoPath
-  })
-}
-
 /* ════════════════════════════════════
    EXPORT TICKET DE CAISSE
 ════════════════════════════════════ */
@@ -48,7 +30,6 @@ export const exportTicketCaisse = async (vente) => {
   const lignes  = vente.lignes ?? []
   const hauteur = Math.max(150, 90 + lignes.length * 10 + 60)
   const doc     = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, hauteur] })
-  const logoB64 = await loadLogoBase64(appConfig.company.logo)
 
   let y  = 10
   const L = 6
@@ -56,20 +37,23 @@ export const exportTicketCaisse = async (vente) => {
   const C = 40
 
   /* ══ HEADER ══ */
-  // Logo
-  if (logoB64) {
-    doc.addImage(logoB64, 'PNG', C - 6, y, 12, 12)
-    y += 16
-  }
-
-  // Nom boutique
-  doc.setFontSize(11)
+  // Nom boutique (grand titre)
+  doc.setFontSize(16)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(...BLACK)
   doc.text(ascii(appConfig.company.name).toUpperCase(), C, y, { align: 'center' })
-  y += 5
+  y += 7
 
-  // Adresse & téléphone
+  // Slogan
+  if (appConfig.company.slogan) {
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...GRAY)
+    doc.text(ascii(appConfig.company.slogan), C, y, { align: 'center' })
+    y += 4
+  }
+
+  // Adresse & téléphone & email
   doc.setFontSize(6.5)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...GRAY)
@@ -143,10 +127,9 @@ export const exportTicketCaisse = async (vente) => {
   /* ══ LIGNES PRODUITS ══ */
   doc.setTextColor(...BLACK)
   lignes.forEach((l, i) => {
-    const nom = ascii(l.produit?.reference ?? `Produit #${l.idProduit}`)
+    const nom = ascii(l.produit?.nomProduit ?? l.produit?.reference ?? `Produit #${l.idProduit}`)
     const nomCourt = nom.length > 20 ? nom.substring(0, 19) + '.' : nom
 
-    // Fond alterné léger
     if (i % 2 === 0) {
       doc.setFillColor(250, 250, 250)
       doc.rect(L - 1, y - 3.5, R - L + 2, 7, 'F')

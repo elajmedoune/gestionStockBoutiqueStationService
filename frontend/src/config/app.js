@@ -1,26 +1,29 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURATION DE L'ENTREPRISE CLIENTE
-// Modifie uniquement ce fichier pour personnaliser l'application
-// ─────────────────────────────────────────────────────────────────────────────
 const appConfig = {
-  // Nom du logiciel (ne pas modifier)
   appName: 'GestStock SN',
-
-  // Informations de l'entreprise cliente
   company: {
-    name:    'Boutique Station Service',  // ← Nom affiché partout
-    slogan:  'Station Service',           // ← Sous-titre dans la sidebar
-    logo:    '/cs-logo.jpg',                        // ← Mettre '/logo.png' quand disponible
-    email:   '',                          // ← Optionnel — apparaît dans les PDFs
-    phone:   '',                          // ← Optionnel — apparaît dans les PDFs
-    address: 'Thiés, Sénégal',            // ← Optionnel — apparaît dans les PDFs
+    name:    'Boutique Station Service',
+    slogan:  'Station Service',
+    logo:    '/cs-logo.jpg',
+    email:   '',
+    phone:   '',
+    address: 'Thiès, Sénégal',
   },
-
-  // Monnaie affichée dans l'app et les PDFs
   currency: 'FCFA',
-
-  // TVA appliquée
   tva: 18,
 }
 
-export default appConfig
+const savedCompany = (() => {
+  try { return JSON.parse(localStorage.getItem('company_config') || '{}') } catch { return {} }
+})()
+
+const mergedConfig = {
+  ...appConfig,
+  company: { 
+    ...appConfig.company, 
+    ...savedCompany, 
+    logo:   appConfig.company.logo,
+    slogan: appConfig.company.slogan,
+  },
+}
+
+export default mergedConfig
