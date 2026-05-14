@@ -462,7 +462,7 @@ FOR EACH ROW
 BEGIN
     UPDATE stocks s
     JOIN lignecommande lc ON lc.idProduit = s.idProduit
-    SET s.quantiteRestante = s.quantiteRestante + lc.quantiteRecu,
+    SET s.quantiteRestante = s.quantiteRestante + lc.quantite,
         s.dateEntree       = NEW.dateLivraison
     WHERE lc.idCommande = NEW.idCommande;
 

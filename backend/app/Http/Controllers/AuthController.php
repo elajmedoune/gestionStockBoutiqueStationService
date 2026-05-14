@@ -74,9 +74,9 @@ class AuthController extends Controller
             'prenom'     => 'required|string|max:50',
             'login'      => 'required|string|max:50|unique:utilisateurs,login',
             'email'      => ['required', 'max:100', 'unique:utilisateurs,email',
-                            'regex:/^[a-zA-Z0-9\-]+@[a-zA-Z.\-]+\.[a-zA-Z]{2,3}$/'],
-            'motDePasse' => ['required', 'string', 'min:8', 'confirmed'],
-                            // 'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-]).{8,}$/'],
+                            'regex:/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/'],
+            'motDePasse' => ['required', 'string', 'min:8', 'confirmed',
+                             'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!*_\-@]).{8,}$/'],
             'role'       => 'required|in:gerant,caissier,magasinier,gestionnaire_stock',
         ], [
             'nom.required'          => 'Le nom est obligatoire.',
@@ -103,6 +103,15 @@ class AuthController extends Controller
             'role'       => $validated['role'],
             'actif'      => true,
         ]);
+
+        // Envoi email
+        \Illuminate\Support\Facades\Mail::raw(
+            "Bonjour {$utilisateur->prenom},\n\nVotre compte a été créé.\nLogin : {$validated['login']}\nMot de passe : {$validated['motDePasse']}\n\nConnectez-vous sur : http://localhost:5173",
+            function ($message) use ($utilisateur) {
+                $message->to($utilisateur->email)
+                        ->subject('Vos identifiants de connexion - GestStock');
+            }
+        );
 
         return response()->json([
             'message'     => 'Utilisateur créé avec succès',

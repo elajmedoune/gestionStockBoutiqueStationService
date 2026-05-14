@@ -24,7 +24,9 @@ const today = new Date()
 const MODE_LABELS = {
   especes:      { label: 'Espèces',      cls: 'badge-success' },
   carte:        { label: 'Carte',        cls: 'badge-info'    },
-  mobile_money: { label: 'Mobile Money', cls: 'badge-warning' },
+  orange_money: { label: 'Orange Money', cls: 'badge-warning' },
+  wave:         { label: 'Wave',         cls: 'badge-primary' },
+  free_money:   { label: 'Free Money',   cls: 'badge-secondary' },
 }
 
 const TVA_RATE = 18
@@ -472,6 +474,9 @@ export default function Ventes() {
   }, [])
 
   const ventesFiltrees = useMemo(() => ventes.filter(v => {
+    // Caissier voit uniquement ses ventes
+    if (user?.role === 'caissier' && v.utilisateur?.idUtilisateur !== user?.idUtilisateur) return false
+    
     if (filterMode && v.modePaiement !== filterMode) return false
     if (search) {
       const s = search.toLowerCase()
@@ -592,13 +597,13 @@ export default function Ventes() {
           </div>
         </div>
 
-        {/* KPIs */}
+      {user?.role !== 'caissier' && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-  {[
-    { label: 'Ventes auj.',    value: ventesAuj.length,   sub: 'transactions',  icon: <ShoppingCart size={15} />, color: 'primary'   },
-    { label: "CA aujourd'hui", value: `${fmt(caAuj)} F`,  sub: 'total TTC',     icon: <DollarSign size={15} />,   color: 'secondary' },
-    { label: 'CA ce mois',     value: `${fmt(caMois)} F`, sub: today.toLocaleDateString('fr-FR', { month: 'long' }), icon: <TrendingUp size={15} />, color: 'accent' },
-  ].map((kpi, i) => (
+          {[
+            { label: 'Ventes auj.',    value: ventesAuj.length,   sub: 'transactions',  icon: <ShoppingCart size={15} />, color: 'primary'   },
+            { label: "CA aujourd'hui", value: `${fmt(caAuj)} F`,  sub: 'total TTC',     icon: <DollarSign size={15} />,   color: 'secondary' },
+            { label: 'CA ce mois',     value: `${fmt(caMois)} F`, sub: today.toLocaleDateString('fr-FR', { month: 'long' }), icon: <TrendingUp size={15} />, color: 'accent' },
+          ].map((kpi, i) => (
             <div key={i} className="card bg-base-100 shadow-sm border border-base-200 hover:-translate-y-0.5 transition-transform duration-200">
               <div className="card-body p-4 gap-1">
                 <div className={`p-2 rounded-2xl bg-${kpi.color}/15 text-${kpi.color} w-fit mb-1`}>{kpi.icon}</div>
@@ -609,6 +614,7 @@ export default function Ventes() {
             </div>
           ))}
         </div>
+      )}
 
         {/* Filtres */}
         <div className="card bg-base-100 shadow-sm border border-base-200">
@@ -620,12 +626,14 @@ export default function Ventes() {
                   className="input input-bordered input-sm pl-8 w-44"
                   value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} />
               </div>
-              <select className="select select-bordered select-sm w-36"
+              <select className="select select-bordered select-sm w-40"
                 value={filterMode} onChange={e => { setFilterMode(e.target.value); setPage(1) }}>
                 <option value="">Tous les modes</option>
                 <option value="especes">Espèces</option>
                 <option value="carte">Carte</option>
-                <option value="mobile_money">Mobile Money</option>
+                <option value="orange_money">Orange Money</option>
+                <option value="wave">Wave</option>
+                <option value="free_money">Free Money</option>
               </select>
               <input type="date" className="input input-bordered input-sm w-36"
                 value={dateDebut} onChange={e => { setDateDebut(e.target.value); setPage(1) }} />
@@ -648,9 +656,15 @@ export default function Ventes() {
             <table className="table table-sm w-full">
               <thead>
                 <tr className="bg-primary text-primary-content">
-                  <th>#</th><th>Date</th><th>Caissier</th><th>Mode</th><th>Produits</th>
-                  <th className="text-right">HT</th><th className="text-right">TVA</th>
-                  <th className="text-right">TTC</th><th className="text-right">Actions</th>
+                  <th>#</th>
+                  <th>Date</th>
+                  {user?.role !== 'caissier' && <th>Caissier</th>}
+                  <th>Mode</th>
+                  <th>Produits</th>
+                  <th className="text-right">HT</th>
+                  <th className="text-right">TVA</th>
+                  <th className="text-right">TTC</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -665,7 +679,7 @@ export default function Ventes() {
                           <td className="text-base-content/70 text-xs">
                             {v.dateVente ? new Date(v.dateVente).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                           </td>
-                          <td className="text-xs font-medium">{v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—'}</td>
+                          {user?.role !== 'caissier' && <td className="text-xs font-medium">{v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—'}</td> }
                           <td><span className={`badge ${mode.cls} badge-sm font-semibold`}>{mode.label}</span></td>
                           <td className="max-w-xs">
                             {lignes.length === 0
@@ -690,7 +704,7 @@ export default function Ventes() {
                                 : <>
                                     <button className="btn btn-ghost btn-xs btn-circle tooltip" data-tip="Détail" onClick={() => handleDetail(v)}><Eye size={13} /></button>
                                     <button className="btn btn-ghost btn-xs btn-circle tooltip text-primary" data-tip="Ticket" onClick={() => handleTicket(v)}><Printer size={13} /></button>
-                                    <button className="btn btn-ghost btn-xs btn-circle text-warning tooltip" data-tip="Annuler" onClick={() => setConfirmDel(v.idVente)}><Ban size={13} /></button>
+                                    {user?.role === 'gerant' && ( <button className="btn btn-ghost btn-xs btn-circle text-warning tooltip" data-tip="Annuler" onClick={() => setConfirmDel(v.idVente)}><Ban size={13} /></button> )}
                                   </>
                               }
                             </div>

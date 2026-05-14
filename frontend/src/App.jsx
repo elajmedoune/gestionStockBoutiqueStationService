@@ -69,6 +69,13 @@ function PublicRoute({ children }) {
   return !user ? children : <Navigate to="/dashboard" />
 }
 
+function RoleRoute({ children, allowedRoles }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" />
+  if (!allowedRoles.includes(user.role)) return <Navigate to="/inventaire" />
+  return children
+}
+
 function AppRoutes() {
   const { user } = useAuth()
 
@@ -84,7 +91,6 @@ function AppRoutes() {
 
           {/* Pages avec Layout intégré */}
           <Route path="/dashboard"     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/ventes"        element={<ProtectedRoute><Ventes /></ProtectedRoute>} />
           <Route path="/rapport"       element={<ProtectedRoute><Rapport /></ProtectedRoute>} />
           <Route path="/profil"        element={<ProtectedRoute><MonProfil /></ProtectedRoute>} />
           <Route path="/ticket-caisse" element={<ProtectedRoute><TicketCaisse /></ProtectedRoute>} />
@@ -96,8 +102,21 @@ function AppRoutes() {
           <Route path="/stock"        element={<ProtectedRouteWithLayout><Stock /></ProtectedRouteWithLayout>} />
           <Route path="/categories"   element={<ProtectedRouteWithLayout><Categories /></ProtectedRouteWithLayout>} />
           <Route path="/fournisseurs" element={<ProtectedRouteWithLayout><Fournisseurs /></ProtectedRouteWithLayout>} />
-          <Route path="/commandes"    element={<ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>} />
-          <Route path="/livraisons"   element={<ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>} />
+          <Route path="/commandes" element={
+            <RoleRoute allowedRoles={['gerant', 'gestionnaire_stock']}>
+              <ProtectedRouteWithLayout><Commandes /></ProtectedRouteWithLayout>
+            </RoleRoute>
+          } />
+          <Route path="/livraisons" element={
+            <RoleRoute allowedRoles={['gerant', 'gestionnaire_stock']}>
+              <ProtectedRouteWithLayout><Livraisons /></ProtectedRouteWithLayout>
+            </RoleRoute>
+          } />
+          <Route path="/ventes" element={
+            <RoleRoute allowedRoles={['gerant', 'caissier']}>
+              <ProtectedRouteWithLayout><Ventes /></ProtectedRouteWithLayout>
+            </RoleRoute>
+          } />
           <Route path="/alertes"      element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />
           <Route path="/inventaire"   element={<ProtectedRouteWithLayout><Inventaires /></ProtectedRouteWithLayout>} />
 
@@ -110,7 +129,9 @@ function AppRoutes() {
             </ProtectedRoute>
           } />
 
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={
+            <Navigate to={user?.role === 'magasinier' ? '/inventaire' : '/dashboard'} />
+          } />
         </Routes>
       </PageTransition>
     </Suspense>
