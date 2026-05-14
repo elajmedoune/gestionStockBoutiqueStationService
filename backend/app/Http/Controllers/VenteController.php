@@ -27,7 +27,7 @@ public function index(Request $request)
     public function store(Request $request)
 {
     $request->validate([
-        'modePaiement'       => 'required|string|max:20',
+        'modePaiement' => 'required|in:especes,carte,orange_money,wave,free_money',
         'lignes'             => 'required|array|min:1',
         'lignes.*.idProduit' => 'required|integer|exists:produits,idProduit',
         'lignes.*.quantite'  => 'required|integer|min:1',

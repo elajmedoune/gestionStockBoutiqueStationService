@@ -55,14 +55,12 @@ export default function Layout({ children }) {
     {
       label: 'Principal',
       items: [
-        { label: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/dashboard',     roles: ['gerant', 'caissier', 'magasinier', 'gestionnaire_stock'] },
+        { label: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/dashboard',     roles: ['gerant', 'caissier', 'gestionnaire_stock'] },
         { label: 'Rapport',       icon: <TrendingUp size={18} />,      path: '/rapport',       roles: ['gerant'] },
-        { label: 'Rapport Stock', icon: <ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock', 'magasinier'] },
+        { label: 'Rapport Stock', icon: <ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock'] },
       ]
     },
     {
-<<<<<<< HEAD
-=======
       label: 'Opérations',
       items: [
         { label: 'Ventes',     icon: <ShoppingCart size={18} />, path: '/ventes',     roles: ['gerant', 'caissier'] },
@@ -71,21 +69,12 @@ export default function Layout({ children }) {
       ]
     },
     {
->>>>>>> origin/medoune
       label: 'Stock',
       items: [
-        { label: 'Catégories',   icon: <Tag size={18} />,       path: '/categories',   roles: ['gerant', 'gestionnaire_stock'] },
-        { label: 'Produits',     icon: <Archive size={18} />,  path: '/produits',     roles: ['gerant', 'gestionnaire_stock'] },
-        { label: 'Stock',        icon: <BarChart2 size={18} />, path: '/stock',        roles: ['gerant', 'gestionnaire_stock'] },
-        { label: 'Fournisseurs', icon: <Users size={18} />,     path: '/fournisseurs', roles: ['gerant', 'gestionnaire_stock'] },
-      ]
-    },
-    {
-      label: 'Opérations',
-      items: [
-        { label: 'Ventes',     icon: <ShoppingCart size={18} />, path: '/ventes',     roles: ['gerant', 'caissier'] },
-        { label: 'Commandes',  icon: <Package size={18} />,      path: '/commandes',  roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
-        { label: 'Livraisons', icon: <Truck size={18} />,        path: '/livraisons', roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
+        { label: 'Catégories',   icon: <Tag size={18} />,        path: '/categories',   roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Produits',     icon: <Archive size={18} />,    path: '/produits',     roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Stock',        icon: <BarChart2 size={18} />,  path: '/stock',        roles: ['gerant', 'gestionnaire_stock'] },
+        { label: 'Fournisseurs', icon: <Users size={18} />,      path: '/fournisseurs', roles: ['gerant', 'gestionnaire_stock'] },
       ]
     },
     {
