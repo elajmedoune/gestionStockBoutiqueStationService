@@ -55,7 +55,7 @@ export default function Login() {
               : <Fuel size={28} className="text-primary-content" />
             }
           </div>
-          <h1 className="text-xl font-extrabold text-base-content">{appConfig.company.name}</h1>
+          <h1 className="text-xl font-extrabold text-base-content">{appConfig.appName}</h1>
           <p className="text-xs text-base-content/40 mt-1">Connectez-vous à votre espace</p>
         </div>
 

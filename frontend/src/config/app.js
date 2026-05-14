@@ -3,7 +3,7 @@ const appConfig = {
   company: {
     name:    'Boutique Station Service',
     slogan:  'Station Service',
-    logo:    '/cs-logo.jpg',
+    logo:    '/cs-logo.png',
     email:   '',
     phone:   '',
     address: 'Thiès, Sénégal',

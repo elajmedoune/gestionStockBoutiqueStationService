@@ -22,7 +22,7 @@ export default function Accueil() {
               : <Fuel size={20} className="text-primary-content" />
             }
           </div>
-          <span className="font-extrabold text-base-content">{appConfig.company.name}</span>
+          <span className="font-extrabold text-base-content">{appConfig.appName}</span>
         </div>
         <button
           onClick={() => navigate('/login')}

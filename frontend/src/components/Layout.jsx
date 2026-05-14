@@ -57,7 +57,7 @@ export default function Layout({ children }) {
       items: [
         { label: 'Dashboard',     icon: <LayoutDashboard size={18} />, path: '/dashboard',     roles: ['gerant', 'caissier', 'magasinier', 'gestionnaire_stock'] },
         { label: 'Rapport',       icon: <TrendingUp size={18} />,      path: '/rapport',       roles: ['gerant'] },
-        { label: 'Rapport Stock', icon: <ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock', 'magasinier'] },
+        { label: 'Rapport Stock', icon: <ClipboardList size={18} />,   path: '/rapport-stock', roles: ['gestionnaire_stock'] },
       ]
     },
     {
@@ -213,49 +213,61 @@ export default function Layout({ children }) {
         )}
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-4">
-        {menuGroups
-          .map(group => ({ ...group, items: group.items.filter(item => item.roles.includes(user?.role)) }))
-          .filter(group => group.items.length > 0)
-          .map((group) => (
-            <div key={group.label}>
-              {!isCollapsed && (
-                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30 px-3 mb-1">{group.label}</p>
-              )}
-              {isCollapsed && <div className="border-t border-base-200 mx-2 mb-2" />}
-              <ul className="flex flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const isActive = location.pathname === item.path
-                  return (
-                    <li key={item.path}>
-                      <button
-                        onClick={() => onNavigate(item.path)}
-                        title={isCollapsed ? item.label : undefined}
-                        className={`
-                          flex items-center w-full rounded-2xl text-sm font-medium transition-all duration-150
-                          ${isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5'}
-                          ${isActive
-                            ? 'bg-primary text-primary-content shadow-md'
-                            : 'text-base-content/70 hover:bg-primary/10 hover:text-primary'}
-                        `}
-                      >
-                        <span className={isActive ? 'text-primary-content' : 'text-base-content/50'}>{item.icon}</span>
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1 text-left">{item.label}</span>
-                            {isActive && <ChevronRight size={14} className="opacity-70" />}
-                          </>
-                        )}
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))
-        }
-      </nav>
+     {/* Menu */}
+<nav className="flex-1 overflow-y-auto py-4 px-2 space-y-4">
+  {menuGroups
+    .map(group => ({ ...group, items: group.items.filter(item => item.roles.includes(user?.role)) }))
+    .filter(group => group.items.length > 0)
+    .map((group) => (
+      <div key={group.label}>
+        {!isCollapsed && (
+          <p className="text-xs font-semibold uppercase tracking-widest text-base-content/30 px-3 mb-1">{group.label}</p>
+        )}
+        {isCollapsed && <div className="border-t border-base-200 mx-2 mb-2" />}
+        <ul className="flex flex-col gap-0.5">
+          {group.items.map((item) => {
+            const isActive = location.pathname === item.path
+            return (
+              <li key={item.path}>
+                <button
+                  onClick={() => onNavigate(item.path)}
+                  title={isCollapsed ? item.label : undefined}
+                  className={`
+                    flex items-center w-full rounded-2xl text-sm font-medium transition-all duration-150
+                    ${isCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5'}
+                    ${isActive
+                      ? 'bg-primary text-primary-content shadow-md'
+                      : 'text-base-content/70 hover:bg-primary/10 hover:text-primary'}
+                  `}
+                >
+                  <span className={`relative ${isActive ? 'text-primary-content' : 'text-base-content/50'}`}>
+                    {item.icon}
+                    {item.path === '/alertes' && notifsNonLues.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-error text-white text-xs rounded-full flex items-center justify-center font-bold leading-none animate-bounce shadow">
+                        {notifsNonLues.length > 9 ? '9+' : notifsNonLues.length}
+                      </span>
+                    )}
+                  </span>
+                  {!isCollapsed && (
+                    <>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.path === '/alertes' && notifsNonLues.length > 0 && (
+                        <span className="badge badge-error badge-sm text-white font-bold animate-pulse">
+                          {notifsNonLues.length}
+                        </span>
+                      )}
+                      {isActive && item.path !== '/alertes' && <ChevronRight size={14} className="opacity-70" />}
+                    </>
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
 
       {/* Footer profil sidebar — toujours visible */}
       {!isCollapsed && (
