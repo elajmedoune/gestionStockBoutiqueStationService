@@ -33,7 +33,16 @@ class FournisseurController extends Controller
     public function update(StoreFournisseurRequest $request, $id)
     {
         $fournisseur = Fournisseur::findOrFail($id);
-        $fournisseur->update($request->validated());
+        
+        $validated = $request->validated();
+    
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('photos', 'public');
+            $validated['photo'] = $path;
+        }
+        
+        $fournisseur->update($validated);
+
         return response()->json($fournisseur, 200);
     }
 
