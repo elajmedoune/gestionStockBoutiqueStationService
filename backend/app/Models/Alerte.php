@@ -23,7 +23,6 @@ class Alerte extends Model
         'lue' => 'boolean',
         'dateCreation' => 'datetime',
     ];
-    public $timestamps = false;
 
     //-----------------------------------------------------------------------------------------------------
     //Relations

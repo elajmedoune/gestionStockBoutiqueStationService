@@ -16,8 +16,8 @@ return new class extends Migration
             // $table->integer('ecart')->nullable()->storedAs('quantiteReelle - quantiteTheorique'); // commenté, plus sûr
             $table->string('observations', 300)->nullable();
             $table->string('statut', 20)->default('en_cours');
-            $table->unsignedBigInteger('idUtilisateur');
-        $table->unsignedBigInteger('idStock');          
+            $table->unsignedBigInteger('idUtilisateur');        
+            $table->unsignedBigInteger('idProduit');           
             $table->timestamps();
 
             $table->foreign('idUtilisateur')                     
@@ -25,11 +25,12 @@ return new class extends Migration
                   ->on('utilisateurs')
                   ->onDelete('restrict');
 
-            $table->foreign('idStock')
-                  ->references('idStock')
-                  ->on('stocks')
+            $table->foreign('idProduit')                         
+                  ->references('idProduit')
+                  ->on('produits')
                   ->onDelete('restrict');
-            }); 
+            
+        });
     }
 
     public function down(): void

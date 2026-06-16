@@ -228,6 +228,7 @@ function ProduitForm({ initial = null, categories = [], onSubmit, onCancel, load
                   onSubmit={handleAddCategorie}
                   onCancel={() => { setShowAddCat(false); setErrorCat(null) }}
                   loading={savingCat}
+                  inline={true}
                 />
               </div>
             )}

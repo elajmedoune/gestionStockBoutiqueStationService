@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import api from '../../services/api'
 
 function FournisseurProduitsModal({ isOpen, fournisseur, produits, onClose, onSuccess }) {
@@ -34,12 +35,13 @@ function FournisseurProduitsModal({ isOpen, fournisseur, produits, onClose, onSu
 
     if (!isOpen || !fournisseur) return null
 
-    return (
-        <dialog open className="modal modal-open">
-            <div className="modal-box max-w-md">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+            <div className="relative bg-base-100 rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
                 <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
                 <h3 className="font-bold text-lg mb-4">📦 Produits de {fournisseur.nom}</h3>
-                
+
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                     {produits.map(p => (
                         <label key={p.idProduit} className="flex items-center gap-3 p-2 hover:bg-base-200 rounded-xl cursor-pointer">
@@ -55,7 +57,7 @@ function FournisseurProduitsModal({ isOpen, fournisseur, produits, onClose, onSu
                     ))}
                 </div>
 
-                <div className="modal-action">
+                <div className="flex justify-end gap-2 pt-4">
                     <button className="btn btn-ghost" onClick={onClose}>Annuler</button>
                     <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
                         {loading && <span className="loading loading-spinner loading-xs" />}
@@ -63,8 +65,8 @@ function FournisseurProduitsModal({ isOpen, fournisseur, produits, onClose, onSu
                     </button>
                 </div>
             </div>
-            <div className="modal-backdrop bg-black/40" onClick={onClose} />
-        </dialog>
+        </div>,
+        document.body
     )
 }
 export default FournisseurProduitsModal

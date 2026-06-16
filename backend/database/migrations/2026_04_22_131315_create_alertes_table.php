@@ -16,7 +16,7 @@ return new class extends Migration
             $table->boolean('lue')->default(false);
             $table->enum('niveauUrgence', ['faible', 'moyen', 'critique'])->default('moyen');
             $table->unsignedBigInteger('idUtilisateur');         
-            $table->unsignedBigInteger('idStock');              
+            $table->unsignedBigInteger('idProduit');              
             $table->timestamps();
 
             $table->foreign('idUtilisateur')                      
@@ -24,9 +24,9 @@ return new class extends Migration
                   ->on('utilisateurs')                            
                   ->onDelete('restrict');
 
-            $table->foreign('idStock')                        
-                  ->references('idStock')
-                  ->on('stocks')                              
+            $table->foreign('idProduit')                        
+                  ->references('idProduit')
+                  ->on('produits')                              
                   ->onDelete('restrict');
         });
     }

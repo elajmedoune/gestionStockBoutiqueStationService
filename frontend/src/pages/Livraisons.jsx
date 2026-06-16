@@ -568,8 +568,9 @@ const annulerLivraison = async (id) => {
       )}
 
       {validationModal && (
-    <dialog className="modal modal-open">
-        <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40" onClick={() => setValidationModal(null)} />
+        <div className="relative max-w-lg w-full mx-4 rounded-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-xl bg-base-100">
             <div className="bg-success text-success-content px-5 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/25 rounded-2xl"><CheckCircle size={16} /></div>
@@ -626,8 +627,7 @@ const annulerLivraison = async (id) => {
                 </button>
             </div>
         </div>
-        <div className="modal-backdrop" onClick={() => setValidationModal(null)} />
-    </dialog>
+    </div>
 )}
 
       {/* Confirmation suppression */}
