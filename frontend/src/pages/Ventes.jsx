@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import api, { createVente, deleteVente, getVente } from '../services/api'
 import { exportTicketCaisse } from '../services/pdf'
-import { useVentes, useProduits, useStocks } from '../hooks'
+import { useVentes, useProduits, useStocks, clearCache } from '../hooks'
 import ExportPDF from '../components/exports/ExportPDF'
 import ExportExcel from '../components/exports/ExportExcel'
 import ExportCSV from '../components/exports/ExportCSV'
@@ -455,6 +455,7 @@ export default function Ventes() {
   const { refetch: refetchStocks } = useStocks()
 
   const refetchAll = useCallback(() => {
+    clearCache()
     refetchVentes(); refetchProduits(); refetchStocks()
   }, [refetchVentes, refetchProduits, refetchStocks])
 

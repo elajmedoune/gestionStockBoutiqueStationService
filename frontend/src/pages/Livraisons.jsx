@@ -620,14 +620,17 @@ const annulerLivraison = async (id) => {
             </div>
             <div className="flex justify-end gap-2 px-5 py-4 border-t border-base-200 shrink-0 bg-base-100">
                 <button className="btn btn-ghost" onClick={() => setValidationModal(null)}>Annuler</button>
-                <button className="btn btn-success gap-1" onClick={async () => {
-                    try {
-                        await validerLivraison(validationModal.idLivraison, datesExpiration)
-                        setValidationModal(null)
-                    } catch { setError("Erreur lors de la validation") }
-                }}>
-                    <CheckCircle size={14} /> Confirmer la réception
-                </button>
+                <button className="btn btn-success gap-1" disabled={saving} onClick={async () => {
+    setSaving(true)
+    try {
+        await validerLivraison(validationModal.idLivraison, datesExpiration)
+        setValidationModal(null)
+    } catch { setError("Erreur lors de la validation") }
+    finally { setSaving(false) }
+}}>
+    {saving ? <span className="loading loading-spinner loading-xs" /> : <CheckCircle size={14} />}
+    Confirmer la réception
+</button>
             </div>
         </div>
     </div>
