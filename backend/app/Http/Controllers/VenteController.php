@@ -7,7 +7,8 @@ use App\Models\LigneVente;
 use App\Http\Resources\VenteResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use App\Services\AlerteService;
+use App\Models\SessionCaisse;
 class VenteController extends Controller
 {
 public function index(Request $request)
@@ -32,6 +33,16 @@ public function index(Request $request)
         'lignes.*.idProduit' => 'required|integer|exists:produits,idProduit',
         'lignes.*.quantite'  => 'required|integer|min:1',
     ]);
+
+    $sessionOuverte = SessionCaisse::where('idUtilisateur', $request->user()->idUtilisateur)
+    ->where('statut', 'ouverte')
+    ->exists();
+
+if (!$sessionOuverte) {
+    return response()->json([
+        'message' => 'Vous devez initialiser la caisse avant d\'enregistrer une vente.'
+    ], 403);
+}
 
     DB::beginTransaction();
     try {
@@ -69,6 +80,10 @@ public function index(Request $request)
             ]);
             // Le trigger FIFO s'occupe de décrémenter le stock
         }
+
+        foreach ($request->lignes as $ligne) {
+    AlerteService::verifierStock($ligne['idProduit'], $request->user()->idUtilisateur);
+}
 
         $tva = round($montantTotal * 0.18, 2);
         $vente->totalHorsTaxe     = $montantTotal;
