@@ -87,16 +87,18 @@ const canAnnuler     = isGerant || isGestionnaire
   const ouvrirModal = (item = null) => {
     setEditItem(item)
     if (item) {
+      const cmd = commandes.find(c => c.idCommande === item.idCommande) ?? item.commande ?? null
       setForm({
-        idCommande:    item.idCommande,
-        dateLivraison: item.dateLivraison?.split("T")[0] || "",
-        statut:        item.statut,
-        observations:  item.observations || "",
-        montantTotal:  item.montantTotal || 0,
+        idCommande:          item.idCommande,
+        dateLivraison:       item.dateLivraison?.split("T")[0] || "",
+        dateLivraisonPrevue: cmd?.dateLivraisonPrevue ? String(cmd.dateLivraisonPrevue).split("T")[0] : "",
+        statut:              item.statut,
+        observations:        item.observations || "",
+        montantTotal:        item.montantTotal || 0,
       })
-      setCmdSelectionnee(commandes.find(c => c.idCommande === item.idCommande) ?? null)
+      setCmdSelectionnee(cmd)
     } else {
-      setForm({ idCommande: "", dateLivraison: "", statut: "en_attente", observations: "", montantTotal: 0 })
+      setForm({ idCommande: "", dateLivraison: "", dateLivraisonPrevue: "", statut: "en_attente", observations: "", montantTotal: 0 })
       setCmdSelectionnee(null)
     }
     setShowModal(true)
@@ -105,7 +107,12 @@ const canAnnuler     = isGerant || isGestionnaire
   const handleCommandeChange = (idCommande) => {
     const cmd = commandes.find(c => String(c.idCommande) === String(idCommande))
     setCmdSelectionnee(cmd ?? null)
-    setForm(f => ({ ...f, idCommande, montantTotal: cmd?.montantTotal || 0 }))
+    setForm(f => ({
+      ...f,
+      idCommande,
+      montantTotal: cmd?.montantTotal || 0,
+      dateLivraisonPrevue: cmd?.dateLivraisonPrevue ? String(cmd.dateLivraisonPrevue).split("T")[0] : "",
+    }))
     setDatesExpiration({})
   }
 
@@ -159,9 +166,9 @@ const canAnnuler     = isGerant || isGestionnaire
     statut:        STATUT_CONFIG[l.statut]?.label ?? l.statut,
   }))
 
-    const validerLivraison = async (id) => {
+    const validerLivraison = async (id, datesExp = {}) => {
     try {
-        await api.put(`/livraisons/${id}`, { statut: 'livree' })
+        await api.put(`/livraisons/${id}`, { statut: 'livree', datesExpiration: datesExp })
         fetchLivraisons()
         fetchCommandes()
     } catch { setError("Erreur lors de la validation") }
@@ -568,8 +575,9 @@ const annulerLivraison = async (id) => {
       )}
 
       {validationModal && (
-    <dialog className="modal modal-open">
-        <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40" onClick={() => setValidationModal(null)} />
+        <div className="relative max-w-lg w-full mx-4 rounded-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-xl bg-base-100">
             <div className="bg-success text-success-content px-5 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/25 rounded-2xl"><CheckCircle size={16} /></div>
@@ -614,11 +622,7 @@ const annulerLivraison = async (id) => {
                 <button className="btn btn-ghost" onClick={() => setValidationModal(null)}>Annuler</button>
                 <button className="btn btn-success gap-1" onClick={async () => {
                     try {
-                        await api.post(`/livraisons/${validationModal.idLivraison}/dates-expiration`, {
-                            idCommande: validationModal.idCommande,
-                            datesExpiration
-                        })
-                        await validerLivraison(validationModal.idLivraison)
+                        await validerLivraison(validationModal.idLivraison, datesExpiration)
                         setValidationModal(null)
                     } catch { setError("Erreur lors de la validation") }
                 }}>
@@ -626,8 +630,7 @@ const annulerLivraison = async (id) => {
                 </button>
             </div>
         </div>
-        <div className="modal-backdrop" onClick={() => setValidationModal(null)} />
-    </dialog>
+    </div>
 )}
 
       {/* Confirmation suppression */}

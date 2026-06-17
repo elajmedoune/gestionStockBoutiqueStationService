@@ -9,8 +9,10 @@ class ProduitController extends Controller
 {
     public function index()
     {
+        // 'fournisseurs' n'est consommé par aucune page du frontend pour
+        // cette liste — inutile de le charger sur chaque requête /produits.
         return response()->json(
-            Produit::with(['categorie', 'stocks', 'fournisseurs'])->get(), 200
+            Produit::with(['categorie', 'stocks'])->get(), 200
         );
     }
 

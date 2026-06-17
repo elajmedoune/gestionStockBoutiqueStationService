@@ -13,6 +13,7 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\LivraisonController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\SessionCaisseController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
@@ -83,4 +84,14 @@ Route::middleware(['auth:sanctum', 'throttle:200,1'])->group(function () {
     Route::apiResource('commandes', CommandeController::class);
     Route::apiResource('livraisons', LivraisonController::class);
     Route::post('/livraisons/{id}/dates-expiration', [LivraisonController::class, 'saveDatesExpiration']);
+
+    Route::middleware('role:caissier,gerant')->group(function () {
+        Route::get('/caisse/active',  [SessionCaisseController::class, 'active']);
+        Route::post('/caisse/ouvrir', [SessionCaisseController::class, 'ouvrir']);
+        Route::put('/caisse/fermer',  [SessionCaisseController::class, 'fermer']);
+    });
+
+    Route::middleware('role:gerant')->group(function () {
+        Route::get('/caisse/sessions', [SessionCaisseController::class, 'index']);
+    });
 });

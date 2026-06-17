@@ -53,6 +53,7 @@ const Produits       = lazy(() => import('./pages/Produits'))
 const Stock          = lazy(() => import('./pages/Stock'))
 const Fournisseurs   = lazy(() => import('./pages/Fournisseurs'))
 const Commandes      = lazy(() => import('./pages/Commandes'))
+const SessionsCaisse = lazy(() => import('./pages/SessionsCaisse'))
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
@@ -115,6 +116,11 @@ function AppRoutes() {
           <Route path="/ventes" element={
             <RoleRoute allowedRoles={['gerant', 'caissier']}>
               <ProtectedRouteWithLayout><Ventes /></ProtectedRouteWithLayout>
+            </RoleRoute>
+          } />
+          <Route path="/sessions-caisse" element={
+            <RoleRoute allowedRoles={['gerant']}>
+              <ProtectedRouteWithLayout><SessionsCaisse /></ProtectedRouteWithLayout>
             </RoleRoute>
           } />
           <Route path="/alertes"      element={<ProtectedRouteWithLayout><Alertes /></ProtectedRouteWithLayout>} />

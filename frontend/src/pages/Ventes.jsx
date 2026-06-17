@@ -6,7 +6,7 @@ import {
   X, ChevronLeft, ChevronRight, AlertTriangle, Check,
   Receipt, User, Calendar, Package, Trash2
 } from 'lucide-react'
-import { createVente, deleteVente, getVente } from '../services/api'
+import api, { createVente, deleteVente, getVente } from '../services/api'
 import { exportTicketCaisse } from '../services/pdf'
 import { useVentes, useProduits, useStocks } from '../hooks'
 import ExportPDF from '../components/exports/ExportPDF'
@@ -48,8 +48,8 @@ function ModalDetail({ vente, onClose }) {
   const mode = MODE_LABELS[vente.modePaiement] ?? { label: vente.modePaiement, cls: 'badge-ghost' }
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden">
+    <div className="modal modal-open grid place-items-center" style={{ zIndex: 9999 }}>
+      <div className="modal-box max-w-lg rounded-2xl p-0 overflow-hidden" style={{ transform: 'none' }}>
 
         {/* 🧁 Header cupcake */}
         <div className="bg-primary text-primary-content px-5 py-4 flex items-center justify-between">
@@ -235,8 +235,8 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
   }
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-6xl w-full h-[90vh] p-0 overflow-hidden flex flex-col rounded-2xl">
+    <div className="modal modal-open grid place-items-center" style={{ zIndex: 9999 }}>
+      <div className="modal-box max-w-6xl w-full h-[90vh] !max-h-[90vh] p-0 overflow-hidden flex flex-col rounded-2xl" style={{ transform: 'none' }}>
 
         {/* 🧁 Header cupcake */}
         <div className="bg-primary text-primary-content flex items-center justify-between px-5 py-3 shrink-0">
@@ -442,6 +442,7 @@ function ModalNouvelleVente({ produits, onClose, onSuccess }) {
   )
 }
 
+
 /* ════════════════════════════════════
    PAGE PRINCIPALE
 ════════════════════════════════════ */
@@ -456,6 +457,17 @@ export default function Ventes() {
   const refetchAll = useCallback(() => {
     refetchVentes(); refetchProduits(); refetchStocks()
   }, [refetchVentes, refetchProduits, refetchStocks])
+
+  const [sessionActive, setSessionActive] = useState(null)
+
+  const fetchSessionActive = useCallback(async () => {
+    try {
+      const res = await api.get('/caisse/active')
+      setSessionActive(res.data.session)
+    } catch { setSessionActive(null) }
+  }, [])
+
+  useEffect(() => { fetchSessionActive() }, [fetchSessionActive])
 
   const [search,      setSearch]      = useState('')
   const [filterMode,  setFilterMode]  = useState('')
@@ -475,7 +487,7 @@ export default function Ventes() {
   const ventesFiltrees = useMemo(() => ventes.filter(v => {
     // Caissier voit uniquement ses ventes
     if (user?.role === 'caissier' && v.utilisateur?.idUtilisateur !== user?.idUtilisateur) return false
-    
+
     if (filterMode && v.modePaiement !== filterMode) return false
     if (search) {
       const s = search.toLowerCase()
@@ -484,7 +496,7 @@ export default function Ventes() {
     if (dateDebut && new Date(v.dateVente) < new Date(dateDebut)) return false
     if (dateFin   && new Date(v.dateVente) > new Date(dateFin + 'T23:59:59')) return false
     return true
-  }), [ventes, search, filterMode, dateDebut, dateFin])
+  }), [ventes, search, filterMode, dateDebut, dateFin, user])
 
   const totalPages  = Math.max(1, Math.ceil(ventesFiltrees.length / PER_PAGE))
   const ventesPaged = ventesFiltrees.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -533,6 +545,30 @@ export default function Ventes() {
     ttc: Math.round(v.totalTaxeComprise || 0),
   }))
 
+  const handleOuvrirCaisse = async () => {
+    try {
+      const res = await api.post('/caisse/ouvrir')
+      setSessionActive(res.data.session)
+      showToast('success', 'Caisse initialisée !')
+    } catch (e) {
+      if (e.response?.status === 409) {
+        fetchSessionActive()
+        return
+      }
+      showToast('error', e.response?.data?.message ?? 'Erreur ouverture caisse.')
+    }
+  }
+
+  const handleFermerCaisse = async () => {
+    try {
+      await api.put('/caisse/fermer')
+      setSessionActive(null)
+      showToast('success', 'Caisse fermée.')
+    } catch (e) {
+      showToast('error', e.response?.data?.message ?? 'Erreur fermeture caisse.')
+    }
+  }
+
   if (lV || lP) return (
     <div className="max-w-6xl mx-auto p-6">
       <LoadingCard count={8} />
@@ -563,33 +599,76 @@ export default function Ventes() {
             </h1>
             <p className="text-xs text-base-content/40 mt-0.5 ml-1">Historique et saisie des ventes</p>
           </div>
-          <div className="flex gap-2 items-center">
-            {user?.role !== 'caissier' && (
-              <div className="relative">
-                <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5"
-                  onClick={() => setExportOpen(!exportOpen)}>
-                  <Download size={14} /> Exporter
-                </button>
-                {exportOpen && (
-                  <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
-                    <ExportPDF data={exportData} columns={PDF_COLS} filename="ventes" label="PDF" />
-                    <ExportExcel data={ventesFiltrees.map(v => ({
-                      ID: `#${v.idVente}`,
-                      Date: v.dateVente ? new Date(v.dateVente).toLocaleDateString('fr-FR') : '—',
-                      Caissier: v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—',
-                      Mode: MODE_LABELS[v.modePaiement]?.label ?? v.modePaiement,
-                      'HT (F)': v.totalHorsTaxe,
-                      'TVA (F)': v.tva,
-                      'TTC (F)': v.totalTaxeComprise,
-                    }))} filename="ventes" label="Excel" />
-                    <ExportCSV data={exportData} filename="ventes" label="CSV" />
-                  </div>
-                )}
+
+          <div className="flex flex-col items-end gap-2">
+
+            {/* Boutons caisse + nouvelle vente */}
+            <div className="flex gap-2 items-center flex-wrap justify-end">
+              {user?.role !== 'caissier' && (
+                <div className="relative">
+                  <button className="btn btn-sm btn-ghost border border-base-300 gap-1.5"
+                    onClick={() => setExportOpen(!exportOpen)}>
+                    <Download size={14} /> Exporter
+                  </button>
+                  {exportOpen && (
+                    <div className="absolute right-0 mt-1 bg-base-100 rounded-2xl shadow-lg border border-base-200 w-40 p-2 flex flex-col gap-1 z-50">
+                      <ExportPDF data={exportData} columns={PDF_COLS} filename="ventes" label="PDF" />
+                      <ExportExcel data={ventesFiltrees.map(v => ({
+                        ID: `#${v.idVente}`,
+                        Date: v.dateVente ? new Date(v.dateVente).toLocaleDateString('fr-FR') : '—',
+                        Caissier: v.utilisateur ? `${v.utilisateur.prenom} ${v.utilisateur.nom}` : '—',
+                        Mode: MODE_LABELS[v.modePaiement]?.label ?? v.modePaiement,
+                        'HT (F)': v.totalHorsTaxe,
+                        'TVA (F)': v.tva,
+                        'TTC (F)': v.totalTaxeComprise,
+                      }))} filename="ventes" label="Excel" />
+                      <ExportCSV data={exportData} filename="ventes" label="CSV" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Initialiser / Fermer la caisse */}
+              {(user?.role === 'caissier' || user?.role === 'gerant') && (
+                <>
+                  <button
+                    className={`btn btn-sm gap-1.5 ${sessionActive ? 'btn-disabled opacity-50 cursor-not-allowed' : 'btn-success'}`}
+                    onClick={handleOuvrirCaisse}
+                    disabled={!!sessionActive}
+                  >
+                    <DollarSign size={14} />
+                    {sessionActive ? 'Caisse ouverte' : 'Initialiser la caisse'}
+                  </button>
+
+                  {sessionActive && (
+                    <button className="btn btn-sm btn-error gap-1.5" onClick={handleFermerCaisse}>
+                      <X size={14} /> Fermer la caisse
+                    </button>
+                  )}
+                </>
+              )}
+
+              <button className="btn btn-primary gap-2" onClick={() => setModalNew(true)}>
+                <Plus size={16} /> Nouvelle vente
+              </button>
+            </div>
+
+            {/* Bandeau info session */}
+            {sessionActive && (
+              <div className="flex items-center gap-4 text-xs bg-success/10 border border-success/30 text-success-content rounded-2xl px-4 py-2">
+                <span className="flex items-center gap-1 font-semibold text-success">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse inline-block" />
+                  Session ouverte
+                </span>
+                <span className="text-base-content/60">
+                  Depuis&nbsp;<strong>{sessionActive.dateOuverture ? new Date(sessionActive.dateOuverture).toLocaleString('fr-FR') : '—'}</strong>
+                </span>
+                <span className="text-base-content/60">
+                  Fonds&nbsp;<strong>{fmt(sessionActive.fondsOuverture)} F</strong>
+                </span>
               </div>
             )}
-            <button className="btn btn-primary gap-2" onClick={() => setModalNew(true)}>
-              <Plus size={16} /> Nouvelle vente
-            </button>
+
           </div>
         </div>
 
@@ -750,6 +829,7 @@ export default function Ventes() {
       onClose={() => setConfirmDel(null)}
       loading={false}
       />
+
     </div>
   )
 }

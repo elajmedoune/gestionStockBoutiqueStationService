@@ -6,6 +6,7 @@ use App\Models\Commande;
 use App\Http\Resources\CommandeResource;
 use App\Mail\CommandePassee;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class CommandeController extends Controller
@@ -49,20 +50,20 @@ class CommandeController extends Controller
             ]);
         }
 
-        // Recharger les lignes depuis la base avant d'envoyer l'email
+        // ✅ Recharger les lignes depuis la base avant d'envoyer l'email
         $commande->load(['lignes.produit', 'fournisseur']);
 
-        // Envoyer email au fournisseur
+        // ✉️ Envoyer email au fournisseur (ne doit jamais faire échouer la commande)
         $fournisseur = $commande->fournisseur;
         if ($fournisseur && $fournisseur->email) {
-           Mail::to($fournisseur->email)->send(new CommandePassee(
-            $commande,
-            $request->header('X-Company-Name', 'Boutique Station Service'),
-            $request->header('X-Company-Address', 'Thies, Senegal'),
-            $request->header('X-App-Name', 'GestStock SN'),
-            $request->header('X-Company-Email', ''),
-            $request->header('X-Company-Phone', '')
-            ));
+            try {
+                Mail::to($fournisseur->email)->send(new CommandePassee($commande));
+            } catch (\Throwable $e) {
+                Log::warning('Échec envoi email commande au fournisseur', [
+                    'idCommande' => $commande->idCommande,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
         }
 
         return new CommandeResource($commande->load(['utilisateur', 'lignes.produit', 'fournisseur']));

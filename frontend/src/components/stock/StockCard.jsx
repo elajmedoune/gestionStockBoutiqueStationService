@@ -4,15 +4,17 @@ function StockCard ({ stock, onEdit, onDelete }){
     const today = new Date()
     const expDate = stock.dateExpiration ? new Date(stock.dateExpiration) : null
 
+    const isTermine = (stock.quantiteRestante ?? 0) === 0
     const isExpired = expDate && expDate < today
     const isExpiringSoon = expDate && !isExpired &&
         (expDate - today) / (1000 * 60 * 60 * 24) <= 30
 
     return(
-        <div className={`card bg-base-100 shadow-md hover:shadow-lg transition-shadow border ${
-            isExpired ? 'border-error' : 
-            isExpiringSoon ? 'border-warning' : 
-                            'border-base-200'
+        <div className={`card shadow-md transition-shadow border ${
+            isTermine ? 'opacity-50 grayscale bg-base-200 border-base-300' :
+            isExpired ? 'border-error bg-error/5 ring-2 ring-error/30' :
+            isExpiringSoon ? 'border-warning bg-warning/5' :
+            'bg-base-100 border-base-200 hover:shadow-lg'
         }`}>
             <div className="card-body p-4 space-y-3">
 
@@ -26,8 +28,9 @@ function StockCard ({ stock, onEdit, onDelete }){
                             {stock.produit?.categorie?.libelle ?? ''}
                         </p>
                     </div>
-                    {isExpired && <span className="badge badge-error badge-sm">Expiré</span>}
-                    {isExpiringSoon && <span className="badge badge-warning badge-sm">Bientôt expiré</span>}
+                    {isTermine && <span className="badge badge-ghost badge-sm">Terminé</span>}
+                    {!isTermine && isExpired && <span className="badge badge-error badge-sm font-bold">⚠ Expiré</span>}
+                    {!isTermine && isExpiringSoon && <span className="badge badge-warning badge-sm">Bientôt expiré</span>}
                 </div>
 
                 {/* Details */}

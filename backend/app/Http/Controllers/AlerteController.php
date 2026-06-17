@@ -61,15 +61,22 @@ class AlerteController extends Controller
     public function marquerLue(Request $request, int $id): JsonResponse
     {
         $user = $request->user();
-        $query = Alerte::where('lue', false);
+        $query = Alerte::where('idAlerte', $id);
 
         if ($user->role === 'caissier') {
             $query->where('idUtilisateur', $user->idUtilisateur);
         }
 
-        $count = $query->update(['lue' => true]);
+        $alerte = $query->first();
+        if (!$alerte) {
+            return response()->json(['message' => 'Alerte introuvable'], 404);
+        }
+
+        $alerte->update(['lue' => true]);
+
         return response()->json([
-            'message' => "$count alerte(s) marquée(s) comme lue(s)",
+            'message' => 'Alerte marquée comme lue',
+            'alerte'  => $alerte,
         ]);
     }
 

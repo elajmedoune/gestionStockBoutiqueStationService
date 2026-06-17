@@ -349,33 +349,6 @@ FOR EACH ROW
 BEGIN
     -- Décrémenter le stock du lot le plus ancien ayant encore du stock (FIFO)
     UPDATE stocks s
-<<<<<<< HEAD
-    SET s.quantiteRestante = s.quantiteRestante - NEW.quantite
-    WHERE s.idProduit = NEW.idProduit
-      AND s.quantiteRestante > 0
-    ORDER BY s.dateEntree ASC
-    LIMIT 1;
-
-    -- Alerte si stock restant <= seuil de sécurité
-    INSERT INTO alertes (type, message, niveauUrgence, idUtilisateur, idStock)
-    SELECT
-        'stock_faible',
-        CONCAT('Stock faible — Réf : ', p.reference,
-               ' — Restant : ', s.quantiteRestante,
-               ' / Seuil : ', p.seuilSecurite),
-        CASE
-            WHEN s.quantiteRestante = 0                    THEN 'critique'
-            WHEN s.quantiteRestante <= p.seuilSecurite / 2 THEN 'critique'
-            ELSE 'moyen'
-        END,
-        v.idUtilisateur,
-        s.idStock
-    FROM produits p
-    JOIN stocks s ON s.idProduit = p.idProduit
-    JOIN ventes v ON v.idVente   = NEW.idVente
-    WHERE p.idProduit = NEW.idProduit
-      AND s.quantiteRestante <= p.seuilSecurite;
-=======
     JOIN lignecommande lc ON lc.idProduit = s.idProduit
     SET s.quantiteRestante = s.quantiteRestante + lc.quantite,
         s.dateEntree       = NEW.dateLivraison
@@ -385,7 +358,6 @@ BEGIN
     SET statut      = 'livree',
         idLivraison = NEW.idLivraison
     WHERE idCommande = NEW.idCommande;
->>>>>>> origin/medoune
 END;;
 
 -- Recalculer les totaux HT/TVA/TTC de la vente

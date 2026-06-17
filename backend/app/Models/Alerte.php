@@ -18,12 +18,12 @@ class Alerte extends Model
         'niveauUrgence',
         'idUtilisateur',
         'idStock',
+        'lue',
     ];
     protected $casts = [
         'lue' => 'boolean',
         'dateCreation' => 'datetime',
     ];
-    public $timestamps = false;
 
     //-----------------------------------------------------------------------------------------------------
     //Relations

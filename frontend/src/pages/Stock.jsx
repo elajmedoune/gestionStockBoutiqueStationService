@@ -56,9 +56,16 @@ function Stock() {
     useEffect(() => {
         const q = search.toLowerCase()
         setFiltered(
-            stocks.filter((s) =>
-                (s.produit?.reference || '').toLowerCase().includes(q)
-            )
+            stocks
+                .filter((s) =>
+                    (s.produit?.reference || '').toLowerCase().includes(q)
+                )
+                .sort((a, b) => {
+                    const aDone = (a.quantiteRestante ?? 0) === 0
+                    const bDone = (b.quantiteRestante ?? 0) === 0
+                    if (aDone !== bDone) return aDone ? 1 : -1
+                    return new Date(b.dateEntree || 0) - new Date(a.dateEntree || 0)
+                })
         )
     }, [search, stocks])
 

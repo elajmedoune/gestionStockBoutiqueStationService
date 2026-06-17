@@ -3,9 +3,11 @@ import api from './services/api'
 
 // Cache global partagé entre toutes les pages
 const cache = {}
-const cacheTime = {}
-const CACHE_TTL = 60000
 const subscribers = {}
+// Requêtes en cours par endpoint — évite que deux composants montés en
+// même temps (ex: Layout + Dashboard) déclenchent deux appels réseau
+// identiques en parallèle.
+const inFlight = {}
 
 export const clearCache = () => {
   Object.keys(cache).forEach(key => delete cache[key])
@@ -28,15 +30,21 @@ function useFetch(endpoint) {
 
   const doFetch = useCallback(async () => {
     if (!endpoint) return
-    if (cache[endpoint] && Date.now() - (cacheTime[endpoint] || 0) < CACHE_TTL) {
-      setData(cache[endpoint]); return
+    if (cache[endpoint]) { setData(cache[endpoint]); return }
+
+    if (inFlight[endpoint]) {
+      setLoading(true)
+      try { await inFlight[endpoint] } finally { setLoading(false) }
+      return
     }
+
     setLoading(true)
+    const request = api.get(endpoint)
+    inFlight[endpoint] = request
     try {
-      const res = await api.get(endpoint)
+      const res = await request
       const result = Array.isArray(res.data) ? res.data : (res.data.data ?? [])
       cache[endpoint] = result
-      cacheTime[endpoint] = Date.now()
       subscribers[endpoint]?.forEach(cb => cb(result))
     } catch (err) {
       if (err?.response?.status === 403 || err?.response?.status === 404) {
@@ -47,6 +55,7 @@ function useFetch(endpoint) {
       }
     } finally {
       setLoading(false)
+      delete inFlight[endpoint]
     }
   }, [endpoint])
 
@@ -70,10 +79,24 @@ function useFetch(endpoint) {
 export const useVentes       = () => useFetch('/ventes')
 export const useProduits     = () => useFetch('/produits')
 export const useStocks       = () => useFetch('/stocks')
-export const useCategories   = () => useFetch('/categories')
+// Catégories : non utilisées par les dashboards/pages caissier et magasinier
+// (ni accessibles via leur menu) — inutile de les charger pour eux.
+export const useCategories   = () => {
+  const user = JSON.parse(localStorage.getItem('user'))
+  return useFetch(['caissier', 'magasinier'].includes(user?.role) ? null : '/categories')
+}
 export const useFournisseurs = () => useFetch('/fournisseurs')
-export const useCommandes    = () => useFetch('/commandes')
-export const useLivraisons   = () => useFetch('/livraisons')
+// Le caissier n'a accès à aucune page commandes/livraisons et ses
+// notifications ne les utilisent pas (cf. useNotifications) — on évite
+// de charger ces données inutilement pour lui.
+export const useCommandes    = () => {
+  const user = JSON.parse(localStorage.getItem('user'))
+  return useFetch(user?.role === 'caissier' ? null : '/commandes')
+}
+export const useLivraisons   = () => {
+  const user = JSON.parse(localStorage.getItem('user'))
+  return useFetch(user?.role === 'caissier' ? null : '/livraisons')
+}
 export const useUtilisateurs = () => {
   const user = JSON.parse(localStorage.getItem('user'))
   return useFetch(user?.role === 'gerant' ? '/utilisateurs' : null)
