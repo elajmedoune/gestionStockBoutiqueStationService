@@ -15,6 +15,17 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  // Infos boutique depuis localStorage
+  const company = (() => {
+    try { return JSON.parse(localStorage.getItem('company_config') || '{}') } catch { return {} }
+  })()
+  config.headers['X-App-Name']        = 'GestStock SN'
+  config.headers['X-Company-Name']    = company.name    || 'Boutique Station Service'
+  config.headers['X-Company-Address'] = company.address || 'Thies, Senegal'
+  config.headers['X-Company-Email']   = company.email   || ''
+  config.headers['X-Company-Phone']   = company.phone   || ''
+
   // Ne pas forcer Content-Type pour FormData
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type']

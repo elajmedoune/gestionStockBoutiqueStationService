@@ -3,6 +3,8 @@ import api from './services/api'
 
 // Cache global partagé entre toutes les pages
 const cache = {}
+const cacheTime = {}
+const CACHE_TTL = 60000
 const subscribers = {}
 
 export const clearCache = () => {
@@ -26,12 +28,15 @@ function useFetch(endpoint) {
 
   const doFetch = useCallback(async () => {
     if (!endpoint) return
-    if (cache[endpoint]) { setData(cache[endpoint]); return }
+    if (cache[endpoint] && Date.now() - (cacheTime[endpoint] || 0) < CACHE_TTL) {
+      setData(cache[endpoint]); return
+    }
     setLoading(true)
     try {
       const res = await api.get(endpoint)
       const result = Array.isArray(res.data) ? res.data : (res.data.data ?? [])
       cache[endpoint] = result
+      cacheTime[endpoint] = Date.now()
       subscribers[endpoint]?.forEach(cb => cb(result))
     } catch (err) {
       if (err?.response?.status === 403 || err?.response?.status === 404) {

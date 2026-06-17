@@ -49,13 +49,20 @@ class CommandeController extends Controller
             ]);
         }
 
-        // ✅ Recharger les lignes depuis la base avant d'envoyer l'email
+        // Recharger les lignes depuis la base avant d'envoyer l'email
         $commande->load(['lignes.produit', 'fournisseur']);
 
-        // ✉️ Envoyer email au fournisseur
+        // Envoyer email au fournisseur
         $fournisseur = $commande->fournisseur;
         if ($fournisseur && $fournisseur->email) {
-            Mail::to($fournisseur->email)->send(new CommandePassee($commande));
+           Mail::to($fournisseur->email)->send(new CommandePassee(
+            $commande,
+            $request->header('X-Company-Name', 'Boutique Station Service'),
+            $request->header('X-Company-Address', 'Thies, Senegal'),
+            $request->header('X-App-Name', 'GestStock SN'),
+            $request->header('X-Company-Email', ''),
+            $request->header('X-Company-Phone', '')
+            ));
         }
 
         return new CommandeResource($commande->load(['utilisateur', 'lignes.produit', 'fournisseur']));
