@@ -18,6 +18,7 @@ class Alerte extends Model
         'niveauUrgence',
         'idUtilisateur',
         'idStock',
+        'lue',
     ];
     protected $casts = [
         'lue' => 'boolean',

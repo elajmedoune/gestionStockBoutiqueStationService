@@ -71,10 +71,10 @@ public function index(Request $request)
         }
 
         $tva = round($montantTotal * 0.18, 2);
-        $vente->montantTotal      = $montantTotal;
         $vente->totalHorsTaxe     = $montantTotal;
         $vente->tva               = $tva;
         $vente->totalTaxeComprise = $montantTotal + $tva;
+        $vente->montantTotal      = $vente->totalTaxeComprise;
         $vente->statut            = 'validee';
         $vente->save();
 

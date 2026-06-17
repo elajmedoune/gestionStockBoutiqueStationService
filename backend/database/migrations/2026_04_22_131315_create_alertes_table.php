@@ -15,18 +15,18 @@ return new class extends Migration
             $table->timestamp('dateCreation')->useCurrent();
             $table->boolean('lue')->default(false);
             $table->enum('niveauUrgence', ['faible', 'moyen', 'critique'])->default('moyen');
-            $table->unsignedBigInteger('idUtilisateur');         
-            $table->unsignedBigInteger('idProduit');              
+            $table->unsignedBigInteger('idUtilisateur');
+            $table->unsignedBigInteger('idStock');
             $table->timestamps();
 
-            $table->foreign('idUtilisateur')                      
+            $table->foreign('idUtilisateur')
                   ->references('idUtilisateur')
-                  ->on('utilisateurs')                            
+                  ->on('utilisateurs')
                   ->onDelete('restrict');
 
-            $table->foreign('idProduit')                        
-                  ->references('idProduit')
-                  ->on('produits')                              
+            $table->foreign('idStock')
+                  ->references('idStock')
+                  ->on('stocks')
                   ->onDelete('restrict');
         });
     }

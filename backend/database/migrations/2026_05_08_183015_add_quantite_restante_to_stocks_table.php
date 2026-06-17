@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('stocks', function (Blueprint $table) {
-            $table->integer('quantiteRestanant')->default(0)->after('quantiteInitiale');
-        });
+        // quantiteRestante existe déjà depuis la migration d'origine
+        // (create_stocks_table.php) — rien à faire ici.
     }
 
     /**
@@ -21,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('stocks', function (Blueprint $table) {
-            $table->dropColumn('quantiteRestanant');
-        });
+        //
     }
 };

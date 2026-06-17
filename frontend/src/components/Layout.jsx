@@ -8,7 +8,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Truck,
   Menu, X, ChevronRight, ChevronLeft,
   BarChart2, Archive, AlertTriangle, Users, Tag,
-  TrendingUp, ClipboardList, ClipboardCheck, Clock
+  TrendingUp, ClipboardList, ClipboardCheck, Clock, Wallet
 } from 'lucide-react'
 
 export default function Layout({ children }) {
@@ -85,6 +85,7 @@ export default function Layout({ children }) {
         { label: 'Inventaire',   icon: <ClipboardCheck size={18} />, path: '/inventaire',   roles: ['gerant', 'gestionnaire_stock', 'magasinier'] },
         { label: 'Alertes',      icon: <AlertTriangle size={18} />,  path: '/alertes',      roles: ['gerant', 'gestionnaire_stock'] },
         { label: 'Utilisateurs', icon: <Users size={18} />,          path: '/utilisateurs', roles: ['gerant'] },
+        { label: 'Sessions caisse', icon: <Wallet size={18} />,      path: '/sessions-caisse', roles: ['gerant'] },
       ]
     },
   ]

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventaire;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -49,8 +50,14 @@ class InventaireController extends Controller
 
         $validated['idUtilisateur'] = $request->user()->idUtilisateur;
 
-        // Le trigger trg_inventaire_statut_insert calculera automatiquement
-        // quantiteTheorique et statut
+        $quantiteTheorique = Stock::where('idStock', $validated['idStock'])->value('quantiteRestante') ?? 0;
+        $validated['quantiteTheorique'] = $quantiteTheorique;
+        $validated['statut'] = match (true) {
+            $validated['quantiteReelle'] == $quantiteTheorique => 'conforme',
+            $validated['quantiteReelle'] < $quantiteTheorique  => 'deficit',
+            default                                            => 'surplus',
+        };
+
         $inventaire = Inventaire::create($validated);
         $inventaire->refresh();
 
